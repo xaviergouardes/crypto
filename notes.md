@@ -13,3 +13,6 @@ python3 -m venv venv
 source venv/bin/activate
 ``
 
+## Dépendance a installer
+pip install pip install eth_account
+pip install web3
