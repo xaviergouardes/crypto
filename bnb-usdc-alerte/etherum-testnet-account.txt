@@ -1,0 +1,6 @@
+=== Nouveau compte Ethereum (Testnet) ===
+Adresse : 0x65390B0bb9420BD83b1325Bf05dF1b4A8b2938B4
+Clé privée : 97172472ab8f1cd35eb58f51e8b7512744b80d526d8f5bde2fb9aa576296086c
+
+⚠️  Sauvegardez bien votre clé privée, elle permet de dépenser vos fonds.
+Vous pouvez importer cette clé privée directement dans MetaMask ou tout autre wallet.
