@@ -1,0 +1,15 @@
+Pour Uniswap V3 : 
+
+La factory : 0x1F98431c8aD98523631AE4a59f267346ea31F984
+
+Les pool pour WETH / USDC sur POLYGON pour uniswap v3
+Pool WETH/USDC trouvé sur Uniswap V3 Polygon avec fee 500 : 0x45dDa9cb7c25131DF268515131f647d726f50608
+Pool WETH/USDC trouvé sur Uniswap V3 Polygon avec fee 3000 : 0x0e44cEb592AcFC5D3F09D996302eB4C499ff8c10
+Pool WETH/USDC trouvé sur Uniswap V3 Polygon avec fee 10000 : 0xBD934A7778771A7E2D9bf80596002a214D8C9304
+
+
+Pour QuickSwap : 
+La factory : 0x5757371414417b8c6caad45baef941abc7d3ab32
+
+Les pool pour ETH/USDC sur Polygon pour quickswap
+quickswap : 0x853Ee4b2A13f8a742d64C8F088bE7bA2131f670d
