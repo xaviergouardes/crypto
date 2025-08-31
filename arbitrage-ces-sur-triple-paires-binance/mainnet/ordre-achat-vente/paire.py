@@ -1,5 +1,10 @@
 from binance.client import Client
+from binance.exceptions import BinanceAPIException, BinanceOrderException
 from decimal import Decimal
+
+class MinNotionalError(Exception):
+    """Exception levée lorsque le montant en quote est inférieur au minNotional."""
+    pass
 
 class Paire:
     """
@@ -43,7 +48,30 @@ class Paire:
     def assets(self) -> tuple[str, str]:
         """Retourne les deux actifs qui composent la paire (base, quote)."""
         return (self.info["baseAsset"], self.info["quoteAsset"])
-    
+
+    def buy_from_quote(self, amount_quote) -> dict:
+        """
+        Acheter la paire avec un ordre MARKET à partir d'un montant en quote asset.
+        Renvoie toutes les données de la transaction.
+        :param amount_quote: Montant en quote asset à utiliser.
+        :return: dictionnaire contenant les informations de l'ordre.
+        """
+        min_notional = self.min_notional
+        if min_notional is not None and Decimal(amount_quote) < min_notional:
+            message = f"Montant trop faible. MinNotional pour {self.symbol} : {min_notional} {self.quote_asset()}"
+            print(message)
+            raise MinNotionalError(message)
+        
+        try:
+            order = self.client.order_market_buy(
+                symbol=self.symbol,
+                quoteOrderQty=amount_quote
+            )
+            return order
+        except (BinanceAPIException, BinanceOrderException) as e:
+            print(f"Erreur lors de l'achat MARKET: {e}")
+            return None
+        
     def __str__(self) -> str:
         """Retourne une représentation lisible de la paire."""
         base, quote = paire.assets()
