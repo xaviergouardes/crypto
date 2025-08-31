@@ -24,10 +24,12 @@ CAPITAL_USDC = Decimal("100")
 # Triplette à analyser
 # ['ETHUSDC', 'ETHBTC', 'BTCUSDC']
 # ['PLUMEUSDC', 'PLUMETRY', 'USDCTRY']
-# ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
-PAIR_USDC_1 = "SKLUSDC"
-PAIR_INTER = "SKLBTC"
-PAIR_USDC_2 = "BTCUSDC"
+# ['SKLUSDC', 'SKLBTC', 'BTCUSDC'] => marche bien
+# ['ACHUSDC', 'ACHBTC', 'BTCUSDC']
+# ['WCTUSDC', 'WCTTRY', 'USDCTRY']
+PAIR_USDC_1 = "WCTUSDC"
+PAIR_INTER = "WCTTRY"
+PAIR_USDC_2 = "USDCTRY"
 
 # Fonction pour récupérer le prix d'un symbole
 def get_price(symbol):
