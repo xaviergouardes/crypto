@@ -6,6 +6,10 @@ class MinNotionalError(Exception):
     """Exception levée lorsque le montant en quote est inférieur au minNotional."""
     pass
 
+class StepSizeError(Exception):
+    """Exception levée lorsque la quantité est inférieure au step_size."""
+    pass
+
 class Paire:
     """
     Représente une paire de trading Binance.
@@ -49,7 +53,7 @@ class Paire:
         """Retourne les deux actifs qui composent la paire (base, quote)."""
         return (self.info["baseAsset"], self.info["quoteAsset"])
 
-    def buy_from_quote(self, amount_quote) -> dict:
+    def buy_base_from_quote(self, amount_quote: float) -> dict:
         """
         Acheter la paire avec un ordre MARKET à partir d'un montant en quote asset.
         Renvoie toutes les données de la transaction.
@@ -68,23 +72,57 @@ class Paire:
                 quoteOrderQty=amount_quote
             )
             return order
+        
         except (BinanceAPIException, BinanceOrderException) as e:
             print(f"Erreur lors de l'achat MARKET: {e}")
             return None
         
+    def sell_base_get_quote(self, amount_base: float) -> dict:
+        """
+        Vendre une quantité de base asset pour récupérer des quote via un ordre MARKET.
+        :param amount_base: quantité de base à vendre
+        :return: dictionnaire contenant les informations de l'ordre
+        """
+        # Vérifier step_size
+        if amount_base < self.step_size:
+            msg = (f"Quantité trop faible. amount_base = {amount_base} {self.base_asset}, "
+                   f"stepSize = {self.step_size}")
+            print("ERREUR:", msg)
+            raise StepSizeError(msg)
+
+        try:
+            order = self.client.order_market_sell(
+                symbol=self.symbol,
+                quantity=amount_base
+            )
+            print(f"Vente réussie : {amount_base} {self.base_asset}")
+            return order
+
+        except (BinanceAPIException, BinanceOrderException) as e:
+            print(f"Erreur lors de la vente MARKET: {e}")
+            return None
+        
+
     def __str__(self) -> str:
         """Retourne une représentation lisible de la paire."""
         base, quote = paire.assets()
         return (
-            f"{self.symbol} | Prix: {self.prix} | MinNotional: {self.min_notional} {quote} | "
-            f"StepSize: {self.step_size} {base}"
+            f"{self.symbol} | Prix: {self.prix:.8f} | "
+            f"MinNotional: {self.min_notional:.8f} {quote} | "
+            f"StepSize: {self.step_size:.8f} {base}"
         )
 
 # Exemple d’utilisation
 if __name__ == "__main__":
     from binance_client import BinanceClient   # ta classe précédente
     
+    # ['SKLUSDC', 'SKLBTC', 'BTCUSDC'] 
     with BinanceClient() as binance:
-        paire = Paire(binance.client, "BTCUSDC")
+        paire = Paire(binance.client, "SKLUSDC")
         print(paire)   # <-- appelle __str__()  
 
+        paire = Paire(binance.client, "SKLBTC")
+        print(paire)   # <-- appelle __str__()  
+
+        paire = Paire(binance.client, "BTCUSDC")
+        print(paire)   # <-- appelle __str__()  
