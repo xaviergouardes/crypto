@@ -1,2 +1,5 @@
 {
+    "python.analysis.extraPaths": [
+        "./arbitrage-ces-sur-triple-paires-binance/mainnet/ordre-achat-vente"
+    ]
 }

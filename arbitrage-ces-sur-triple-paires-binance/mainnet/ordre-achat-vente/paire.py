@@ -1,6 +1,8 @@
 from binance.client import Client
 from binance.exceptions import BinanceAPIException, BinanceOrderException
 from decimal import Decimal
+import time
+from binance_client import BinanceClient   # ta classe précédente
 
 class MinNotionalError(Exception):
     """Exception levée lorsque le montant en quote est inférieur au minNotional."""
@@ -19,18 +21,24 @@ class Paire:
         self.client = binance_client
         self.symbol = symbol.upper()
         self.info = self.client.get_symbol_info(self.symbol)
+        ticker = self.client.get_symbol_ticker(symbol=self.symbol) 
+        self._dernier_prix = Decimal(ticker["price"])
         
         if not self.info:
-            raise ValueError(f"Impossible de trouver la paire {self.symbol}")
+            raise ValueError(f"Impossible de trouver la paire {symbol}")
 
     @property
-    def prix(self) -> float:
+    def prix(self) -> Decimal:
         """Retourne le prix actuel de la paire."""
+        #ticker = await asyncio.to_thread(
+        #    self.client.get_symbol_ticker(symbol=self.symbol)
+        #)
         ticker = self.client.get_symbol_ticker(symbol=self.symbol)
-        return Decimal(ticker["price"])
+        self._dernier_prix = Decimal(ticker["price"])
+        return self._dernier_prix
 
     @property
-    def min_notional(self) -> float:
+    def min_notional(self) -> Decimal:
         """Retourne le montant minimal (NOTIONAL) obligatoire pour un ordre."""
         for f in self.info["filters"]:
             if f["filterType"] == "NOTIONAL":
@@ -38,7 +46,7 @@ class Paire:
         return None
 
     @property
-    def step_size(self) -> float:
+    def step_size(self) -> Decimal:
         """Retourne la taille minimale de lot (quantité minimale)."""
         for f in self.info["filters"]:
             if f["filterType"] == "LOT_SIZE":
@@ -53,7 +61,7 @@ class Paire:
         """Retourne les deux actifs qui composent la paire (base, quote)."""
         return (self.info["baseAsset"], self.info["quoteAsset"])
 
-    def buy_base_from_quote(self, amount_quote: float) -> dict:
+    def buy_base_from_quote(self, amount_quote: Decimal) -> dict:
         """
         Acheter la paire avec un ordre MARKET à partir d'un montant en quote asset.
         Renvoie toutes les données de la transaction.
@@ -77,7 +85,7 @@ class Paire:
             print(f"Erreur lors de l'achat MARKET: {e}")
             return None
         
-    def sell_base_get_quote(self, amount_base: float) -> dict:
+    def sell_base_get_quote(self, amount_base: Decimal) -> dict:
         """
         Vendre une quantité de base asset pour récupérer des quote via un ordre MARKET.
         :param amount_base: quantité de base à vendre
@@ -107,22 +115,23 @@ class Paire:
         """Retourne une représentation lisible de la paire."""
         base, quote = paire.assets()
         return (
-            f"{self.symbol} | Prix: {self.prix:.8f} | "
+            f"{self.symbol} | Prix: {self._dernier_prix:.8f} | "
             f"MinNotional: {self.min_notional:.8f} {quote} | "
             f"StepSize: {self.step_size:.8f} {base}"
         )
 
-# Exemple d’utilisation
+
 if __name__ == "__main__":
-    from binance_client import BinanceClient   # ta classe précédente
-    
     # ['SKLUSDC', 'SKLBTC', 'BTCUSDC'] 
     with BinanceClient() as binance:
         paire = Paire(binance.client, "SKLUSDC")
         print(paire)   # <-- appelle __str__()  
+        print(paire.prix)
 
         paire = Paire(binance.client, "SKLBTC")
-        print(paire)   # <-- appelle __str__()  
+        print(paire)   
+        print(paire.prix)
 
         paire = Paire(binance.client, "BTCUSDC")
-        print(paire)   # <-- appelle __str__()  
+        print(paire)   
+        print(paire.prix)
