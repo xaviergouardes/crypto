@@ -8,7 +8,7 @@ class ArbitrageScanner:
     """
     Scrute les prix de trois paires pour générer un signal d'arbitrage.
     """
-    def __init__(self, usdc1: Paire, inter: Paire, usdc2: Paire, capital: Decimal=100, seuilUsdc: Decimal = 1):
+    def __init__(self, usdc1: Paire, inter: Paire, usdc2: Paire, capital: Decimal = Decimal("100"), seuilUsdc: Decimal = Decimal("1")):
         """
         :param paire1, paire2, paire3: instances de Paire ou MockPaire
         :param seuil_profitPourcent: seuil minimum de profit (%) pour générer un signal
@@ -26,18 +26,18 @@ class ArbitrageScanner:
         Exemple : USDC -> ETH -> BTC -> USDC
         """
         prixUsdc1 = self.usdc1.prix
-        prixIner = self.inter.prix
+        prixInter = self.inter.prix
         prixUsdc2 = self.usdc2.prix
 
         inter_amount = self.capital / prixUsdc1       # USDC -> crypto1
-        inter_to_other = inter_amount * prixIner  # crypto1 -> crypto2
+        inter_to_other = inter_amount * prixInter  # crypto1 -> crypto2
         finalUsdc = inter_to_other * prixUsdc2   # crypto2 -> USDC
         profit = finalUsdc - self.capital
         profitPourcent = (profit / self.capital) * 100
 
         prixUsdc1 = self.usdc1.prix
         prixUsdc1 = self.usdc1.prix
-        return prixUsdc1, prixIner, prixUsdc2, finalUsdc, profit, profitPourcent
+        return prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit, profitPourcent
 
     def scan(self) -> dict:
         """
@@ -46,27 +46,24 @@ class ArbitrageScanner:
         :return: dictionnaire avec info et signal
         """
         
-        prixUsdc1, prixIner, prixUsdc2, finalUsdc, profit_aller, profitPourcent = self.simulate_aller()
+        prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit_aller, profitPourcent = self.simulate_aller()
 
-        signal = None
-        sens = None
-
+        signal = False
         if profit_aller >= self.seuilUsdc :
-            signal = True
-            sens = "ALLER"
-            profit = profit_aller
-
+                signal = True
+            
         return {
             "prix": {
                 "prixUsdc1": f"{prixUsdc1:.8f}",
-                "prixIner": f"{prixIner:.8f}",
-                "finalUsdc" : f"{prixUsdc2:.8f}",
+                "prixInter": f"{prixInter:.8f}",
+                "prixUsdc2" : f"{prixUsdc2:.8f}",
             },
             "finalUsdc": f"{finalUsdc:.8f}",
             "profitPourcent": f"{profitPourcent:.8f}",
-            "profit": f"{profit:.8f}",
+            "profit": f"{profit_aller:.8f}",
             "signal": signal
         }
+
 
 
 if __name__ == "__main__":
@@ -74,9 +71,13 @@ if __name__ == "__main__":
     with BinanceClient() as binance:
         # Création de paires mock pour test
         # ['SKLUSDC', 'SKLBTC', 'BTCUSDC'] 
-        p1 = MockPaire(Paire(binance.client, "SKLUSDC"))
-        p2 = MockPaire(Paire(binance.client, "SKLBTC"))
-        p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
+        # p1 = MockPaire(Paire(binance.client, "SKLUSDC"))
+        # p2 = MockPaire(Paire(binance.client, "SKLBTC"))
+        # p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
+
+        p1 = Paire(binance.client, "SKLUSDC")
+        p2 = Paire(binance.client, "SKLBTC")
+        p3 = Paire(binance.client, "BTCUSDC")
 
         scanner = ArbitrageScanner(p1, p2, p3)
 
