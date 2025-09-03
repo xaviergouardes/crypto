@@ -3,6 +3,7 @@ import time
 from paire import Paire
 from binance_client import BinanceClient
 from mock_paire import MockPaire
+from datetime import datetime
 
 class ArbitrageScanner:
     """
@@ -19,16 +20,11 @@ class ArbitrageScanner:
         self.capital = capital
         self.seuilUsdc = Decimal(seuilUsdc)
 
-
-    def simulate_aller(self):
+    def simulate_aller(self, prixUsdc1: Decimal, prixInter:Decimal, prixUsdc2: Decimal):
         """
         USDC -> intermédiaire -> autre crypto -> USDC
         Exemple : USDC -> ETH -> BTC -> USDC
         """
-        prixUsdc1 = self.usdc1.prix
-        prixInter = self.inter.prix
-        prixUsdc2 = self.usdc2.prix
-
         inter_amount = self.capital / prixUsdc1       # USDC -> crypto1
         inter_to_other = inter_amount * prixInter  # crypto1 -> crypto2
         finalUsdc = inter_to_other * prixUsdc2   # crypto2 -> USDC
@@ -39,20 +35,47 @@ class ArbitrageScanner:
         prixUsdc1 = self.usdc1.prix
         return prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit, profitPourcent
 
+    def simulate_retour(self, prixUsdc1: Decimal, prixInter:Decimal, prixUsdc2: Decimal):
+        """
+        USDC -> autre crypto -> intermédiaire -> USDC
+        Exemple : USDC -> BTC -> ETH -> USDC
+        """
+        other_amount = self.capital / prixUsdc2         # USDC -> crypto2
+        other_to_inter = other_amount / prixInter  # crypto2 -> crypto1
+        finalUsdc = other_to_inter * prixUsdc1    # crypto1 -> USDC
+        profit = finalUsdc - self.capital
+        profitPourcent = (profit / self.capital) * 100
+
+        return prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit, profitPourcent
+
     def scan(self) -> dict:
         """
         Scrute les prix et renvoie un dictionnaire avec le signal et le profit théorique.
         :param montant_initial: montant en quote de la première paire
         :return: dictionnaire avec info et signal
         """
+        prixUsdc1 = self.usdc1.prix
+        prixInter = self.inter.prix
+        prixUsdc2 = self.usdc2.prix
         
-        prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit_aller, profitPourcent = self.simulate_aller()
+        prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit_aller, profitPourcent = self.simulate_aller(prixUsdc1, prixInter, prixUsdc2)
+        prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit_retour, profitPourcent = self.simulate_retour(prixUsdc1, prixInter, prixUsdc2)
 
-        signal = False
+        signal = None
+        profit = 0.0
         if profit_aller >= self.seuilUsdc :
-                signal = True
-            
+                profit = profit_aller
+                signal = "ALLER"
+
+        if profit_retour >= self.seuilUsdc :
+                profit = profit_retour
+                signal = "RETOUR"
+
+        # timestamp en millisecondes
+        ts_millis = int(datetime.now().timestamp() * 1000)
+    
         return {
+            "timestamp": ts_millis,
             "prix": {
                 "prixUsdc1": f"{prixUsdc1:.8f}",
                 "prixInter": f"{prixInter:.8f}",
@@ -60,7 +83,7 @@ class ArbitrageScanner:
             },
             "finalUsdc": f"{finalUsdc:.8f}",
             "profitPourcent": f"{profitPourcent:.8f}",
-            "profit": f"{profit_aller:.8f}",
+            "profit": f"{profit:.8f}",
             "signal": signal
         }
 
@@ -84,5 +107,6 @@ if __name__ == "__main__":
         while True:
             result = scanner.scan()  # 1000 USDC en quote initial
             import json
-            print(json.dumps(result, indent=4))
+            #print(json.dumps(result, indent=4))
+            print(json.dumps(result))
             time.sleep(5)
