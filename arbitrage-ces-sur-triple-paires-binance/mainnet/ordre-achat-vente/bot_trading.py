@@ -78,19 +78,22 @@ class BotTrading:
             f.write(json.dumps(result_with_time, ensure_ascii=False) + "\n")
 
         # Affiche joliment à l’écran
-        print(json.dumps(result_with_time, indent=4, ensure_ascii=False))
+        print(json.dumps(result_with_time, ensure_ascii=False))
 
 if __name__ == "__main__":
     # PAIRS = ["SKLUSDC", "SKLBTC", "BTCUSDC"]
     with BinanceClient() as binance:
-        #p1 = Paire(binance.client, "SKLUSDC")
-        #p2 = Paire(binance.client, "SKLBTC")
-        #p3 = Paire(binance.client, "BTCUSDC")
+        # paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
+        paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
 
-        p1 = MockPaire(Paire(binance.client, "ACHUSDC"))
-        p2 = MockPaire(Paire(binance.client, "ACHBTC"))
-        p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
+        p1 = Paire(binance.client, paires[0])
+        p2 = Paire(binance.client, paires[1])
+        p3 = Paire(binance.client, paires[2])
 
-        bot = BotTrading(p1, p2, p3, 100, 1)
-        #result = bot.scan_and_trade()
+        #p1 = MockPaire(Paire(binance.client, paires[0]))
+        #p2 = MockPaire(Paire(binance.client, paires[1]))
+        #p3 = MockPaire(Paire(binance.client, paires[2]))
+
+        bot = BotTrading(p1, p2, p3, 50, 1)
+        #result = bot.scan_and_trade(1)
         bot.scan_only()

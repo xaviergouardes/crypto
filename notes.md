@@ -32,3 +32,9 @@ explorateur uniswap sur telnet : https://app.uniswap.org/?utm_source=chatgpt.com
 
 adresse de la factory de pool uniswap v3 sur sepolia : https://sepolia.etherscan.io/address/0x0227628f3F023bb0B980b67D528571c95c6DaC1c#events
 => aller voir dans les events les création de pool avec leur adresse et l'adresse des deux jetons.
+
+## Nettoyer l'hitory de la consile
+
+```
+history -c && history -w
+```

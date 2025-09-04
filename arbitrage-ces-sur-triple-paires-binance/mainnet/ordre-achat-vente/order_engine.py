@@ -12,17 +12,29 @@ class OrderEngine:
 
     def execute_trade_aller(self):
             # USDC -> Intermédiaire
-            order1 = self.usdc1.buy_base_from_quote(self.capital)
-            qty_base1 = Decimal(order1["executedQty"])
+            try:
+                order1 = self.usdc1.buy_base_from_quote(self.capital)
+                qty_base1 = Decimal(order1["executedQty"])
+            except Exception as e:
+                print("Erreur dans execute_trade_aller : order1", e)
+                raise e
 
             # Intermédiaire -> Autre crypto
-            order2 = self.inter.sell_base_get_quote(qty_base1)
-            qty_base2 = Decimal(order2["cummulativeQuoteQty"])
+            try:
+                order2 = self.inter.sell_base_get_quote(qty_base1)
+                qty_base2 = Decimal(order2["cummulativeQuoteQty"])
+            except Exception as e:
+                print("Erreur dans execute_trade_aller : order2", e)
+                raise e
 
             # Autre crypto -> USDC
-            order3 = self.usdc2.sell_base_get_quote(qty_base2)
-            final_usdc = Decimal(order3["cummulativeQuoteQty"])
-
+            try:
+                order3 = self.usdc2.sell_base_get_quote(qty_base2)
+                final_usdc = Decimal(order3["cummulativeQuoteQty"])
+            except Exception as e:
+                print("Erreur dans execute_trade_aller : order2", e)
+                raise e
+            
             #print(f"[TRADE ALLER] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
 
             return [order1, order2, order3]
@@ -30,17 +42,29 @@ class OrderEngine:
     def execute_trade_retour(self):
 
             # USDC -> Autre crypto (BTC par ex.)
-            order1 = self.usdc2.buy_base_from_quote(self.capital)
-            qty_base1 = Decimal(order1["executedQty"])
+            try:
+                order1 = self.usdc2.buy_base_from_quote(self.capital)
+                qty_base1 = Decimal(order1["executedQty"])
+            except Exception as e:
+                print("Erreur dans execute_trade_aller : order2", e)
+                raise e
 
             # Autre crypto -> Intermédiaire (ETH par ex.)
-            order2 = self.inter.buy_base_from_quote(float(qty_base1))
-            qty_base2 = Decimal(order2["executedQty"])
-
+            try:
+                order2 = self.inter.buy_base_from_quote(float(qty_base1))
+                qty_base2 = Decimal(order2["executedQty"])
+            except Exception as e:
+                print("Erreur dans execute_trade_aller : order2", e)
+                raise e
+    
             # Intermédiaire -> USDC
-            order3 = self.usdc1.sell_base_get_quote(qty_base2)
-            final_usdc = Decimal(order3["cummulativeQuoteQty"])
-
+            try:
+                order3 = self.usdc1.sell_base_get_quote(qty_base2)
+                final_usdc = Decimal(order3["cummulativeQuoteQty"])
+            except Exception as e:
+                print("Erreur dans execute_trade_aller : order2", e)
+                raise e
+    
             #print(f"[TRADE RETOUR] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
 
             return [order1, order2, order3]
@@ -57,7 +81,7 @@ if __name__ == "__main__":
         p2 = MockPaire(Paire(binance.client, "SKLBTC"))
         p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
 
-        engine_order = OrderEngine(p1, p2, p3, 100)
+        engine_order = OrderEngine(p1, p2, p3, 10)
         #order1 = engine_order.execute_trade_aller()
         #print(order1)
 
