@@ -23,15 +23,14 @@ class BotTrading:
                     
                     signal_data = self.scanner.scan()
                     signal = signal_data["signal"]
+                    sens = signal_data["sens"]
 
                     orders = []
-                    if signal == "ALLER":
+                    if signal and sens == "ALLER":
                         orders = self.order_engine.execute_trade_aller()
-                        #print(order1)
 
-                    if signal == "RETOUR":
+                    if signal and sens == "RETOUR":
                         orders = self.order_engine.execute_trade_retour()
-                        #print(order1)
 
                     time.sleep(5)
                     count += 1
@@ -41,12 +40,31 @@ class BotTrading:
                     raise e
                     time.sleep(5)
             
-            result = {
-                "signal_data": signal_data,
-                "orders": orders
-            }
+                result = {
+                    "signal_data": signal_data,
+                    "orders": orders
+                }
 
-            return result
+                if signal:
+                    self.log_trade(result)
+
+    def scan_only(self, iterations: int | None = None):
+            """Boucle principale : scruter le marché et simuler les trades ALLER uniquement."""
+            count = 0
+            while iterations is None or count < iterations:
+                try:
+                    
+                    signal_data = self.scanner.scan()
+                    time.sleep(5)
+                    count += 1
+
+                except Exception as e:
+                    print("Erreur dans le scan onlytrade:", e)
+                    raise e
+                    time.sleep(5)
+            
+                print(json.dumps(signal_data, ensure_ascii=False))
+
 
     def log_trade(self, result: dict, filename="./trades.json"):
         # Ajoute un horodatage dans les données
@@ -69,10 +87,10 @@ if __name__ == "__main__":
         #p2 = Paire(binance.client, "SKLBTC")
         #p3 = Paire(binance.client, "BTCUSDC")
 
-        p1 = MockPaire(Paire(binance.client, "SKLUSDC"))
-        p2 = MockPaire(Paire(binance.client, "SKLBTC"))
+        p1 = MockPaire(Paire(binance.client, "ACHUSDC"))
+        p2 = MockPaire(Paire(binance.client, "ACHBTC"))
         p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
 
-        bot = BotTrading(p1, p2, p3)
-        result = bot.scan_and_trade(1)
-        bot.log_trade(result)
+        bot = BotTrading(p1, p2, p3, 100, 1)
+        #result = bot.scan_and_trade()
+        bot.scan_only()

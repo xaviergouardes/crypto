@@ -23,7 +23,7 @@ class OrderEngine:
             order3 = self.usdc2.sell_base_get_quote(qty_base2)
             final_usdc = Decimal(order3["cummulativeQuoteQty"])
 
-            print(f"[TRADE ALLER] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
+            #print(f"[TRADE ALLER] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
 
             return [order1, order2, order3]
 
@@ -41,7 +41,7 @@ class OrderEngine:
             order3 = self.usdc1.sell_base_get_quote(qty_base2)
             final_usdc = Decimal(order3["cummulativeQuoteQty"])
 
-            print(f"[TRADE RETOUR] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
+            #print(f"[TRADE RETOUR] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
 
             return [order1, order2, order3]
 

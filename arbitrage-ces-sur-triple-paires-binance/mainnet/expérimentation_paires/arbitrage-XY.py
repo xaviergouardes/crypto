@@ -27,8 +27,8 @@ CAPITAL_USDC = Decimal("100")
 # ['SKLUSDC', 'SKLBTC', 'BTCUSDC'] => marche bien
 # ['ACHUSDC', 'ACHBTC', 'BTCUSDC']
 # ['WCTUSDC', 'WCTTRY', 'USDCTRY']
-PAIR_USDC_1 = "SKLUSDC"
-PAIR_INTER = "SKLBTC"
+PAIR_USDC_1 = "ACHUSDC"
+PAIR_INTER = "ACHBTC"
 PAIR_USDC_2 = "BTCUSDC"
 
 # Fonction pour récupérer le prix d'un symbole

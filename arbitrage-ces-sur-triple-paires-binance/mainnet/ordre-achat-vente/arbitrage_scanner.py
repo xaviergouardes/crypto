@@ -33,7 +33,7 @@ class ArbitrageScanner:
 
         prixUsdc1 = self.usdc1.prix
         prixUsdc1 = self.usdc1.prix
-        return prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit, profitPourcent
+        return finalUsdc, profit, profitPourcent
 
     def simulate_retour(self, prixUsdc1: Decimal, prixInter:Decimal, prixUsdc2: Decimal):
         """
@@ -46,7 +46,7 @@ class ArbitrageScanner:
         profit = finalUsdc - self.capital
         profitPourcent = (profit / self.capital) * 100
 
-        return prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit, profitPourcent
+        return finalUsdc, profit, profitPourcent
 
     def scan(self) -> dict:
         """
@@ -58,18 +58,25 @@ class ArbitrageScanner:
         prixInter = self.inter.prix
         prixUsdc2 = self.usdc2.prix
         
-        prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit_aller, profitPourcent = self.simulate_aller(prixUsdc1, prixInter, prixUsdc2)
-        prixUsdc1, prixInter, prixUsdc2, finalUsdc, profit_retour, profitPourcent = self.simulate_retour(prixUsdc1, prixInter, prixUsdc2)
+        finalUsdc_aller, profit_aller, profitPourcent_aller = self.simulate_aller(prixUsdc1, prixInter, prixUsdc2)
+        finalUsdc_retour, profit_retour, profitPourcent_retour = self.simulate_retour(prixUsdc1, prixInter, prixUsdc2)
 
-        signal = None
+        signal = False
         profit = 0.0
-        if profit_aller >= self.seuilUsdc :
+        sens = None
+        if profit_aller > profit_retour:
                 profit = profit_aller
-                signal = "ALLER"
+                sens = "ALLER"
+                finalUsdc = finalUsdc_aller
+                profitPourcent = profitPourcent_aller
+                signal = finalUsdc + self.seuilUsdc > self.capital if  True else False
 
-        if profit_retour >= self.seuilUsdc :
+        if profit_retour > profit_aller:
                 profit = profit_retour
-                signal = "RETOUR"
+                sens = "RETOUR"
+                finalUsdc = finalUsdc_retour
+                profitPourcent = profitPourcent_retour
+                signal = finalUsdc + self.seuilUsdc > self.capital if  True else False
 
         # timestamp en millisecondes
         ts_millis = int(datetime.now().timestamp() * 1000)
@@ -81,9 +88,12 @@ class ArbitrageScanner:
                 "prixInter": f"{prixInter:.8f}",
                 "prixUsdc2" : f"{prixUsdc2:.8f}",
             },
+            "capital": f"{self.capital:.8f}",
+            "seuil": f"{self.seuilUsdc:.8f}",
             "finalUsdc": f"{finalUsdc:.8f}",
             "profitPourcent": f"{profitPourcent:.8f}",
             "profit": f"{profit:.8f}",
+            "sens": sens,
             "signal": signal
         }
 
@@ -98,8 +108,8 @@ if __name__ == "__main__":
         # p2 = MockPaire(Paire(binance.client, "SKLBTC"))
         # p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
 
-        p1 = Paire(binance.client, "SKLUSDC")
-        p2 = Paire(binance.client, "SKLBTC")
+        p1 = Paire(binance.client, "ACHUSDC")
+        p2 = Paire(binance.client, "ACHBTC")
         p3 = Paire(binance.client, "BTCUSDC")
 
         scanner = ArbitrageScanner(p1, p2, p3)
