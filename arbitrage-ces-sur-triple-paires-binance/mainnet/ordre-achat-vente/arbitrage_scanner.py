@@ -69,14 +69,14 @@ class ArbitrageScanner:
                 sens = "ALLER"
                 finalUsdc = finalUsdc_aller
                 profitPourcent = profitPourcent_aller
-                signal = finalUsdc + self.seuilUsdc > self.capital if  True else False
+                signal = profit >= self.seuilUsdc if  True else False
 
         if profit_retour > profit_aller:
                 profit = profit_retour
                 sens = "RETOUR"
                 finalUsdc = finalUsdc_retour
                 profitPourcent = profitPourcent_retour
-                signal = finalUsdc + self.seuilUsdc > self.capital if  True else False
+                signal = profit >= self.seuilUsdc if  True else False
 
         # timestamp en millisecondes
         ts_millis = int(datetime.now().timestamp() * 1000)

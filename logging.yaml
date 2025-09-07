@@ -1,0 +1,34 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+  simple:
+    format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  detailed:
+    format: "%(asctime)s [%(levelname)s] %(name)s (%(filename)s:%(lineno)d): %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: detailed
+    filename: ./project.log
+    encoding: utf8
+
+loggers:
+  # loggers spécifiques (optionnel)
+  # Exemple: logger pour ton module trading
+  bot_trading:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: no
+
+root:
+  level: WARNING
+  handlers: [console, file]

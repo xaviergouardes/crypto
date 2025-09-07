@@ -61,6 +61,24 @@ class Paire:
         """Retourne les deux actifs qui composent la paire (base, quote)."""
         return (self.info["baseAsset"], self.info["quoteAsset"])
 
+    def adjust_quantity_step(self, quantity: Decimal, mode="floor") -> Decimal:
+        """
+        Ajuste la quantité pour respecter le stepSize (LOT_SIZE).
+        """
+        step = self.step_size
+
+        if mode == "floor":
+            qty_adj = (quantity // step) * step
+        elif mode == "ceil":
+            qty_adj = ((quantity + step - Decimal("0.00000001")) // step) * step
+        else:
+            raise ValueError("mode doit être 'floor' ou 'ceil'")
+
+        if qty_adj < step:
+            raise StepSizeError(f"Quantité {qty_adj} trop faible (stepSize = {step})")
+
+        return qty_adj.quantize(step)
+    
     def buy_base_from_quote(self, amount_quote: Decimal) -> dict:
         """
         Acheter la paire avec un ordre MARKET à partir d'un montant en quote asset.
@@ -82,7 +100,7 @@ class Paire:
             return order
         
         except (BinanceAPIException, BinanceOrderException) as e:
-            print(f"Erreur lors de l'achat MARKET: {e}")
+            print(f"Erreur lors de l'achat MARKET - buy_base_from_quote : {amount_quote} {self.symbol} : {e}")
             return None
         
     def sell_base_get_quote(self, amount_base: Decimal) -> dict:
@@ -91,23 +109,23 @@ class Paire:
         :param amount_base: quantité de base à vendre
         :return: dictionnaire contenant les informations de l'ordre
         """
-        # Vérifier step_size
-        if amount_base < self.step_size:
-            msg = (f"Quantité trop faible. amount_base = {amount_base} {self.base_asset}, "
-                   f"stepSize = {self.step_size}")
-            print("ERREUR:", msg)
-            raise StepSizeError(msg)
-
+        # 
+        try:
+            # Ajustement quantité
+            amount_base_adj = self.adjust_quantity_step(amount_base, mode="floor")
+        except (StepSizeError) as e:
+            print("ERREUR:", e)
+            return None
+    
         try:
             order = self.client.order_market_sell(
                 symbol=self.symbol,
-                quantity=amount_base
+                quantity=float(amount_base_adj)
             )
-            print(f"Vente réussie : {amount_base} {self.base_asset}")
             return order
 
         except (BinanceAPIException, BinanceOrderException) as e:
-            print(f"Erreur lors de la vente MARKET: {e}")
+            print(f"Erreur lors de la vente MARKET - sell_base_get_quote: {amount_base} -> {amount_base_adj} {self.symbol} : {e}")
             return None
         
 

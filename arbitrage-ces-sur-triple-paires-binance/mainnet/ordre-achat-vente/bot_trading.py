@@ -7,6 +7,12 @@ from order_engine import OrderEngine
 import time
 import json
 from datetime import datetime
+import logging
+import logging.config
+import yaml
+from pathlib import Path
+
+logger = logging.getLogger("bot_trading")
 
 class BotTrading:
     def __init__(self, usdc1: Paire, inter: Paire, usdc2: Paire, capital: Decimal = Decimal("100"), seuilUsdc: Decimal = Decimal("1")):
@@ -45,8 +51,7 @@ class BotTrading:
                     "orders": orders
                 }
 
-                if signal:
-                    self.log_trade(result)
+                self.log_trade(result)
 
     def scan_only(self, iterations: int | None = None):
             """Boucle principale : scruter le marché et simuler les trades ALLER uniquement."""
@@ -63,7 +68,7 @@ class BotTrading:
                     raise e
                     time.sleep(5)
             
-                print(json.dumps(signal_data, ensure_ascii=False))
+                logger.debug(json.dumps(signal_data, ensure_ascii=False))
 
 
     def log_trade(self, result: dict, filename="./trades.json"):
@@ -80,20 +85,33 @@ class BotTrading:
         # Affiche joliment à l’écran
         print(json.dumps(result_with_time, ensure_ascii=False))
 
+
+    def setup_logging(config_path="logging.yaml"):
+        current_dir = Path.cwd()
+        config_file = current_dir / "logging.yaml"
+        with open(config_file, "r") as f:
+            config = yaml.safe_load(f)
+            logging.config.dictConfig(config)
+
 if __name__ == "__main__":
+
+    logger.info(f"Bot Trading Démarrge ...")
+
     # PAIRS = ["SKLUSDC", "SKLBTC", "BTCUSDC"]
     with BinanceClient() as binance:
         # paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
         paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
 
-        p1 = Paire(binance.client, paires[0])
-        p2 = Paire(binance.client, paires[1])
-        p3 = Paire(binance.client, paires[2])
+        #p1 = Paire(binance.client, paires[0])
+        #p2 = Paire(binance.client, paires[1])
+        #p3 = Paire(binance.client, paires[2])
 
-        #p1 = MockPaire(Paire(binance.client, paires[0]))
-        #p2 = MockPaire(Paire(binance.client, paires[1]))
-        #p3 = MockPaire(Paire(binance.client, paires[2]))
+        p1 = MockPaire(Paire(binance.client, paires[0]))
+        p2 = MockPaire(Paire(binance.client, paires[1]))
+        p3 = MockPaire(Paire(binance.client, paires[2]))
 
-        bot = BotTrading(p1, p2, p3, 50, 1)
+        bot = BotTrading(p1, p2, p3, 50, 0.5)
+        bot.setup_logging()
+
         #result = bot.scan_and_trade(1)
         bot.scan_only()
