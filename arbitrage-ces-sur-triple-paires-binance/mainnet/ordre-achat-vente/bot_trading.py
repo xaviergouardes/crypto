@@ -23,35 +23,46 @@ class BotTrading:
 
     def scan_and_trade(self, iterations: int | None = None):
             """Boucle principale : scruter le marché et simuler les trades ALLER uniquement."""
+            logger.info("Demarrage du scan_and_trade...")
             count = 0
             while iterations is None or count < iterations:
                 try:
-                    
                     signal_data = self.scanner.scan()
                     signal = signal_data["signal"]
                     sens = signal_data["sens"]
+                    if logger.isEnabledFor(logging.DEBUG): logger.debug(f"signal = {signal_data}")
 
                     orders = []
                     if signal and sens == "ALLER":
+                        if logger.isEnabledFor(logging.DEBUG): logger.debug("Trade ALLER lancé ... ")
                         orders = self.order_engine.execute_trade_aller()
 
                     if signal and sens == "RETOUR":
+                        if logger.isEnabledFor(logging.DEBUG): logger.debug("Trade RETOUR lancé ... ")
                         orders = self.order_engine.execute_trade_retour()
+                    
+
+                    result = {
+                        "signal_data": signal_data,
+                        "orders": orders
+                    }
+                    if orders is not None:
+                        logger.info(f"Trade {sens} : {json.dumps(result, ensure_ascii=False)}" )
+
+                    if (count + 1) % 20 == 0:
+                        logger.info(f"Signal {signal} : {json.dumps(result, ensure_ascii=False)}" )
 
                     time.sleep(5)
                     count += 1
 
                 except Exception as e:
-                    print("Erreur dans le scan/trade:", e)
+                    logger.error("Erreur dans le scan_and_trade :", e)
                     raise e
                     time.sleep(5)
             
-                result = {
-                    "signal_data": signal_data,
-                    "orders": orders
-                }
 
-                self.log_trade(result)
+
+
 
     def scan_only(self, iterations: int | None = None):
             """Boucle principale : scruter le marché et simuler les trades ALLER uniquement."""
@@ -64,26 +75,11 @@ class BotTrading:
                     count += 1
 
                 except Exception as e:
-                    print("Erreur dans le scan onlytrade:", e)
+                    logger.error("Erreur dans le scan_only ", e)
                     raise e
                     time.sleep(5)
             
-                logger.debug(json.dumps(signal_data, ensure_ascii=False))
-
-
-    def log_trade(self, result: dict, filename="./trades.json"):
-        # Ajoute un horodatage dans les données
-        result_with_time = {
-            "timestamp": datetime.now().isoformat(timespec="seconds"),
-            **result
-        }
-
-        # Écrit dans le fichier en mode append (chaque trade sur une ligne JSON)
-        with open(filename, "a", encoding="utf-8") as f:
-            f.write(json.dumps(result_with_time, ensure_ascii=False) + "\n")
-
-        # Affiche joliment à l’écran
-        print(json.dumps(result_with_time, ensure_ascii=False))
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(json.dumps(signal_data, ensure_ascii=False))
 
 
     def setup_logging(config_path="logging.yaml"):
@@ -95,12 +91,10 @@ class BotTrading:
 
 if __name__ == "__main__":
 
-    logger.info(f"Bot Trading Démarrge ...")
-
     # PAIRS = ["SKLUSDC", "SKLBTC", "BTCUSDC"]
     with BinanceClient() as binance:
-        # paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
-        paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
+        paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
+        # paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
 
         #p1 = Paire(binance.client, paires[0])
         #p2 = Paire(binance.client, paires[1])
@@ -110,8 +104,8 @@ if __name__ == "__main__":
         p2 = MockPaire(Paire(binance.client, paires[1]))
         p3 = MockPaire(Paire(binance.client, paires[2]))
 
-        bot = BotTrading(p1, p2, p3, 50, 0.5)
+        bot = BotTrading(p1, p2, p3, 100, 0.5)
         bot.setup_logging()
 
-        #result = bot.scan_and_trade(1)
-        bot.scan_only()
+        result = bot.scan_and_trade()
+        #bot.scan_only()

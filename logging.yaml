@@ -25,8 +25,13 @@ loggers:
   # loggers spécifiques (optionnel)
   # Exemple: logger pour ton module trading
   bot_trading:
-    level: DEBUG
-    handlers: [console, file]
+    level: INFO
+    handlers: [file]
+    propagate: no
+
+  order_engine:
+    level: INFO
+    handlers: [file]
     propagate: no
 
 root:

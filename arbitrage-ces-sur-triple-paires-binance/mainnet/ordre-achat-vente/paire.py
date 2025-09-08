@@ -101,7 +101,7 @@ class Paire:
         
         except (BinanceAPIException, BinanceOrderException) as e:
             print(f"Erreur lors de l'achat MARKET - buy_base_from_quote : {amount_quote} {self.symbol} : {e}")
-            return None
+            raise e
         
     def sell_base_get_quote(self, amount_base: Decimal) -> dict:
         """
@@ -115,7 +115,7 @@ class Paire:
             amount_base_adj = self.adjust_quantity_step(amount_base, mode="floor")
         except (StepSizeError) as e:
             print("ERREUR:", e)
-            return None
+            raise e
     
         try:
             order = self.client.order_market_sell(
@@ -126,7 +126,7 @@ class Paire:
 
         except (BinanceAPIException, BinanceOrderException) as e:
             print(f"Erreur lors de la vente MARKET - sell_base_get_quote: {amount_base} -> {amount_base_adj} {self.symbol} : {e}")
-            return None
+            raise e
         
 
     def __str__(self) -> str:

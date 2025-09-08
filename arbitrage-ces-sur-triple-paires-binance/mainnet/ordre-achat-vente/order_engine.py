@@ -5,6 +5,10 @@ from mock_paire import MockPaire
 import time
 import json
 from datetime import datetime
+import logging
+
+
+logger = logging.getLogger("order_engine")
 
 class OrderEngine:
     def __init__(self, usdc1: Paire, inter: Paire, usdc2: Paire, capital: Decimal = Decimal("100")):
@@ -17,32 +21,43 @@ class OrderEngine:
     def execute_trade_aller(self):
             # USDC -> Intermédiaire
             try:
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order1 = buy_base_from_quote(capital={self.capital})")
                 order1 = self.usdc1.buy_base_from_quote(self.capital)
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order1 ={order1})")
                 qty_base1 = Decimal(order1["executedQty"])
-                self.log_binance_orders(order1, "execute_trade_aller_order1")
 
             except Exception as e:
-                print("Erreur dans execute_trade_aller : order1", e)
+                logger.error(f"Erreur dans execute_trade_aller.buy_base_from_quote : order1 - exception={e}")
+                logger.error(f"Erreur dans execute_trade_aller.buy_base_from_quote({self.capital})")
                 raise e
 
             # Intermédiaire -> Autre crypto
             try:
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order2 = sell_base_get_quote(qty_base1={qty_base1})")
                 order2 = self.inter.sell_base_get_quote(qty_base1)
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order2 ={order2})")
                 qty_base2 = Decimal(order2["cummulativeQuoteQty"])
-                self.log_binance_orders(order2, "execute_trade_aller_order2")
 
             except Exception as e:
-                print("Erreur dans execute_trade_aller : order2", e)
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote : order2 - exception={e}")
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote : order1={order1}")
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote({qty_base1})")
+
                 raise e
 
             # Autre crypto -> USDC
             try:
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order3 = sell_base_get_quote(qty_base2={qty_base2})")
                 order3 = self.usdc2.sell_base_get_quote(qty_base2)
-                final_usdc = Decimal(order3["cummulativeQuoteQty"])
-                self.log_binance_orders(order3, "execute_trade_aller_order3")
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order3 ={order3})")
+                #final_usdc = Decimal(order3["cummulativeQuoteQty"])
+
 
             except Exception as e:
-                print("Erreur dans execute_trade_aller : order3", e)
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote : order3 - exception={e}")
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote : order1={order1}")
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote : order2={order2}")
+                logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote({qty_base2})")
                 raise e
             
             #print(f"[TRADE ALLER] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
@@ -53,49 +68,44 @@ class OrderEngine:
 
             # USDC -> Autre crypto (BTC par ex.)
             try:
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order1 = buy_base_from_quote(capital={self.capital})")
                 order1 = self.usdc2.buy_base_from_quote(self.capital)
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order1 ={order1})")
                 qty_base1 = Decimal(order1["executedQty"])
 
             except Exception as e:
-                print("Erreur dans execute_trade_retour : order2", e)
+                logger.error(f"Erreur dans execute_trade_retour.buy_base_from_quote : order1 - exception={e}")
+                logger.error(f"Erreur dans execute_trade_retour.buy_base_from_quote({self.capital})")
                 raise e
 
             # Autre crypto -> Intermédiaire (ETH par ex.)
             try:
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order2 = buy_base_from_quote(qty_base1={qty_base1})")
                 order2 = self.inter.buy_base_from_quote(float(qty_base1))
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order2 ={order2})")
                 qty_base2 = Decimal(order2["executedQty"])
 
             except Exception as e:
-                print("Erreur dans execute_trade_retour : order2", e)
+                logger.error(f"Erreur dans execute_trade_retour.buy_base_from_quote : order2 - exception={e}")
+                logger.error(f"Erreur dans execute_trade_retour.buy_base_from_quote : order1={order1}")
+                logger.error(f"Erreur dans execute_trade_retour.buy_base_from_quote({self.capital})")
                 raise e
     
             # Intermédiaire -> USDC
             try:
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order3 = sell_base_get_quote(qty_base2={qty_base2})")
                 order3 = self.usdc1.sell_base_get_quote(qty_base2)
-                final_usdc = Decimal(order3["cummulativeQuoteQty"])
+                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order3 ={order3})")
+                #final_usdc = Decimal(order3["cummulativeQuoteQty"])
 
             except Exception as e:
-                print("Erreur dans execute_trade_retour : order2", e)
+                logger.error(f"Erreur dans execute_trade_retour.sell_base_get_quote : order3 - exception={e}")
+                logger.error(f"Erreur dans execute_trade_retour.sell_base_get_quote : order1={order1}")
+                logger.error(f"Erreur dans execute_trade_retour.sell_base_get_quote : order2={order2}")
+                logger.error(f"Erreur dans execute_trade_retour.sell_base_get_quote({self.capital})")
                 raise e
-    
-            #print(f"[TRADE RETOUR] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
 
             return [order1, order2, order3]
-
-    def log_binance_orders(self, result: dict, order_num, filename="./binances_orders.json"):
-        # Ajoute un horodatage dans les données
-        result_with_time = {
-            "timestamp": datetime.now().isoformat(timespec="seconds"),
-            "order_num": order_num
-            **result
-        }
-
-        # Écrit dans le fichier en mode append (chaque trade sur une ligne JSON)
-        with open(filename, "a", encoding="utf-8") as f:
-            f.write(json.dumps(result_with_time, ensure_ascii=False) + "\n")
-
-        # Affiche joliment à l’écran
-        print(json.dumps(result_with_time, ensure_ascii=False))
 
 
 if __name__ == "__main__":
@@ -110,8 +120,8 @@ if __name__ == "__main__":
         p3 = MockPaire(Paire(binance.client, "BTCUSDC"))
 
         engine_order = OrderEngine(p1, p2, p3, 10)
-        #order1 = engine_order.execute_trade_aller()
-        #print(order1)
+        order1 = engine_order.execute_trade_aller()
+        print(order1)
 
         order1 = engine_order.execute_trade_retour()
         print(order1)
