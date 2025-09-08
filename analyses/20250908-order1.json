@@ -1,0 +1,34 @@
+{
+    "symbol": "ACHUSDC",
+    "orderId": 9418360,
+    "orderListId": -1,
+    "clientOrderId": "x-HNA2TXFJ7f17031e9344756c42f386",
+    "transactTime": 1757362097272,
+    "price": "0.00000000",
+    "origQty": "2562.00000000",
+    "executedQty": "2562.00000000",
+    "origQuoteOrderQty": "50.00000000",
+    "cummulativeQuoteQty": "49.98462000",
+    "status": "FILLED",
+    "timeInForce": "GTC",
+    "type": "MARKET",
+    "side": "BUY",
+    "workingTime": 1757362097272,
+    "fills": [
+        {
+            "price": "0.01951000",
+            "qty": "792.00000000",
+            "commission": "0.75240000",
+            "commissionAsset": "ACH",
+            "tradeId": 116852
+        },
+        {
+            "price": "0.01951000",
+            "qty": "1770.00000000",
+            "commission": "1.68150000",
+            "commissionAsset": "ACH",
+            "tradeId": 116853
+        }
+    ],
+    "selfTradePreventionMode": "EXPIRE_MAKER"
+}

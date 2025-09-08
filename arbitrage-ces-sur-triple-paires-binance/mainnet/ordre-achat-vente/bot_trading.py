@@ -96,16 +96,16 @@ if __name__ == "__main__":
         paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
         # paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
 
-        #p1 = Paire(binance.client, paires[0])
-        #p2 = Paire(binance.client, paires[1])
-        #p3 = Paire(binance.client, paires[2])
+        p1 = Paire(binance.client, paires[0])
+        p2 = Paire(binance.client, paires[1])
+        p3 = Paire(binance.client, paires[2])
 
-        p1 = MockPaire(Paire(binance.client, paires[0]))
-        p2 = MockPaire(Paire(binance.client, paires[1]))
-        p3 = MockPaire(Paire(binance.client, paires[2]))
+        #p1 = MockPaire(Paire(binance.client, paires[0]))
+        #p2 = MockPaire(Paire(binance.client, paires[1]))
+        #p3 = MockPaire(Paire(binance.client, paires[2]))
 
-        bot = BotTrading(p1, p2, p3, 100, 0.5)
+        bot = BotTrading(p1, p2, p3, 50, 1)
         bot.setup_logging()
 
-        result = bot.scan_and_trade()
+        result = bot.scan_and_trade(1)
         #bot.scan_only()
