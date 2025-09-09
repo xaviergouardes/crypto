@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     # PAIRS = ["SKLUSDC", "SKLBTC", "BTCUSDC"]
     with BinanceClient(testnet=True) as binance:
-        # paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
+        paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
         # paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
         # paires = ['BNBUSDC', 'DOTBNB', 'DOTUSDC']
         # paires = ['BTCUSDC', 'DOTBTC', 'DOTUSDC']
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         # paires = ['SOLUSDC', 'SOLETH', 'ETHUSDC']
         # paires = ['AVAXUSDC', 'AVAXBTC', 'BTCUSDC']
         # paires = ['ROSEUSDC', 'ROSEBTC', 'BTCUSDC']
-        paires = ['ETHUSDC', 'ETHBTC', 'BTCUSDC']
+        # paires = ['ETHUSDC', 'ETHBTC', 'BTCUSDC']
 
         p1 = Paire(binance.client, paires[0])
         p2 = Paire(binance.client, paires[1])
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         #p2 = MockPaire(Paire(binance.client, paires[1]))
         #p3 = MockPaire(Paire(binance.client, paires[2]))
 
-        bot = BotTrading(p1, p2, p3, 500, 0.1)
+        bot = BotTrading(p1, p2, p3, 100, 1)
         bot.setup_logging()
 
         result = bot.scan_and_trade()

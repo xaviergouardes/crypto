@@ -33,9 +33,15 @@ class Paire:
         #ticker = await asyncio.to_thread(
         #    self.client.get_symbol_ticker(symbol=self.symbol)
         #)
-        ticker = self.client.get_symbol_ticker(symbol=self.symbol)
-        self._dernier_prix = Decimal(ticker["price"])
-        return self._dernier_prix
+        #ticker = self.client.get_symbol_ticker(symbol=self.symbol)
+        #self._dernier_prix = Decimal(ticker["price"])
+        #return self._dernier_prix
+
+        order_book = self.client.get_order_book(symbol=self.symbol, limit=5)
+        best_ask = float(order_book['asks'][0][0])  # meilleur prix vendeur
+        best_bid = float(order_book['bids'][0][0])  # meilleur prix acheteur
+        self._dernier_prix = Decimal(best_ask)
+        return self._dernier_prix        
 
     @property
     def min_notional(self) -> Decimal:
