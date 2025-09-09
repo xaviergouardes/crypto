@@ -21,7 +21,7 @@ KNOWN_QUOTES = ['USD', 'USDC', 'ACH', 'BTC', 'SKL']
 
 FEE = 0.001       # 0.1% Binance
 MIN_PROFIT = 0.007  # profit minimal 0.7%
-BASE_AMOUNT = 100   # montant initial (ex: USDT)
+BASE_AMOUNT = 1000   # montant initial (ex: USDT)
 
 # =========================
 # FONCTIONS UTILES
@@ -33,6 +33,7 @@ async def get_order_book(pair):
         data = json.loads(msg)
         bids = [(float(p[0]), float(p[1])) for p in data['bids']]
         asks = [(float(p[0]), float(p[1])) for p in data['asks']]
+        print(f"Prix Brut : paire={pair} bids={bids[0][0]:.12f} asks={asks[0][0]:.12f}")
         return bids, asks
 
 def get_assets_from_pairs(pairs):
@@ -111,8 +112,8 @@ def calc_triangular_profit_auto(order_books, pairs, base_amount):
     final2 = simulate_flow(order_books, flow2)
     profit2 = (final2 - base_amount)/base_amount
 
-    print("Direction 1:", flow1, "Profit:", profit1*100, "%")
-    print("Direction 2:", flow2, "Profit:", profit2*100, "%")
+    #print("Direction 1:", flow1, "Profit:", profit1*100, "%")
+    #print("Direction 2:", flow2, "Profit:", profit2*100, "%")
 
     if profit1 > profit2:
         return profit1, final1, flow1
