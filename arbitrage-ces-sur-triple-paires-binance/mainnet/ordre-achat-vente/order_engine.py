@@ -21,9 +21,9 @@ class OrderEngine:
     def execute_trade_aller(self):
             # USDC -> Intermédiaire
             try:
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order1 = buy_base_from_quote(capital={self.capital})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order1 = buy_base_from_quote(capital={self.capital})")
                 order1 = self.usdc1.buy_base_from_quote(self.capital)
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order1 ={order1})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order1 ={order1})")
                 qty_base1 = Decimal(order1["executedQty"])
 
             except Exception as e:
@@ -33,9 +33,9 @@ class OrderEngine:
 
             # Intermédiaire -> Autre crypto
             try:
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order2 = sell_base_get_quote(qty_base1={qty_base1})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order2 = sell_base_get_quote(qty_base1={qty_base1})")
                 order2 = self.inter.sell_base_get_quote(qty_base1)
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order2 ={order2})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order2 ={order2})")
                 qty_base2 = Decimal(order2["cummulativeQuoteQty"])
 
             except Exception as e:
@@ -47,9 +47,9 @@ class OrderEngine:
 
             # Autre crypto -> USDC
             try:
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order3 = sell_base_get_quote(qty_base2={qty_base2})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_aller - order3 = sell_base_get_quote(qty_base2={qty_base2})")
                 order3 = self.usdc2.sell_base_get_quote(qty_base2)
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order3 ={order3})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_aller - order3 ={order3})")
                 #final_usdc = Decimal(order3["cummulativeQuoteQty"])
 
 
@@ -60,17 +60,15 @@ class OrderEngine:
                 logger.error(f"Erreur dans execute_trade_aller.sell_base_get_quote({qty_base2})")
                 raise e
             
-            #print(f"[TRADE ALLER] Capital initial={self.capital}, Capital final={final_usdc:.8f}")
-
             return [order1, order2, order3]
 
     def execute_trade_retour(self):
 
             # USDC -> Autre crypto (BTC par ex.)
             try:
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order1 = buy_base_from_quote(capital={self.capital})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order1 = buy_base_from_quote(capital={self.capital})")
                 order1 = self.usdc2.buy_base_from_quote(self.capital)
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order1 ={order1})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order1 ={order1})")
                 qty_base1 = Decimal(order1["executedQty"])
 
             except Exception as e:
@@ -80,9 +78,9 @@ class OrderEngine:
 
             # Autre crypto -> Intermédiaire (ETH par ex.)
             try:
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order2 = buy_base_from_quote(qty_base1={qty_base1})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order2 = buy_base_from_quote(qty_base1={qty_base1})")
                 order2 = self.inter.buy_base_from_quote(float(qty_base1))
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order2 ={order2})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order2 ={order2})")
                 qty_base2 = Decimal(order2["executedQty"])
 
             except Exception as e:
@@ -93,9 +91,9 @@ class OrderEngine:
     
             # Intermédiaire -> USDC
             try:
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order3 = sell_base_get_quote(qty_base2={qty_base2})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"execute_trade_retour - order3 = sell_base_get_quote(qty_base2={qty_base2})")
                 order3 = self.usdc1.sell_base_get_quote(qty_base2)
-                #if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order3 ={order3})")
+                if logger.isEnabledFor(logging.DEBUG): logger.debug(f"Binance - execute_trade_retour - order3 ={order3})")
                 #final_usdc = Decimal(order3["cummulativeQuoteQty"])
 
             except Exception as e:

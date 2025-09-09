@@ -25,7 +25,7 @@ loggers:
   # loggers spécifiques (optionnel)
   # Exemple: logger pour ton module trading
   bot_trading:
-    level: INFO
+    level: DEBUG
     handlers: [file]
     propagate: no
   order_engine:
@@ -33,9 +33,14 @@ loggers:
     handlers: [file]
     propagate: no
   binance_client:
-    level: DEBUG
+    level: INFO
     handlers: [file]
     propagate: no
+  arbitrage_scanner:
+    level: INFO
+    handlers: [file]
+    propagate: no
+    
 
 root:
   level: WARNING

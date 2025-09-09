@@ -94,9 +94,16 @@ class BotTrading:
 if __name__ == "__main__":
 
     # PAIRS = ["SKLUSDC", "SKLBTC", "BTCUSDC"]
-    with BinanceClient() as binance:
-        # paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
-        paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
+    with BinanceClient(testnet=True) as binance:
+        #paires = ["ACHUSDC", "ACHBTC", "BTCUSDC"]
+        #paires = ['SKLUSDC', 'SKLBTC', 'BTCUSDC']
+        #paires = ['BNBUSDC', 'DOTBNB', 'DOTUSDC']
+        # paires = ['BTCUSDC', 'DOTBTC', 'DOTUSDC']
+        # paires = ['TRXUSDC', 'TRXBTC', 'BTCUSDC']
+        # paires = ['ATOMUSDC', 'ATOMBTC', 'BTCUSDC']
+        # paires = ['SOLUSDC', 'SOLETH', 'ETHUSDC']
+        #paires = ['AVAXUSDC', 'AVAXBTC', 'BTCUSDC']
+        paires = ['ROSEUSDC', 'ROSEBTC', 'BTCUSDC']
 
         p1 = Paire(binance.client, paires[0])
         p2 = Paire(binance.client, paires[1])

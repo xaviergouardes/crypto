@@ -4,6 +4,10 @@ from paire import Paire
 from binance_client import BinanceClient
 from mock_paire import MockPaire
 from datetime import datetime
+import logging
+import logging.config
+
+logger = logging.getLogger("arbitrage_scanner")
 
 class ArbitrageScanner:
     """
@@ -60,18 +64,19 @@ class ArbitrageScanner:
         
         finalUsdc_aller, profit_aller, profitPourcent_aller = self.simulate_aller(prixUsdc1, prixInter, prixUsdc2)
         finalUsdc_retour, profit_retour, profitPourcent_retour = self.simulate_retour(prixUsdc1, prixInter, prixUsdc2)
+        logger.debug(f"profit_aller = {profit_aller} / profit_retour= {profit_retour}")
 
         signal = False
         profit = 0.0
         sens = None
-        if profit_aller > profit_retour:
+        if (profit_aller > 0) and (profit_aller > profit_retour):
                 profit = profit_aller
                 sens = "ALLER"
                 finalUsdc = finalUsdc_aller
                 profitPourcent = profitPourcent_aller
                 signal = profit >= self.seuilUsdc if  True else False
 
-        if profit_retour > profit_aller:
+        if (profit_retour > 0) and (profit_retour > profit_aller):
                 profit = profit_retour
                 sens = "RETOUR"
                 finalUsdc = finalUsdc_retour
