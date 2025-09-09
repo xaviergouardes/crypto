@@ -28,9 +28,12 @@ loggers:
     level: INFO
     handlers: [file]
     propagate: no
-
   order_engine:
     level: INFO
+    handlers: [file]
+    propagate: no
+  binance_client:
+    level: DEBUG
     handlers: [file]
     propagate: no
 

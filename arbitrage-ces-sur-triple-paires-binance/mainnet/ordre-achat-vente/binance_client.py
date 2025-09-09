@@ -1,5 +1,9 @@
 import os
 from binance.client import Client
+import logging
+import logging.config
+
+logger = logging.getLogger("binance_client")
 
 class BinanceClient:
     """
@@ -11,9 +15,10 @@ class BinanceClient:
     Utilisable comme contexte avec 'with'.
     """
 
-    def __init__(self):
+    def __init__(self, testnet=True):
         self.__api_key = os.getenv("BINANCE_API_KEY")
         self.__api_secret = os.getenv("BINANCE_API_SECRET")
+        self.__testnet = testnet
 
         if not self.__api_key or not self.__api_secret:
             raise ValueError("Les variables d'environnement BINANCE_API_KEY et BINANCE_API_SECRET doivent être définies.")
@@ -21,7 +26,10 @@ class BinanceClient:
         self.client = None
 
     def __enter__(self):
-        self.client = Client(self.__api_key, self.__api_secret)
+        self.client = Client(self.__api_key, self.__api_secret, testnet=self.__testnet)
+        #logger.info(f"Client Binance sur {'TESTNET' if self.__testnet else 'MAINNET'}")
+        logger.info("#### TOTO")
+        print(f"Client Binance sur {'TESTNET' if self.__testnet else 'MAINNET'}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -30,6 +38,7 @@ class BinanceClient:
 
 
 if __name__ == "__main__":
+    
     try:
         with BinanceClient() as binance:
             # Exemple rapide : récupération du solde
