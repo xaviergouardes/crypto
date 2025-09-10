@@ -13,8 +13,8 @@ client = Client(API_KEY, API_SECRET, testnet=True)
 # =========================
 # 2️⃣ Paramètres
 # =========================
-symbol = "BTCUSDT"
-quantity = 0.001
+symbol = "ACHBTC"
+quantity = 1000.000
 
 # =========================
 # 3️⃣ Lire le carnet d'ordres
@@ -32,7 +32,7 @@ print(f"Meilleur prix acheteur (bid): {best_bid}")
 # =========================
 order = client.create_order(
     symbol=symbol,
-    side=SIDE_BUY,
+    side=SIDE_SELL,
     type=ORDER_TYPE_MARKET,
     quantity=quantity
 )
