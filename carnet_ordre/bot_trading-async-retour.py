@@ -1,3 +1,9 @@
+
+# 💡 Règle simple :
+# Pour une paire BASE/QUOTE :
+# Achat → tu dépenses QUOTE pour recevoir BASE
+# Vente → tu dépenses BASE pour recevoir QUOTE
+
 import asyncio
 import websockets
 import json
@@ -30,9 +36,16 @@ async def ws_order_book(pair):
             asks = [(float(p[0]), float(p[1])) for p in data['asks']]
             prices[pair] = (bids, asks)
 
-async def place_order(symbol, side, qty):
+async def place_order(symbol, side, quantity):
     try:
-        return client.create_order(symbol=symbol, side=side, type=ORDER_TYPE_MARKET, quantity=qty)
+        return client.create_order(symbol=symbol, side=side, type='MARKET', quantity=quantity)
+    except Exception as e:
+        print(f"Erreur sur {symbol}: {e}")
+        raise e
+
+async def place_order_with_quote(symbol, side, quoteOrderQty):
+    try:
+        return client.create_order(symbol=symbol, side=side, type='MARKET', quoteOrderQty=quoteOrderQty)
     except Exception as e:
         print(f"Erreur sur {symbol}: {e}")
         raise e
@@ -68,6 +81,8 @@ def adjust_qty(symbol, qty):
     qty = round(qty, decimals)
     if qty < min_qty:
         qty = min_qty
+
+    # print(f"qty={qty} decimals={decimals}")
     return qty
 
 def get_assets_from_pairs(pairs):
@@ -103,38 +118,45 @@ async def execute_arbitrage():
     bids2, asks2 = prices[PAIRS[1]]
     bids3, asks3 = prices[PAIRS[2]]
 
-    ask1 = asks1[0][0]
+    ask1 = asks1[0][0] # pris pour l'achat
     ask2 = asks2[0][0]
-    bid2 = bids2[0][0]
+    bid2 = bids2[0][0] # pris pour la vente
     bid3 = bids3[0][0]
 
-    btc_amount = (BASE_AMOUNT / ask1) * (1 - FEE)
-    btc_amount = (eth_amount * ask2) * (1 - FEE)
-    final_amount = btc_amount * bid3 * (1 - FEE)
+    print(f"==> bid2={bids2[0][0]} / bid2={bids3[0][1]}" )
+
+    btc_amount = adjust_qty(PAIRS[0], (BASE_AMOUNT / ask1) ) # * (1 - FEE)
+    ach_amount = adjust_qty(PAIRS[2], (btc_amount / bid2) ) # * (1 - FEE) * (1 - FEE)
+    final_amount = ach_amount * bid3 # * (1 - FEE)
     profit_pct = (final_amount - BASE_AMOUNT)/BASE_AMOUNT
-    #print(f"Quantité calculée : Achat ETH={eth_amount:.12f}, Vente BTC={eth_amount:.12f}, Vente ETH={btc_amount:.12f}")
-    #print(f"Profit potentiel : {profit_pct*100:.2f}% → final={final_amount:.4f} - prix {PAIRS[0]} ask1={ask1:.12f} - prix {PAIRS[1]} aks2={ask2:.12f} - prix {PAIRS[2]} bid3={bid3:.12f}")
+    print(f"Quantité calculée : Achat BTC={btc_amount:.12f}, Vente BTC={btc_amount:.12f}, Vente ACH={ach_amount:.12f}")
+    print(f"Profit potentiel : {profit_pct*100:.2f}% → final={final_amount:.4f} - prix {PAIRS[0]} ask1={ask1:.12f} - prix {PAIRS[1]} aks2={bid2:.12f} - prix {PAIRS[2]} bid3={bid3:.12f}")
 
     if profit_pct > MIN_PROFIT:
         try:
-            eth_amount_buy = adjust_qty(PAIRS[0], BASE_AMOUNT / ask1)
-            btc_amount_buy = adjust_qty(PAIRS[2], eth_amount * ask2 * (1 - FEE))
-            btc_amount_sell = adjust_qty(PAIRS[2], (btc_amount_buy - btc_amount_buy * 0.021))
-            final_amount_sell = btc_amount_sell * bid3
+            #eth_amount_buy = adjust_qty(PAIRS[0], BASE_AMOUNT / ask1)
+            #btc_amount_buy = adjust_qty(PAIRS[2], eth_amount * ask2 * (1 - FEE))
+            #btc_amount_sell = adjust_qty(PAIRS[2], (btc_amount_buy - btc_amount_buy * 0.021))
+            #final_amount_sell = btc_amount_sell * bid3
 
             #print(f"Envoi des ordres: {PAIRS[0]}={qty1:.12f}, {PAIRS[1]}={qty2:.12f}, {PAIRS[2]}={qty2:.12f}")
-            #print(f"Envoi des ordres: Achat de {eth_amount_buy:.12f} ACH avec 100 USDC, Vente de {eth_amount_buy:.12f} ACH récupération de {btc_amount_buy:.12f} BTC, Vente de {btc_amount_sell:.12f} BTC récupération de {final_amount_sell:.12f} USDC")
+            #print(f"Envoi des ordres: Achat de {btc_amount:.12f} BTC avec 100 USDC, Vente de {btc_amount:.12f} BTC récupération de {ach_amount:.12f} ACH, Vente de {ach_amount:.12f} ACH récupération de {final_amount:.12f} USDC")
             orders = await asyncio.gather(
-                place_order(PAIRS[0], 'BUY', eth_amount_buy),
-                place_order(PAIRS[1], 'SELL', eth_amount_buy),
-                place_order(PAIRS[2], 'SELL', btc_amount_sell)
+                # place_order(PAIRS[0], 'BUY', btc_amount),
+                # place_order_with_quote(PAIRS[1], 'BUY', btc_amount),
+                # place_order(PAIRS[2], 'SELL', adjust_qty(PAIRS[2], ach_amount - 200))
+                place_order_with_quote(PAIRS[0], 'BUY', 100),
+                place_order_with_quote(PAIRS[1], 'BUY', btc_amount),
             )
+            print(f"--> prix de vente : {orders[1]['executedQty']}")
+            orders.append( await place_order(PAIRS[2], 'SELL', orders[1]["executedQty"]) )
+            
             result = {
                 "order1:": orders[0],
                 "order2:": orders[1],
                 "order3:": orders[2]
             }
-            #print(f"result : {json.dumps(result, ensure_ascii=False)}")
+            print(f"result : {json.dumps(result, ensure_ascii=False)}")
             print("💰 Soldes après arbitrage :", get_balances(PAIRS))
         except Exception as e:
             print(f"Erreur sur {symbol}: {e}")
