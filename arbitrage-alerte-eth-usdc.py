@@ -12,7 +12,7 @@ ETH_RPC_URL = "https://mainnet.infura.io/v3/3bdc55739dab4115ad4b202733a69938"
 TRADE_SIZE_ETH = Decimal("0.5")          # Taille du trade
 BINANCE_TAKER_FEE_BPS = 10             # 0.10 %
 UNISWAP_FEE_BPS = 5                    # 0.05 %
-THRESHOLD_BPS = 20                      # 0.20 % minimum pour signal
+THRESHOLD_BPS = 7                      # 0.20 % minimum pour signal
 
 BINANCE_MARKET = "ETH/USDC"
 
