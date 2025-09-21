@@ -73,7 +73,7 @@ def strategy():
     else:
         # Calcul P&L en temps réel
         pnl_actuel = (last_price - entry_price) * QUANTITY if open_position == "LONG" else (entry_price - last_price) * QUANTITY
-        print(f"📌 Position simulée : {open_position} @ {entry_price:.8f} | SL = {stop_loss:.8f} | TP = {take_profit:.8f} | P&L actuel = {pnl_actuel:.8f} BTC")
+        print(f"📌 Position simulée : {open_position} @ {entry_price:.8f} | SL = {stop_loss:.8f} | TP = {take_profit:.8f} | P&L actuel = {pnl_actuel:.8f} BTC | Prix actuel = {last_price:.8f}")
 
         # ---- GESTION DE SORTIE SIMULÉE ----
         if open_position == "LONG":
