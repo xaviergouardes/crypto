@@ -6,10 +6,9 @@ import numpy as np
 SYMBOL = "ETHBTC"
 QUANTITY = 0.01
 RISK_REWARD = 1.5          # Ratio TP / SL
-PRINT_EVERY = 50           # Affichage du prix/support tous les N cycles
+PRINT_EVERY = 10           # Affichage du prix/support tous les N cycles
 
 # ==== CLIENT PUBLIC BINANCE ====
-# Seule la lecture publique est nécessaire
 client = Client()  # Sans clés API
 
 # ==== VARIABLES GLOBALES ====
@@ -36,6 +35,25 @@ def detect_levels(bids, asks, top_n=10):
     strong_resistances = sorted([p for p,q in asks_sorted])
     return strong_supports, strong_resistances
 
+def calcul_tp_sl(entry_price, stop_level, position_type, rr=RISK_REWARD):
+    """
+    Calcule le Stop Loss et le Take Profit.
+    entry_price : prix d'entrée
+    stop_level : niveau détecté du support (LONG) ou résistance (SHORT)
+    position_type : "LONG" ou "SHORT"
+    rr : ratio gain/perte
+    Retourne : (stop_loss, take_profit)
+    """
+    if position_type == "LONG":
+        stop_loss = stop_level
+        take_profit = entry_price + (entry_price - stop_loss) * rr
+    elif position_type == "SHORT":
+        stop_loss = stop_level
+        take_profit = entry_price - (stop_loss - entry_price) * rr
+    else:
+        raise ValueError("position_type doit être 'LONG' ou 'SHORT'")
+    return stop_loss, take_profit
+
 def strategy():
     """Stratégie simulée avec P&L"""
     global open_position, entry_price, stop_loss, take_profit, cycle_count, pnl_simule
@@ -58,22 +76,21 @@ def strategy():
         if supports and last_price <= supports[0] * 1.001:
             open_position = "LONG"
             entry_price = last_price
-            stop_loss = supports[0] * 0.999
-            take_profit = entry_price + (entry_price - stop_loss) * RISK_REWARD
+            stop_loss, take_profit = calcul_tp_sl(entry_price, supports[0], "LONG")
             print(f"🟢 Signal Achat @ {entry_price:.8f} | SL = {stop_loss:.8f} | TP = {take_profit:.8f}")
 
         # ---- SIGNAL SIMULATION VENTE ----
         elif resistances and last_price >= resistances[0] * 0.999:
             open_position = "SHORT"
             entry_price = last_price
-            stop_loss = resistances[0] * 1.001
-            take_profit = entry_price - (stop_loss - entry_price) * RISK_REWARD
+            stop_loss, take_profit = calcul_tp_sl(entry_price, resistances[0], "SHORT")
             print(f"🔴 Signal Vente @ {entry_price:.8f} | SL = {stop_loss:.8f} | TP = {take_profit:.8f}")
 
     else:
         # Calcul P&L en temps réel
         pnl_actuel = (last_price - entry_price) * QUANTITY if open_position == "LONG" else (entry_price - last_price) * QUANTITY
-        print(f"📌 Position simulée : {open_position} @ {entry_price:.8f} | SL = {stop_loss:.8f} | TP = {take_profit:.8f} | P&L actuel = {pnl_actuel:.8f} BTC | Prix actuel = {last_price:.8f}")
+        if cycle_count % PRINT_EVERY == 0:
+            print(f"📌 Position simulée : {open_position} @ {entry_price:.8f} | SL = {stop_loss:.8f} | TP = {take_profit:.8f} | P&L actuel = {pnl_actuel:.8f} BTC | Prix actuel = {last_price:.8f}")
 
         # ---- GESTION DE SORTIE SIMULÉE ----
         if open_position == "LONG":
