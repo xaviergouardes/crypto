@@ -7,13 +7,18 @@ API_KEY = ""
 API_SECRET = ""
 
 # Paramètres de base
-SYMBOL = "BTCUSDC"
-BASE_SPREAD = 0.00005    # spread minimal
+# SYMBOL = "BTCUSDC"
+# BASE_SPREAD = 0.00005    # spread minimal
 MAX_SPREAD = 0.001       # spread maximal
-BASE_CYCLE = 10          # secondes
+# BASE_CYCLE = 10          # secondes
 MIN_CYCLE = 9
 MAX_CYCLE = 60
-CAPITAL = 1000           # USDT par trade
+# CAPITAL = 1000           # USDT par trade
+
+SYMBOL = "ETHBTC"
+BASE_SPREAD = 0.00005
+BASE_CYCLE = 50
+CAPITAL = 1000
 
 # Variables globales
 prices = []          # stockage des ticks du cycle
