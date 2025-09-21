@@ -11,7 +11,7 @@ API_KEY = os.getenv("BINANCE_API_KEY")
 API_SECRET = os.getenv("BINANCE_API_SECRET")
 SYMBOL = "ETHBTC"
 QTY = 0.01  # quantité d’ETH
-RISK_PCT = 0.003  # 0.3% de risque par trade
+RISK_PCT = 0.0003  # 0.3% de risque par trade
 RR = 1.5  # ratio Risk/Reward
 
 client = Client(API_KEY, API_SECRET, testnet=True)
