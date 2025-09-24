@@ -1,5 +1,7 @@
 import asyncio
 
+# Responsabilité : servir de mémoire partagée entre toutes les classes.
+# Rôle : stocker les prix, carnet, indicateurs, support/resistance et signaux de façon thread-safe/asynchrone.
 class SharedState:
     def __init__(self):
         self.data = {}

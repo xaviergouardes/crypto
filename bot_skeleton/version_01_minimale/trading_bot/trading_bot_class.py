@@ -18,6 +18,8 @@ from trading_bot.protocols.protocols import (
     TraderProtocol
 )
 
+# Responsabilité : orchestrer toutes les classes.
+# Rôle : créer les instances, démarrer toutes les coroutines en parallèle avec asyncio.gather.
 class TradingBot:
     def __init__(self, api_key, api_secret, symbol="BTCUSDT"):
         self.state = SharedState()
