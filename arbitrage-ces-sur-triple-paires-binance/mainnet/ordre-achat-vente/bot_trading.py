@@ -12,7 +12,7 @@ import logging.config
 import yaml
 from pathlib import Path
 
-logger = logging.getLogger("bot_trading")
+logger = logging.getLogger("trading_bot")
 
 class BotTrading:
     def __init__(self, usdc1: Paire, inter: Paire, usdc2: Paire, capital: Decimal = Decimal("100"), seuilUsdc: Decimal = Decimal("1")):

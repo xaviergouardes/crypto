@@ -1,15 +1,33 @@
-import asyncio
-from trading_bot.protocols.shared_state import SharedState
-from trading_bot.protocols.protocols import IndicatorEngineProtocol
+# trading_bot/indicators/indicator_engine.py
+from collections import deque
+from trading_bot.core.event_bus import EventBus
+from trading_bot.core.events import PriceUpdated, IndicatorUpdated
 
-class IndicatorEngine(IndicatorEngineProtocol):
-    def __init__(self, shared_state):
-        self.state = shared_state
+class IndicatorEngine:
+    """Calcule les indicateurs techniques à partir des prix."""
+
+    def __init__(self, event_bus: EventBus, window: int = 5):
+        self.event_bus = event_bus
+        self.window = window
+        self.prices = deque(maxlen=window)
+        # S'abonner aux prix
+        self.event_bus.subscribe(PriceUpdated, self.on_price)
+
+    async def on_price(self, event: PriceUpdated):
+        self.prices.append(event.price)
+        if len(self.prices) < self.window:
+            return  # pas assez de données pour calculer l'indicateur
+
+        # Calcul d'indicateurs simples
+        sma = sum(self.prices) / len(self.prices)
+        momentum = self.prices[-1] - self.prices[0]
+
+        # Publier uniquement les valeurs calculées
+        await self.event_bus.publish(IndicatorUpdated(
+            values={"sma": sma, "momentum": momentum}
+        ))
+        # print(f"[IndicatorEngine] SMA: {sma:.2f}, Momentum: {momentum:.2f}")
 
     async def run(self):
-        while True:
-            price = await self.state.get("price")
-            if price:
-                indicator = price * 0.99  # simulation
-                await self.state.set("indicator", indicator)
-            await asyncio.sleep(1)
+        # Tout est événementiel, rien à faire ici
+        pass

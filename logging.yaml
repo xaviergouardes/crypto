@@ -24,7 +24,7 @@ handlers:
 loggers:
   # loggers spécifiques (optionnel)
   # Exemple: logger pour ton module trading
-  bot_trading:
+  trading_bot:
     level: INFO
     handlers: [file]
     propagate: no

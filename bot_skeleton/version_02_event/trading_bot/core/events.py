@@ -19,14 +19,15 @@ class OrderBookUpdated(Event):
 # 📊 Support / résistance détectés
 @dataclass
 class SupportResistanceDetected(Event):
-    support: float
-    resistance: float
+    supports: List[float]      # Liste de niveaux de support
+    resistances: List[float]   # Liste de niveaux de résistance
 
 # 📉 Indicateur technique généré
 @dataclass
-class IndicatorSignalGenerated(Event):
-    signal: str
-    value: float
+class IndicatorUpdated:
+    """Événement publié lorsque les indicateurs sont recalculés."""
+    def __init__(self, values: dict):
+        self.values = values  # ex: {"sma": 123.45, "momentum": 0.67}
 
 # 📊 Signal de stratégie
 @dataclass

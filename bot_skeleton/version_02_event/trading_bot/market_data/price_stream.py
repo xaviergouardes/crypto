@@ -2,8 +2,8 @@
 import os
 import asyncio
 import aiohttp
-from core.event_bus import EventBus
-from core.events import PriceUpdated
+from trading_bot.core.event_bus import EventBus
+from trading_bot.core.events import PriceUpdated
 
 class PriceStream:
     def __init__(self, event_bus: EventBus, symbol: str = "ethusdc"):
@@ -20,7 +20,7 @@ class PriceStream:
                         data = msg.json()
                         price = float(data["p"])  # prix de la transaction
                         await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price))
-                        print(f"[PriceStream] Nouveau prix: {price}")
+                        # print(f"[PriceStream] Nouveau prix: {price}")
                     elif msg.type == aiohttp.WSMsgType.ERROR:
                         print("[PriceStream] Erreur WebSocket, reconnexion dans 5s...")
                         await asyncio.sleep(5)
