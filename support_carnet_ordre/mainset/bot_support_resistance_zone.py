@@ -165,26 +165,26 @@ def strategy():
 
         if open_position == "LONG":
             if last_price <= stop_loss:
-                pnl_simule += pnl_actuel
+                pnl_simule = - (entry_price - stop_loss) * QUANTITY  
                 solde += pnl_simule
                 open_position = None
-                print(f"❌ Stop Loss LONG ({last_price:.2f}) | P&L = {pnl_actuel:.2f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
+                print(f"❌ Stop Loss LONG ({stop_loss:.2f}) | P&L = {pnl_simule:.4f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
             elif last_price >= take_profit:
-                pnl_simule += pnl_actuel
+                pnl_simule = (take_profit - entry_price) * QUANTITY  
                 solde += pnl_simule
                 open_position = None
-                print(f"✅ Take Profit LONG ({last_price:.2f}) | P&L = {pnl_actuel:.2f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
+                print(f"✅ Take Profit LONG ({take_profit:.2f}) | P&L = {pnl_simule:.4f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
         elif open_position == "SHORT":
             if last_price >= stop_loss:
-                pnl_simule += pnl_actuel
+                pnl_simule = - (entry_price - stop_loss) * QUANTITY  
                 solde += pnl_simule
                 open_position = None
-                print(f"❌ Stop Loss SHORT ({last_price:.2f}) | P&L = {pnl_actuel:.2f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
+                print(f"❌ Stop Loss SHORT ({stop_loss:.2f}) | P&L = {pnl_simule:.4f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
             elif last_price <= take_profit:
-                pnl_simule += pnl_actuel
+                pnl_simule = (take_profit - entry_price) * QUANTITY   
                 solde += pnl_simule
                 open_position = None
-                print(f"✅ Take Profit SHORT ({last_price:.2f}) | P&L = {pnl_actuel:.2f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
+                print(f"✅ Take Profit SHORT ({take_profit:.2f}) | P&L = {pnl_simule:.4f} {QUOTE} | Solde = {solde:.2f} {QUOTE}")
 
 
 # ==== BOUCLE PRINCIPALE ====
