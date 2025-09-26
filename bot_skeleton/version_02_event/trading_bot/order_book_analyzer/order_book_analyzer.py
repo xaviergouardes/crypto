@@ -29,7 +29,7 @@ class OrderBookAnalyzer:
             supports=self.supports,
             resistances=self.resistances
         ))
-        print(f"[OrderBookAnalyzer] Supports: {self.supports}, Resistances: {self.resistances}")
+        # print(f"[OrderBookAnalyzer] Supports: {self.supports}, Resistances: {self.resistances}")
 
     async def run(self):
         # Rien à faire dans run car tout est événementiel

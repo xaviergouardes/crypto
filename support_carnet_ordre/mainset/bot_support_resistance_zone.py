@@ -94,28 +94,30 @@ def calcul_tp_sl(supports, resistances, position_type, min_gap=1.0):
     if position_type == "LONG":
         if len(supports) < 2:
             raise ValueError("Pas assez de supports pour calculer SL")
-        entry_price = supports[0]
-        stop_loss = supports[1]
-        take_profit = None
-        for r in resistances:
-            if r >= entry_price + min_gap:
-                take_profit = r
-                break
-        if take_profit is None:
-            take_profit = entry_price + min_gap  
+        entry_price = supports[1]
+        stop_loss = supports[2]
+        take_profit = resistances[2]
+        # take_profit = None
+        # for r in resistances:
+        #     if r >= entry_price + min_gap:
+        #         take_profit = r
+        #         break
+        # if take_profit is None:
+        #     take_profit = entry_price + min_gap  
 
     elif position_type == "SHORT":
         if len(resistances) < 2:
             raise ValueError("Pas assez de résistances pour calculer SL")
-        entry_price = resistances[0]
-        stop_loss = resistances[1]
-        take_profit = None
-        for s in supports:
-            if s <= entry_price - min_gap:
-                take_profit = s
-                break
-        if take_profit is None:
-            take_profit = entry_price - min_gap  
+        entry_price = resistances[1]
+        stop_loss = resistances[2]
+        take_profit = supports[2]
+        # take_profit = None
+        # for s in supports:
+        #     if s <= entry_price - min_gap:
+        #         take_profit = s
+        #         break
+        # if take_profit is None:
+        #     take_profit = entry_price - min_gap  
 
     else:
         raise ValueError("position_type doit être 'LONG' ou 'SHORT'")

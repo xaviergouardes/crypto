@@ -2,6 +2,7 @@
 import os
 import asyncio
 import aiohttp
+import time
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import PriceUpdated
 
@@ -10,6 +11,7 @@ class PriceStream:
         self.event_bus = event_bus
         self.symbol = symbol.lower()
         self.ws_url = f"wss://stream.binance.com:9443/ws/{self.symbol}@trade"
+        self.last_print_time = 0  # horodatage du dernier affichage
 
     async def run(self):
         print(f"[PriceStream] Connexion WebSocket pour {self.symbol.upper()}...")
@@ -20,7 +22,11 @@ class PriceStream:
                         data = msg.json()
                         price = float(data["p"])  # prix de la transaction
                         await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price))
-                        # print(f"[PriceStream] Nouveau prix: {price}")
+                        # ✅ Afficher le prix toutes les 25 secondes
+                        now = time.time()
+                        if now - self.last_print_time >= 25:
+                            print(f"[PriceStream] 📈 Prix actuel {self.symbol.upper()} : {price:.2f}")
+                            self.last_print_time = now
                     elif msg.type == aiohttp.WSMsgType.ERROR:
                         print("[PriceStream] Erreur WebSocket, reconnexion dans 5s...")
                         await asyncio.sleep(5)

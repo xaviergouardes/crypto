@@ -47,7 +47,7 @@ class RiskManager:
             tp=tp,
             sl=sl
         ))
-        print(f"[RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, TP {tp:.2f}, SL {sl:.2f}")
+        # print(f"[RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
 
     async def run(self):
         pass

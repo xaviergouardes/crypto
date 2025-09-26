@@ -6,7 +6,7 @@ from trading_bot.core.events import PriceUpdated, IndicatorUpdated
 class IndicatorEngine:
     """Calcule les indicateurs techniques à partir des prix."""
 
-    def __init__(self, event_bus: EventBus, window: int = 5):
+    def __init__(self, event_bus: EventBus, window: int = 25):
         self.event_bus = event_bus
         self.window = window
         self.prices = deque(maxlen=window)

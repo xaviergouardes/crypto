@@ -1,9 +1,10 @@
-# trading_bot/trader/trader.py
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
+from trading_bot.core.events import TradeApproved, PriceUpdated
 
-class Trader:
-    """Simule l'exécution d'un trade approuvé avec TP et SL."""
+class TraderOnlyOnePosition:
+    """Simule l'exécution d'un trade approuvé avec TP et SL.
+       ⚠️ Ne permet qu'une seule position à la fois.
+    """
 
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
@@ -12,6 +13,11 @@ class Trader:
         self.active_trades = []  # trades en cours
 
     async def on_trade_approved(self, event: TradeApproved):
+        # ✅ Bloquer l'ouverture si une position est déjà en cours
+        if self.active_trades:
+            # print("[Trader] ⚠️ Signal ignoré : une position est déjà ouverte.")
+            return
+
         trade = {
             "side": event.side,
             "entry": event.price,
@@ -20,7 +26,7 @@ class Trader:
             "size": event.size
         }
         self.active_trades.append(trade)
-        # print(f"[Trader] Trade ouvert : {trade}")
+        print(f"[Trader] ✅ Nouvelle position ouverte : {trade}")
 
     async def on_price(self, event: PriceUpdated):
         to_close = []
@@ -28,33 +34,24 @@ class Trader:
             price = event.price
             if trade["side"] == "BUY":
                 if price >= trade["tp"]:
-                    print(f"[Trader] TP atteint ! Clôture trade BUY à {price:.2f}")
-                    trade["target"] = "TP"
+                    print(f"[Trader] ✅ TP atteint ! Clôture trade BUY à {price:.2f}")
                     to_close.append(trade)
                 elif price <= trade["sl"]:
-                    print(f"[Trader] SL atteint ! Clôture trade BUY à {price:.2f}")
-                    trade["target"] = "SL"
-                    to_close.append(trade)
-            elif trade["side"] == "SELL":
-                if price <= trade["tp"]:
-                    print(f"[Trader] TP atteint ! Clôture trade SELL à {price:.2f}")
-                    trade["target"] = "TP"
-                    to_close.append(trade)
-                elif price >= trade["sl"]:
-                    print(f"[Trader] SL atteint ! Clôture trade SELL à {price:.2f}")
-                    trade["target"] = "SL"
+                    print(f"[Trader] 🛑 SL atteint ! Clôture trade BUY à {price:.2f}")
                     to_close.append(trade)
 
+            elif trade["side"] == "SELL":
+                if price <= trade["tp"]:
+                    print(f"[Trader] ✅ TP atteint ! Clôture trade SELL à {price:.2f}")
+                    to_close.append(trade)
+                elif price >= trade["sl"]:
+                    print(f"[Trader] 🛑 SL atteint ! Clôture trade SELL à {price:.2f}")
+                    to_close.append(trade)
+
+        # ✅ Supprimer les trades clôturés
         for trade in to_close:
             self.active_trades.remove(trade)
-            await self.event_bus.publish(TradeClose(
-                side=trade.["side"],
-                price=trade.["entry"],
-                tp=trade.["tp"],
-                sl=trade.["sl"],
-                size=trade.["size"],
-                target=trade.["target"]
-            ))
+            print("[Trader] 📉 Position clôturée, prêt à ouvrir une nouvelle position.")
 
     async def run(self):
         # Tout est événementiel, rien à faire ici
