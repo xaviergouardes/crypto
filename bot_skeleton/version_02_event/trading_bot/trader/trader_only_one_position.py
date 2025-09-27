@@ -24,7 +24,7 @@ class TraderOnlyOnePosition:
             "sl": event.sl,
             "size": event.size
         }
-        print(f"[Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
+        # print(f"[Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
 
     async def on_price(self, event: PriceUpdated):
         if self.active_trade is None:
@@ -39,21 +39,21 @@ class TraderOnlyOnePosition:
             if price >= trade["tp"]:
                 target = "TP"
                 closed = True
-                print(f"[Trader] ✅ TP atteint ! Clôture BUY à {price:.2f}")
+                # print(f"[Trader] ✅ TP atteint ! Clôture BUY à {price:.2f}")
             elif price <= trade["sl"]:
                 target = "SL"
                 closed = True
-                print(f"[Trader] 🛑 SL atteint ! Clôture BUY à {price:.2f}")
+                # print(f"[Trader] 🛑 SL atteint ! Clôture BUY à {price:.2f}")
 
         elif trade["side"] == "SELL":
             if price <= trade["tp"]:
                 target = "TP"
                 closed = True
-                print(f"[Trader] ✅ TP atteint ! Clôture SELL à {price:.2f}")
+                # print(f"[Trader] ✅ TP atteint ! Clôture SELL à {price:.2f}")
             elif price >= trade["sl"]:
                 target = "SL"
                 closed = True
-                print(f"[Trader] 🛑 SL atteint ! Clôture SELL à {price:.2f}")
+                # print(f"[Trader] 🛑 SL atteint ! Clôture SELL à {price:.2f}")
 
         # Si le trade est clôturé, on publie l'événement et on réinitialise l'état
         if closed:
