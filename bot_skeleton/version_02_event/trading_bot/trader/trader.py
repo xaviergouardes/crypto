@@ -48,12 +48,12 @@ class Trader:
         for trade in to_close:
             self.active_trades.remove(trade)
             await self.event_bus.publish(TradeClose(
-                side=trade.["side"],
-                price=trade.["entry"],
-                tp=trade.["tp"],
-                sl=trade.["sl"],
-                size=trade.["size"],
-                target=trade.["target"]
+                side=trade["side"],
+                price=trade["entry"],
+                tp=trade["tp"],
+                sl=trade["sl"],
+                size=trade["size"],
+                target=trade["target"]
             ))
 
     async def run(self):

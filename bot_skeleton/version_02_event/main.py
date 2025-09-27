@@ -27,6 +27,7 @@ async def main():
     strategy_engine = StrategySynchronizedEngine(event_bus)         # génère les signaux
     # risk_manager = RiskManager(event_bus, tp_percent=1.0, sl_percent=0.5)
     risk_manager = RiskManager(event_bus, tp_percent=0.07, sl_percent=0.07)
+    # trader = Trader(event_bus)
     trader = TraderOnlyOnePosition(event_bus)
     trader_journal = TradeJournal(event_bus)
 

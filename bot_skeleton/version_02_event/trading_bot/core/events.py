@@ -54,6 +54,7 @@ class TradeClose(Event):
     price: float
     tp: float
     sl: float
+    target: str # TP / SL
 
 # ❌ Trade rejeté
 @dataclass

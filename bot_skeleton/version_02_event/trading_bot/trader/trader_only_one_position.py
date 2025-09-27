@@ -1,58 +1,73 @@
+# trading_bot/trader/trader.py
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeApproved, PriceUpdated
+from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
 
 class TraderOnlyOnePosition:
-    """Simule l'exécution d'un trade approuvé avec TP et SL.
-       ⚠️ Ne permet qu'une seule position à la fois.
-    """
+    """Exécute un seul trade à la fois avec TP/SL et envoie un événement TradeClose."""
 
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
         self.event_bus.subscribe(TradeApproved, self.on_trade_approved)
         self.event_bus.subscribe(PriceUpdated, self.on_price)
-        self.active_trades = []  # trades en cours
+        self.active_trade = None  # ✅ Une seule position à la fois
 
     async def on_trade_approved(self, event: TradeApproved):
-        # ✅ Bloquer l'ouverture si une position est déjà en cours
-        if self.active_trades:
+        # Ignorer si une position est déjà ouverte
+        if self.active_trade is not None:
             # print("[Trader] ⚠️ Signal ignoré : une position est déjà ouverte.")
             return
 
-        trade = {
+        self.active_trade = {
             "side": event.side,
             "entry": event.price,
             "tp": event.tp,
             "sl": event.sl,
             "size": event.size
         }
-        self.active_trades.append(trade)
-        print(f"[Trader] ✅ Nouvelle position ouverte : {trade}")
+        print(f"[Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
 
     async def on_price(self, event: PriceUpdated):
-        to_close = []
-        for trade in self.active_trades:
-            price = event.price
-            if trade["side"] == "BUY":
-                if price >= trade["tp"]:
-                    print(f"[Trader] ✅ TP atteint ! Clôture trade BUY à {price:.2f}")
-                    to_close.append(trade)
-                elif price <= trade["sl"]:
-                    print(f"[Trader] 🛑 SL atteint ! Clôture trade BUY à {price:.2f}")
-                    to_close.append(trade)
+        if self.active_trade is None:
+            return  # Aucun trade en cours
 
-            elif trade["side"] == "SELL":
-                if price <= trade["tp"]:
-                    print(f"[Trader] ✅ TP atteint ! Clôture trade SELL à {price:.2f}")
-                    to_close.append(trade)
-                elif price >= trade["sl"]:
-                    print(f"[Trader] 🛑 SL atteint ! Clôture trade SELL à {price:.2f}")
-                    to_close.append(trade)
+        trade = self.active_trade
+        price = event.price
+        closed = False
+        target = None
 
-        # ✅ Supprimer les trades clôturés
-        for trade in to_close:
-            self.active_trades.remove(trade)
-            print("[Trader] 📉 Position clôturée, prêt à ouvrir une nouvelle position.")
+        if trade["side"] == "BUY":
+            if price >= trade["tp"]:
+                target = "TP"
+                closed = True
+                print(f"[Trader] ✅ TP atteint ! Clôture BUY à {price:.2f}")
+            elif price <= trade["sl"]:
+                target = "SL"
+                closed = True
+                print(f"[Trader] 🛑 SL atteint ! Clôture BUY à {price:.2f}")
+
+        elif trade["side"] == "SELL":
+            if price <= trade["tp"]:
+                target = "TP"
+                closed = True
+                print(f"[Trader] ✅ TP atteint ! Clôture SELL à {price:.2f}")
+            elif price >= trade["sl"]:
+                target = "SL"
+                closed = True
+                print(f"[Trader] 🛑 SL atteint ! Clôture SELL à {price:.2f}")
+
+        # Si le trade est clôturé, on publie l'événement et on réinitialise l'état
+        if closed:
+            await self.event_bus.publish(TradeClose(
+                side=trade["side"],
+                price=trade["entry"],
+                tp=trade["tp"],
+                sl=trade["sl"],
+                size=trade["size"],
+                target=target
+            ))
+            self.active_trade = None  # ✅ prêt pour un nouveau trade
 
     async def run(self):
         # Tout est événementiel, rien à faire ici
         pass
+

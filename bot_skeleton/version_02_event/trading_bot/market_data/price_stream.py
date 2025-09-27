@@ -24,7 +24,7 @@ class PriceStream:
                         await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price))
                         # ✅ Afficher le prix toutes les 25 secondes
                         now = time.time()
-                        if now - self.last_print_time >= 25:
+                        if now - self.last_print_time >= 60*15:
                             print(f"[PriceStream] 📈 Prix actuel {self.symbol.upper()} : {price:.2f}")
                             self.last_print_time = now
                     elif msg.type == aiohttp.WSMsgType.ERROR:
