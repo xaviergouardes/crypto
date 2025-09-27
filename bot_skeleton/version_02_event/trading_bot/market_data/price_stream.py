@@ -3,6 +3,7 @@ import os
 import asyncio
 import aiohttp
 import time
+from datetime import datetime
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import PriceUpdated
 
@@ -21,11 +22,11 @@ class PriceStream:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         data = msg.json()
                         price = float(data["p"])  # prix de la transaction
-                        await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price))
+                        await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price, timestamp=datetime.utcnow()))
                         # ✅ Afficher le prix toutes les 25 secondes
                         now = time.time()
                         if now - self.last_print_time >= 60*15:
-                            print(f"[PriceStream] 📈 Prix actuel {self.symbol.upper()} : {price:.2f}")
+                            print(f"[PriceStream] ({self.symbol.upper()})📈 Prix actuel {self.symbol.upper()} : {price:.2f}")
                             self.last_print_time = now
                     elif msg.type == aiohttp.WSMsgType.ERROR:
                         print("[PriceStream] Erreur WebSocket, reconnexion dans 5s...")

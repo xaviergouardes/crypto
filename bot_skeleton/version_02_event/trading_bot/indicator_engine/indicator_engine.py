@@ -24,6 +24,8 @@ class IndicatorEngine:
 
         # Publier uniquement les valeurs calculées
         await self.event_bus.publish(IndicatorUpdated(
+            symbol=event.symbol,
+            timestamp=event.timestamp.timestamp(),
             values={"sma": sma, "momentum": momentum}
         ))
         # print(f"[IndicatorEngine] SMA: {sma:.2f}, Momentum: {momentum:.2f}")

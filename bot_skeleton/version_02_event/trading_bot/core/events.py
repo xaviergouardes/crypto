@@ -2,12 +2,14 @@
 from dataclasses import dataclass
 from typing import List, Tuple
 from .event_bus import Event
+from datetime import datetime, timedelta
 
 # 📈 Événement : nouveau prix reçu
 @dataclass
 class PriceUpdated(Event):
     symbol: str
     price: float
+    timestamp: datetime
 
 # 🪟 Événement : carnet d’ordre mis à jour
 @dataclass
@@ -26,8 +28,9 @@ class SupportResistanceDetected(Event):
 @dataclass
 class IndicatorUpdated:
     """Événement publié lorsque les indicateurs sont recalculés."""
-    def __init__(self, values: dict):
-        self.values = values  # ex: {"sma": 123.45, "momentum": 0.67}
+    symbol: str
+    timestamp: datetime
+    values: dict  # ex: {"sma": 123.45, "momentum": 0.67}
 
 # 📊 Signal de stratégie
 @dataclass
@@ -60,3 +63,28 @@ class TradeClose(Event):
 @dataclass
 class TradeRejected(Event):
     reason: str
+
+# Une structure de type Chandelier
+@dataclass
+class Candle:
+    symbol: str
+    open: float
+    high: float
+    low: float
+    close: float
+    start_time: datetime
+    end_time: datetime
+
+# Event émis a chaque fermeture de bougie
+@dataclass
+class CandleClose:
+    symbol: str
+    candle: Candle
+
+# 
+@dataclass
+class CandleHistoryReady:
+    symbol: str
+    timestamp: datetime
+    period: timedelta
+    candles: List[Candle]
