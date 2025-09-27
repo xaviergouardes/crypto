@@ -1,6 +1,7 @@
 # trading_bot/main.py
 #
-# Test avec les bougies
+# Test avec les bougies et historique sur 25 bougie d'une minutes
+# Stratégie basée sur la pente de la SMA avec une période de 25 bougie de 1 minutes
 #
 
 import asyncio
@@ -34,11 +35,11 @@ async def main():
     order_book_analyzer = OrderBookAnalyzer(event_bus)  # analyse supports/résistances
 
     indicator_engine = IndicatorEngine(event_bus)       # calcule indicateurs
-    indicator_sma_candle = IndicatorSmaCandle(event_bus, period=20)  # SMA
+    indicator_sma_candle = IndicatorSmaCandle(event_bus, period=25)  # SMA
     
     strategy_engine = StrategySmaCandleSlopeEngine(event_bus, threshold=0.05, window_size=3)         # génère les signaux
     
-    risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
+    risk_manager = RiskManager(event_bus, tp_percent=0.07, sl_percent=0.035)
     
     trader = TraderOnlyOnePosition(event_bus)
     
