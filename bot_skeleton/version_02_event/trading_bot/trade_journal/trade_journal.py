@@ -9,6 +9,8 @@ class TradeJournal:
         self.event_bus = event_bus
         self.trades = []  # historique des trades fermés
         self.total_pnl = 0.0
+        self.pnl_total_avec_frais = 0.0
+        self.frais_par_transaction = 0.01
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
 
     async def on_trade_close(self, event: TradeClose):
@@ -38,8 +40,9 @@ class TradeJournal:
         }
         self.trades.append(trade_record)
         self.total_pnl += pnl
+        self.pnl_total_avec_frais = self.total_pnl - (self.frais_par_transaction * len(self.trades) * event.size)
 
-        print(f"[📘 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f}")
+        print(f"[📘 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
 
     def summary(self):
         """Retourne un résumé global du journal."""
