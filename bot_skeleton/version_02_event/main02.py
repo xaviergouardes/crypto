@@ -7,7 +7,8 @@ from trading_bot.market_data.order_book_stream import OrderBookStream
 from trading_bot.market_data.price_stream import PriceStream
 from trading_bot.order_book_analyzer.order_book_analyzer import OrderBookAnalyzer
 from trading_bot.indicator_engine.indicator_engine import IndicatorEngine
-from trading_bot.strategy.strategy_smacross import StrategySmaCrossEngine
+# from trading_bot.strategy.strategy_sma_cross import StrategySmaCrossEngine
+from trading_bot.strategy.strategy_sma_slope import StrategySmaSlopeEngine
 from trading_bot.risk_manager.risk_manager import RiskManager
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 from trading_bot.trade_journal.trade_journal import TradeJournal
@@ -21,8 +22,9 @@ async def main():
     order_book_stream = OrderBookStream(event_bus)      # et carnet réel
     order_book_analyzer = OrderBookAnalyzer(event_bus)  # analyse supports/résistances
     indicator_engine = IndicatorEngine(event_bus)       # calcule indicateurs
-    strategy_engine = StrategySmaCrossEngine(event_bus)         # génère les signaux
-    risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
+    strategy_engine = StrategySmaSlopeEngine(event_bus)         # génère les signaux
+    # risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
+    risk_manager = RiskManager(event_bus, tp_percent=0.07, sl_percent=0.035)
     trader = TraderOnlyOnePosition(event_bus)
     trader_journal = TradeJournal(event_bus)
 

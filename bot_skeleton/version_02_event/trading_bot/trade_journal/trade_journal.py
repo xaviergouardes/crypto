@@ -42,7 +42,10 @@ class TradeJournal:
         self.total_pnl += pnl
         self.pnl_total_avec_frais = self.total_pnl - (self.frais_par_transaction * len(self.trades) * event.size)
 
-        print(f"[📘 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
+        if pnl >= 0 :
+            print(f"[🟢 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
+        else:
+            print(f"[🔴 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
 
     def summary(self):
         """Retourne un résumé global du journal."""
