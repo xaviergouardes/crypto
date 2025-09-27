@@ -21,7 +21,7 @@ async def main():
     order_book_stream = OrderBookStream(event_bus)      # et carnet réel
     order_book_analyzer = OrderBookAnalyzer(event_bus)  # analyse supports/résistances
     indicator_engine = IndicatorEngine(event_bus)       # calcule indicateurs
-    strategy_engine = StrategySmaCrossSlopeEngine(event_bus)         # génère les signaux
+    strategy_engine = StrategySmaCrossEngine(event_bus)         # génère les signaux
     risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
     trader = TraderOnlyOnePosition(event_bus)
     trader_journal = TradeJournal(event_bus)
