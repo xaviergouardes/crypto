@@ -49,10 +49,10 @@ async def main():
     # Lancer tous les modules
     await asyncio.gather(
         price_stream.run(),
-        order_book_stream.run(),
+        # order_book_stream.run(),
         candel_snapshot_history.run(),
         candel_stream.run(),
-        order_book_analyzer.run(),
+        # order_book_analyzer.run(),
         indicator_engine.run(),
         indicator_sma_candle.run(),
         strategy_engine.run(),

@@ -61,7 +61,7 @@ class CandleStream:
                 candle=candle
             ))
             self._start_new_candle(event)
-            # print(f"[CandleStream] Candle fermée : {candle}")
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Candle fermée : {candle}")
         else:
             # Mise à jour des valeurs OHLC
             candle.high = max(candle.high, event.price)

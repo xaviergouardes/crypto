@@ -1,4 +1,6 @@
 # trading_bot/trader/trader.py
+from datetime import datetime
+
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose
 

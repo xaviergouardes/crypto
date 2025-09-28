@@ -45,7 +45,7 @@ class IndicatorSmaCandle:
                     "sma_candle_period": self.period
                 }
             ))
-            # print(f"[IndicatorSmaCandle] Initial SMA{self.period} ({self.symbol}) = {sma_value:.4f} @ {event.candles[-1].end_time}")
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSmaCandle] Initial SMA{self.period} ({self.symbol}) = {sma_value:.4f} @ {event.candles[-1].end_time}")
 
     async def on_candle_close(self, event: CandleClose) -> None:
         """Mise à jour de la SMA à chaque clôture de bougie."""
@@ -71,7 +71,7 @@ class IndicatorSmaCandle:
             }
         ))
 
-        # print(f"[IndicatorSmaCandle] 📈 SMA{self.period} ({self.symbol}) = {sma_value:.4f} @ {event.candle.end_time}")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSmaCandle] 📈 SMA{self.period} ({self.symbol}) = {sma_value:.4f} @ {event.candle.end_time}")
 
     async def run(self):
         # Tout est événementiel

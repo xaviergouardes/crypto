@@ -29,7 +29,7 @@ class CandleSnapShotHistory:
 
     async def fetch_snapshot(self):
         """Récupère le snapshot des chandelles et publie l'événement."""
-        print(f"[CandleSnapShotHistory] Fetching snapshot for {self.symbol} ...")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Fetching snapshot for {self.symbol} ...")
         if self._fetched:
             return  # ne faire qu'une seule fois
 
@@ -68,7 +68,7 @@ class CandleSnapShotHistory:
             period=self.period,
             candles=candles
         ))
-        print(f"[CandleSnapShotHistory] Snapshot reçu {len(candles)}")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot reçu {len(candles)}")
 
         self._fetched = True
 

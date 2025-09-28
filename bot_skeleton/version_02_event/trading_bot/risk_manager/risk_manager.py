@@ -1,4 +1,6 @@
 # trading_bot/risk/risk_manager.py
+from datetime import datetime
+
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeSignalGenerated, TradeApproved, TradeRejected
 
@@ -47,7 +49,7 @@ class RiskManager:
             tp=tp,
             sl=sl
         ))
-        # print(f"[RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
 
     async def run(self):
         pass
