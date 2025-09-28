@@ -28,7 +28,7 @@ class TraderOnlyOnePosition:
             "open_timestamp": datetime.utcnow(),
             "close_timestamp": None
         }
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
 
     async def on_price(self, event: PriceUpdated):
         if self.active_trade is None:

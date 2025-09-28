@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional, Deque
 from collections import deque
+from zoneinfo import ZoneInfo
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import PriceUpdated, CandleClose, Candle, CandleHistoryReady
@@ -36,6 +37,9 @@ class CandleStream:
         # Calcul de la période à partir de la dernière bougie du snapshot
         self._period = event.period.total_seconds()
         self._initialized = True  # l'historique est prêt, les ticks live peuvent être traités
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Initialisation Terminée {len(self.candles)}")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Last Candle : {self.current_candle}")
+        # self._dump_candles(self.candles)
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Appelée à chaque tick de prix pour construire ou mettre à jour une bougie."""
@@ -56,12 +60,12 @@ class CandleStream:
 
         # Si on dépasse la fin de la bougie -> on la clôture et on en démarre une nouvelle
         if event.timestamp >= candle.end_time:
+            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Candle fermée : {candle}")
             await self.event_bus.publish(CandleClose(
                 symbol=event.symbol,
                 candle=candle
             ))
             self._start_new_candle(event)
-            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Candle fermée : {candle}")
         else:
             # Mise à jour des valeurs OHLC
             candle.high = max(candle.high, event.price)
@@ -93,6 +97,20 @@ class CandleStream:
         )
         self.candles.append(self.current_candle)
         # print(f"[CandleStream] Candle ouverte : {self.current_candle}")
+
+    def _dump_candles(self, candles):
+        paris_tz = ZoneInfo("Europe/Paris")
+
+        print("📊 Liste des bougies (heure de Paris) :")
+        for i, c in enumerate(candles, start=1):  # ✅ Ajout de l'index
+            start = c.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+            end = c.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+
+            print(
+                f"{i:02d}. "
+                f"[{start.strftime('%Y-%m-%d %H:%M:%S')} ➝ {end.strftime('%Y-%m-%d %H:%M:%S')}] "
+                f"{c.symbol} | O:{c.open:.2f} H:{c.high:.2f} L:{c.low:.2f} C:{c.close:.2f}"
+            )
 
     async def run(self):
         """Pas de loop nécessaire car tout est événementiel."""

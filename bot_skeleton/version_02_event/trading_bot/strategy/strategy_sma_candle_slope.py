@@ -8,6 +8,11 @@ from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, Pric
 class SmaBuffer:
     """Collecte des valeurs SMA jusqu'à ce que le buffer soit rempli."""
     def __init__(self, window_size: int):
+        if window_size < 2:
+            raise ValueError(
+                f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] "
+                f"Impossible de créer un SmaBuffer : window_size doit être >= 2 (valeur reçue : {window_size})"
+            )
         self.window_size = window_size
         self.buffer = deque(maxlen=window_size)
 
@@ -19,11 +24,23 @@ class SmaBuffer:
 
     def get_slope(self):
         if not self.is_ready():
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] Impossible calculer la pente - Initialisation en cours")
             return None
+        # calcula de la pente si    
         return self.buffer[-1] - self.buffer[0]
 
     def latest(self):
         return self.buffer[-1] if self.buffer else None
+
+    def show(self):
+        """Affiche le contenu du buffer avec l'indice et la valeur."""
+        if not self.buffer:
+            print("📭 Buffer vide")
+            return
+        
+        print(f"📊 SMA Buffer ({len(self.buffer)}/{self.window_size}):")
+        for i, value in enumerate(self.buffer):
+            print(f"  {i+1:02d} ➝ {value:.4f}")
 
 class StrategySmaCandleSlopeEngine:
     """
@@ -44,13 +61,14 @@ class StrategySmaCandleSlopeEngine:
         self.event_bus.subscribe(PriceUpdated, self.on_price_update)
 
     async def on_indicator(self, event: IndicatorUpdated):
-        """Réception d'une nouvelle SMA issue des bougies."""
+        """Réception des indicateurs les plus récents """
         sma_value = event.values.get("sma_candle")
         if sma_value is None:
             return
 
         # Ajout dans l'historique
         self.sma_buffer.add(sma_value)
+        # self.sma_buffer.show()       
 
         # Phase d'initialisation
         if self.state == "initializing":
@@ -68,8 +86,6 @@ class StrategySmaCandleSlopeEngine:
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Réception d'un nouveau prix."""
-        if self.state != "ready":
-            return
         self.entry_price = event.price
 
 
@@ -77,7 +93,10 @@ class StrategySmaCandleSlopeEngine:
         """ Récupére la pente SMA si l'initialisation est fait sinon None """
         slope = self.sma_buffer.get_slope()
         if slope is None:
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] Pas assez de données pour calculer la pente.")
             return
+        # else:
+        #     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] pente SMA = {slope:.5f}")
 
         signal = None
         if slope > self.threshold:
@@ -85,13 +104,13 @@ class StrategySmaCandleSlopeEngine:
         elif slope < -self.threshold:
             signal = "SELL"
 
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] Signal {signal} | slope={slope:.5f}")
         if signal:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
                 price=self.entry_price,  # on peut utiliser la dernière SMA comme proxy
             ))
-            # print(f"[StrategySmaCandleSlope] Signal {signal} | slope={slope:.5f}")
 
     async def run(self):
         """Rien à faire ici : tout est événementiel."""

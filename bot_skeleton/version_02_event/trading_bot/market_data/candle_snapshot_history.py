@@ -1,6 +1,7 @@
 import requests
 from datetime import datetime, timedelta
 from typing import List
+from zoneinfo import ZoneInfo
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import Candle, CandleHistoryReady
@@ -29,7 +30,7 @@ class CandleSnapShotHistory:
 
     async def fetch_snapshot(self):
         """Récupère le snapshot des chandelles et publie l'événement."""
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Fetching snapshot for {self.symbol} ...")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Fetching snapshot for {self.symbol} ...")
         if self._fetched:
             return  # ne faire qu'une seule fois
 
@@ -63,6 +64,7 @@ class CandleSnapShotHistory:
 
         # Publier l'événement avec l'historique des bougies
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot reçu {len(candles)}")
+        # self._dump_candles(candles)
         await self.event_bus.publish(CandleHistoryReady(
             symbol=self.symbol,
             timestamp=datetime.utcnow(),
@@ -71,6 +73,21 @@ class CandleSnapShotHistory:
         ))
 
         self._fetched = True
+
+    def _dump_candles(self, candles):
+        paris_tz = ZoneInfo("Europe/Paris")
+
+        print("📊 Liste des bougies (heure de Paris) :")
+        for i, c in enumerate(candles, start=1):  # ✅ Ajout de l'index
+            start = c.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+            end = c.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+
+            print(
+                f"{i:02d}. "
+                f"[{start.strftime('%Y-%m-%d %H:%M:%S')} ➝ {end.strftime('%Y-%m-%d %H:%M:%S')}] "
+                f"{c.symbol} | O:{c.open:.2f} H:{c.high:.2f} L:{c.low:.2f} C:{c.close:.2f}"
+            )
+
 
     async def run(self):
         """Lance la construction du snapshot une seule fois."""
