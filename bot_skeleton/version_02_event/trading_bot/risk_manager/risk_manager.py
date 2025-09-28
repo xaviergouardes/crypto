@@ -19,6 +19,8 @@ class RiskManager:
 
         # S'abonner aux signaux de la stratégie
         self.event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Initialisation terminée, riskmanager opérationnel. tp_percent={self.tp_percent} / sl_percent={self.sl_percent}")
+
 
     async def on_trade_signal(self, event: TradeSignalGenerated):
         # Vérifier la présence du prix
@@ -42,6 +44,7 @@ class RiskManager:
         else:
             tp = sl = None
 
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
         await self.event_bus.publish(TradeApproved(
             side=event.side,
             size=self.max_position_size,
@@ -49,7 +52,6 @@ class RiskManager:
             tp=tp,
             sl=sl
         ))
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
 
     async def run(self):
         pass
