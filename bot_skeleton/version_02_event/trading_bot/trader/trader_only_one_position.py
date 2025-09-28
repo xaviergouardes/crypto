@@ -1,4 +1,6 @@
 # trading_bot/trader/trader.py
+from datetime import datetime
+
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
 
@@ -22,7 +24,9 @@ class TraderOnlyOnePosition:
             "entry": event.price,
             "tp": event.tp,
             "sl": event.sl,
-            "size": event.size
+            "size": event.size,
+            "open_timestamp": datetime.utcnow(),
+            "close_timestamp": None
         }
         # print(f"[Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
 
@@ -63,7 +67,9 @@ class TraderOnlyOnePosition:
                 tp=trade["tp"],
                 sl=trade["sl"],
                 size=trade["size"],
-                target=target
+                target=target,
+                open_timestamp=trade["open_timestamp"],
+                close_timestamp=datetime.utcnow()
             ))
             self.active_trade = None  # ✅ prêt pour un nouveau trade
 

@@ -39,7 +39,8 @@ async def main():
     
     strategy_engine = StrategySmaCandleSlopeEngine(event_bus, threshold=0.05, window_size=3)         # génère les signaux
     
-    risk_manager = RiskManager(event_bus, tp_percent=0.07, sl_percent=0.035)
+    # risk_manager = RiskManager(event_bus, tp_percent=0.07, sl_percent=0.035)
+    risk_manager = RiskManager(event_bus, tp_percent=0.04, sl_percent=0.04)
     
     trader = TraderOnlyOnePosition(event_bus)
     

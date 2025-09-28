@@ -14,19 +14,32 @@ class TradeJournal:
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
 
     async def on_trade_close(self, event: TradeClose):
-        # Calcul du P&L pour ce trade
+        """
+        Traite la fermeture d'un trade et calcule le PnL en tenant compte de la taille et des frais.
+        event doit contenir :
+        - side : "BUY" ou "SELL"
+        - price : prix d'entrée
+        - tp : take profit
+        - sl : stop loss
+        - size : taille de la position
+        - target : "TP" ou "SL"
+        - timestamp : date/heure du trade
+        """
+
+        # Déterminer le prix de clôture en fonction du target
+        if event.target == "TP":
+            close_price = event.tp
+        elif event.target == "SL":
+            close_price = event.sl
+        else:
+            close_price = event.price  # fallback
+
+        # Calcul du PnL en tenant compte du type de trade et de la taille
         pnl = 0.0
         if event.side == "BUY":
-            if event.target == "TP":
-                pnl = (event.tp - event.price) * event.size
-            elif event.target == "SL":
-                pnl = (event.sl - event.price) * event.size
-
+            pnl = (close_price - event.price) * event.size
         elif event.side == "SELL":
-            if event.target == "TP":
-                pnl = (event.price - event.tp) * event.size
-            elif event.target == "SL":
-                pnl = (event.price - event.sl) * event.size
+            pnl = (event.price - close_price) * event.size
 
         # Enregistrer le trade dans le journal
         trade_record = {
@@ -36,17 +49,21 @@ class TradeJournal:
             "sl": event.sl,
             "size": event.size,
             "target": event.target,
+            "open_timestamp": event.open_timestamp,
+            "close_timestamp": event.close_timestamp,
             "pnl": pnl
         }
         self.trades.append(trade_record)
+
+        # Mettre à jour le PnL total et le PnL après frais
         self.total_pnl += pnl
         self.pnl_total_avec_frais = self.total_pnl - (self.frais_par_transaction * len(self.trades) * event.size)
 
-        if pnl >= 0 :
-            print(f"[🟢 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
-        else:
-            print(f"[🔴 Journal] Trade fermé: {trade_record} | P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
-
+        # Journaliser avec couleur selon PnL
+        color = "🟢" if pnl >= 0 else "🔴"
+        print(f"[{color} Journal] Trade fermé - : {trade_record} | "
+            f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
+          
     def summary(self):
         """Retourne un résumé global du journal."""
         total_trades = len(self.trades)

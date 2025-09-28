@@ -26,7 +26,7 @@ class SupportResistanceDetected(Event):
 
 # 📉 Indicateur technique généré
 @dataclass
-class IndicatorUpdated:
+class IndicatorUpdated(Event):
     """Événement publié lorsque les indicateurs sont recalculés."""
     symbol: str
     timestamp: datetime
@@ -58,6 +58,8 @@ class TradeClose(Event):
     tp: float
     sl: float
     target: str # TP / SL
+    open_timestamp: datetime
+    close_timestamp: datetime
 
 # ❌ Trade rejeté
 @dataclass
@@ -66,7 +68,7 @@ class TradeRejected(Event):
 
 # Une structure de type Chandelier
 @dataclass
-class Candle:
+class Candle(Event):
     symbol: str
     open: float
     high: float
@@ -77,13 +79,13 @@ class Candle:
 
 # Event émis a chaque fermeture de bougie
 @dataclass
-class CandleClose:
+class CandleClose(Event):
     symbol: str
     candle: Candle
 
 # 
 @dataclass
-class CandleHistoryReady:
+class CandleHistoryReady(Event):
     symbol: str
     timestamp: datetime
     period: timedelta
