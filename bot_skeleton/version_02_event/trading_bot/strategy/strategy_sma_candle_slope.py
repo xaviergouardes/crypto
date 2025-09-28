@@ -2,10 +2,8 @@ from datetime import datetime
 
 from collections import deque
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated
-from collections import deque
-from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated
+from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, PriceUpdated
+
 
 class SmaBuffer:
     """Collecte des valeurs SMA jusqu'à ce que le buffer soit rempli."""
@@ -39,9 +37,11 @@ class StrategySmaCandleSlopeEngine:
         self.threshold = threshold
         self.sma_buffer = SmaBuffer(window_size)
         self.state = "initializing"
+        self.entry_price = None
 
         # Abonnement aux SMA des chandelles
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator)
+        self.event_bus.subscribe(PriceUpdated, self.on_price_update)
 
     async def on_indicator(self, event: IndicatorUpdated):
         """Réception d'une nouvelle SMA issue des bougies."""
@@ -54,17 +54,23 @@ class StrategySmaCandleSlopeEngine:
 
         # Phase d'initialisation
         if self.state == "initializing":
-            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Strategy] Collecte SMA : {len(self.sma_buffer.buffer)}/{self.sma_buffer.window_size}")
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] En cours d'initialisation ... Collecte SMA : {len(self.sma_buffer.buffer)}/{self.sma_buffer.window_size}")
 
             if self.sma_buffer.is_ready():
                 self.state = "ready"
-                print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Strategy] Initialisation terminée, stratégie opérationnelle.")
+                print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySmaCandleSlopeEngine] Initialisation terminée, stratégie opérationnelle.")
                 return
             else:
                 return
 
         # Phase de traitement
         await self.evaluate_strategy()
+
+    async def on_price_update(self, event: PriceUpdated) -> None:
+        """Réception d'un nouveau prix."""
+        if self.state != "ready":
+            return
+        self.entry_price = event.price
 
 
     async def evaluate_strategy(self):
@@ -83,7 +89,7 @@ class StrategySmaCandleSlopeEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.sma_buffer.latest()  # on peut utiliser la dernière SMA comme proxy
+                price=self.entry_price,  # on peut utiliser la dernière SMA comme proxy
             ))
             # print(f"[StrategySmaCandleSlope] Signal {signal} | slope={slope:.5f}")
 

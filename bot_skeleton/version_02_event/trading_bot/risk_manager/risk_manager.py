@@ -49,7 +49,7 @@ class RiskManager:
             tp=tp,
             sl=sl
         ))
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé : {event.side}, taille {self.max_position_size}, Entry_Price {entry_price:.2f}, TP {tp:.2f}, SL {sl:.2f}")
 
     async def run(self):
         pass

@@ -62,13 +62,13 @@ class CandleSnapShotHistory:
             candles.append(candle)
 
         # Publier l'événement avec l'historique des bougies
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot reçu {len(candles)}")
         await self.event_bus.publish(CandleHistoryReady(
             symbol=self.symbol,
             timestamp=datetime.utcnow(),
             period=self.period,
             candles=candles
         ))
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot reçu {len(candles)}")
 
         self._fetched = True
 
