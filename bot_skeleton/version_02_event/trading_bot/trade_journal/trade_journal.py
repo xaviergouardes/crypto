@@ -63,7 +63,7 @@ class TradeJournal:
 
         # Journaliser avec couleur selon PnL
         color = "🟢" if pnl >= 0 else "🔴"
-        print(f"[{color} Journal] Trade fermé - : {trade_record} | "
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [{color} Journal] Trade fermé - : {trade_record} | "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
           
     def summary(self):
