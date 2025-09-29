@@ -67,7 +67,7 @@ class CandleSnapShotHistory:
         # self._dump_candles(candles)
         await self.event_bus.publish(CandleHistoryReady(
             symbol=self.symbol,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(),
             period=self.period,
             candles=candles
         ))
