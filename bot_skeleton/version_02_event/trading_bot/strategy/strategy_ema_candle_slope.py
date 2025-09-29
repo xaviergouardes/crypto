@@ -4,6 +4,9 @@ from collections import deque
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, PriceUpdated
 
+"""
+A refactoriser pour faire une classe commune SMA / EMA
+""" 
 
 class SmaBuffer:
     """Collecte des valeurs SMA jusqu'à ce que le buffer soit rempli."""
@@ -73,7 +76,7 @@ class StrategyEmaCandleSlopeEngine:
 
         # Phase d'initialisation
         if self.state == "initializing":
-            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCandleSlopeEngine] En cours d'initialisation ... Collecte SMA : {len(self.sma_buffer.buffer)}/{self.sma_buffer.window_size}")
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCandleSlopeEngine] En cours d'initialisation ... Collecte EMA : {len(self.sma_buffer.buffer)}/{self.sma_buffer.window_size}")
 
             if self.sma_buffer.is_ready():
                 self.state = "ready"

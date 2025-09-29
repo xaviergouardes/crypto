@@ -34,7 +34,7 @@ async def main():
 
     indicator_sma_candle = IndicatorMovingAverage(event_bus, period=25, mode="EMA")  # SMA
     
-    # strategy_engine = StrategySmaCandleSlopeEngine(event_bus, threshold=0.01, window_size=2)         # génère les signaux
+    #strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=0.01, window_size=2)         # génère les signaux
     strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=0.05, window_size=3)         # génère les signaux
     
     #risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)

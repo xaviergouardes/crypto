@@ -43,9 +43,11 @@ class CandleStream:
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Appelée à chaque tick de prix pour construire ou mettre à jour une bougie."""
+        # print(f"[CandleStream] PriceUpdated recu : {event}")
 
         # Ignorer les ticks tant que l'historique n'est pas initialisé
         if not self._initialized or self._period is None:
+            print(f"[CandleStream] Historique en cours d'initilisation ...")
             return
 
         # Vérification du symbole
@@ -59,6 +61,7 @@ class CandleStream:
         candle = self.current_candle
 
         # Si on dépasse la fin de la bougie -> on la clôture et on en démarre une nouvelle
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Bougie en cours : {event.timestamp} > {candle.end_time} = {event.timestamp >= candle.end_time} ")
         if event.timestamp >= candle.end_time:
             # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Candle fermée : {candle}")
             await self.event_bus.publish(CandleClose(
@@ -76,6 +79,7 @@ class CandleStream:
 
     def _start_new_candle(self, event: PriceUpdated) -> None:
         """Crée une nouvelle bougie alignée sur la période du snapshot."""
+        # print(f"[CandleStream] Candle en cours d'ouverture ...")
         if self._period is None:
             raise ValueError("La période n'est pas initialisée depuis l'historique")
 

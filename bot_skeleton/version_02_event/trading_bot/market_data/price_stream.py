@@ -22,7 +22,7 @@ class PriceStream:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         data = msg.json()
                         price = float(data["p"])  # prix de la transaction
-                        await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price, timestamp=datetime.utcnow()))
+                        await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price, timestamp=datetime.now()))
                         # ✅ Afficher le prix toutes les 25 secondes
                         now = time.time()
                         if now - self.last_print_time >= 60*15:

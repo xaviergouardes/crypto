@@ -62,6 +62,8 @@ class IndicatorMovingAverage:
     # -----------------------------------------------------
     async def on_candle_close(self, event: CandleClose):
         """Met à jour la moyenne mobile à chaque clôture de bougie."""
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] onCandleClose")
+ 
         if not self._initialized or event.symbol.upper() != self.symbol:
             return
 
@@ -93,6 +95,8 @@ class IndicatorMovingAverage:
     # -----------------------------------------------------
     async def _publish(self, timestamp: datetime):
         """Publie l'événement IndicatorUpdated avec la valeur calculée."""
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Event Publich  {self.mode.lower()}_candle={self.current_value}")
+
         await self.event_bus.publish(
             IndicatorUpdated(
                 symbol=self.symbol,
