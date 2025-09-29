@@ -34,6 +34,8 @@ class IndicatorMovingAverage:
         # Souscription aux événements
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(CandleHistoryReady, self.on_history_ready)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] mode={self.mode} period={self.period}")
+ 
 
     # -----------------------------------------------------
     # Historique
