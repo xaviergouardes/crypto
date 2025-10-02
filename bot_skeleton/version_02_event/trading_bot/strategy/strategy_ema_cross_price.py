@@ -78,7 +78,6 @@ class StrategyEmaCrossPriceEngine:
         cross_down = self.candle.close < self.ema and self.ema < self.candle.open
         # corps_en_dessous = (max(o, c) <= self.ema)
 
-
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] bullish={bullish} / bearish={bearish} / open={self.candle.open} / close={self.candle.close} / ema={self.ema}")
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] grand_corps {grand_corps} / "
         #       f"meche_haute {meche_haute} / "
@@ -86,9 +85,9 @@ class StrategyEmaCrossPriceEngine:
         #       f"cross_up {cross_up} / "
         #       f"cross_down {cross_down}")
         # Conditions de signal
-        if cross_down and grand_corps and (meche_haute > meche_basse):
+        if cross_down and (grand_corps or (meche_haute > meche_basse) ):
             signal = "SELL"
-        elif cross_up and grand_corps and (meche_basse > meche_haute):
+        elif cross_up and (grand_corps or (meche_basse > meche_haute) ):
             signal = "BUY"
         else:
             # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] Signal {signal} / {self.candle} / {self.ema}")
