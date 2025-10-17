@@ -41,6 +41,8 @@ class IndicatorMovingAverage:
     # Historique
     # -----------------------------------------------------
     async def on_history_ready(self, event: CandleHistoryReady):
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Initialisation ...")
+
         """Initialise le buffer à partir de l'historique reçu."""
         if not event.candles:
             return
@@ -59,12 +61,14 @@ class IndicatorMovingAverage:
                 self.current_value = sum(self.candles) / self.period  # première EMA = SMA
             await self._publish(event.candles[-1].end_time)
 
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Initialisation Terminée {self.current_value}")
+
     # -----------------------------------------------------
     # Temps réel
     # -----------------------------------------------------
     async def on_candle_close(self, event: CandleClose):
         """Met à jour la moyenne mobile à chaque clôture de bougie."""
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] onCandleClose")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] onCandleClose {event}")
  
         if not self._initialized or event.symbol.upper() != self.symbol:
             return

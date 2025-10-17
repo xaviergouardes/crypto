@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeClose
+from trading_bot.core.events import TradeClose, StopBot
 
 class TradeJournal:
     """Journalise tous les trades fermés et calcule le P&L total."""
@@ -13,7 +13,9 @@ class TradeJournal:
         self.total_pnl = 0.0
         self.pnl_total_avec_frais = 0.0
         self.frais_par_transaction = 0.01
+
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
+        self.event_bus.subscribe(StopBot, self.on_stop_bot)
 
     async def on_trade_close(self, event: TradeClose):
         """
@@ -66,6 +68,11 @@ class TradeJournal:
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [{color} Journal] Trade fermé - : {trade_record} | "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
           
+    async def on_stop_bot(self, event: StopBot):
+        self.summary()
+
+
+
     def summary(self):
         """Retourne un résumé global du journal."""
         total_trades = len(self.trades)

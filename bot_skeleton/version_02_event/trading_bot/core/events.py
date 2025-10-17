@@ -90,3 +90,8 @@ class CandleHistoryReady(Event):
     timestamp: datetime
     period: timedelta
     candles: List[Candle]
+
+# 
+@dataclass
+class StopBot(Event):
+    timestamp: datetime

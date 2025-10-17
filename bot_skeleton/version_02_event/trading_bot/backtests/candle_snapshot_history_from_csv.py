@@ -49,7 +49,7 @@ class CandleSnapShotHistoryFromCsv:
 
         # Limite du nombre de bougies
         if self.history_limit and len(df) > self.history_limit:
-            df = df.tail(self.history_limit)
+            df = df.head(self.history_limit)
 
         candles: List[Candle] = []
         for _, row in df.iterrows():
@@ -65,8 +65,8 @@ class CandleSnapShotHistoryFromCsv:
                 end_time=end_time
             ))
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot CSV chargé ({len(candles)} bougies)")
-        self._dump_candles(candles)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistoryFromCsv] Snapshot CSV chargé ({len(candles)} bougies)")
+        # self._dump_candles(candles)
 
         # Émission de l’événement CandleHistoryReady
         await self.event_bus.publish(CandleHistoryReady(
@@ -80,14 +80,15 @@ class CandleSnapShotHistoryFromCsv:
 
     def _dump_candles(self, candles):
         """Affiche les bougies pour debug."""
-        paris_tz = ZoneInfo("Europe/Paris")
-        print("📊 Liste des bougies (heure de Paris) :")
+        # paris_tz = ZoneInfo("Europe/Paris")
+        # print("📊 Liste des bougies (heure de Paris) :")
         for i, c in enumerate(candles, start=1):
             # start = c.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
             # end = c.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
             start = c.start_time.replace(tzinfo=ZoneInfo("UTC"))
             end = c.end_time.replace(tzinfo=ZoneInfo("UTC"))
             print(
+                f"CandleSnapShotHistoryFromCsv - "
                 f"{i:02d}. "
                 f"[{start.strftime('%Y-%m-%d %H:%M:%S')} ➝ {end.strftime('%Y-%m-%d %H:%M:%S')}] "
                 f"{c.symbol} | O:{c.open:.2f} H:{c.high:.2f} L:{c.low:.2f} C:{c.close:.2f}"
