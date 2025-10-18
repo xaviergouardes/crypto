@@ -114,54 +114,20 @@ class CandleStreamFromCSV:
                     )
                 )
             
-            bearish = candle.open >= candle.close
-            bullish = candle.close >= candle.open
-            if bearish:
+            # Déterminer la séquence d'évolution du prix à l'intérieur de la bougie
+            if candle.close >= candle.open:  # bougie haussière
+                sequence = [candle.open, candle.low, candle.high, candle.close]
+            else:  # bougie baissière
+                sequence = [candle.open, candle.high, candle.low, candle.close]
+
+            # Publier les points dans l'ordre
+            for price_value in sequence:
                 await self.event_bus.publish(
                     PriceUpdated(
                         Price(
-                            symbol=self.symbol.upper(), 
-                            price=candle.high, 
-                            timestamp=candle.end_time
-                            )
-                        )
-                    )
-                await self.event_bus.publish(
-                    PriceUpdated(
-                        Price(
-                            symbol=self.symbol.upper(), 
-                            price=candle.low, 
-                            timestamp=candle.end_time
-                            )
-                        )
-                    )
-                
-            if bullish:
-                await self.event_bus.publish(
-                    PriceUpdated(
-                        Price(
-                            symbol=self.symbol.upper(), 
-                            price=candle.low, 
-                            timestamp=candle.end_time
-                            )
-                        )
-                    )
-                await self.event_bus.publish(
-                    PriceUpdated(
-                        Price(
-                            symbol=self.symbol.upper(), 
-                            price=candle.high, 
-                            timestamp=candle.end_time
-                            )
-                        )
-                    )
-                
-            await self.event_bus.publish(
-                PriceUpdated(
-                    Price(
-                        symbol=self.symbol.upper(), 
-                        price=candle.close, 
-                        timestamp=candle.end_time
+                            symbol=self.symbol.upper(),
+                            price=price_value,
+                            timestamp=candle.end_time,
                         )
                     )
                 )
