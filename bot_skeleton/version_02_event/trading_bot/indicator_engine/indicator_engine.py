@@ -9,18 +9,21 @@ class IndicatorEngine:
     def __init__(self, event_bus: EventBus, window: int = 25):
         self.event_bus = event_bus
         self.window = window
-        self.prices = deque(maxlen=window)
+        self.prices = deque(maxlen=window) # stocke les objets Price
+
         # S'abonner aux prix
         self.event_bus.subscribe(PriceUpdated, self.on_price)
 
     async def on_price(self, event: PriceUpdated):
-        self.prices.append(event.price.price)
+        self.prices.append(event.price)
         if len(self.prices) < self.window:
             return  # pas assez de données pour calculer l'indicateur
 
+        prices_only = [p.price for p in self.prices]
+
         # Calcul d'indicateurs simples
-        sma = sum(self.prices) / len(self.prices)
-        momentum = self.prices[-1] - self.prices[0]
+        sma = sum(prices_only) / len(prices_only)
+        momentum = prices_only[-1] - prices_only[0]
 
         # Publier uniquement les valeurs calculées
         await self.event_bus.publish(IndicatorUpdated(

@@ -25,7 +25,7 @@ class TraderOnlyOnePosition:
             "tp": event.tp,
             "sl": event.sl,
             "size": event.size,
-            "open_timestamp": datetime.now(),
+            "open_timestamp": event.price.timestamp,
             "close_timestamp": None
         }
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
@@ -69,8 +69,10 @@ class TraderOnlyOnePosition:
                 size=trade["size"],
                 target=target,
                 open_timestamp=trade["open_timestamp"],
-                close_timestamp=datetime.now()
+                close_timestamp=event.price.timestamp
             ))
+            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] 🛑  Position fermée : {event.price.timestamp}")
+
             self.active_trade = None  # ✅ prêt pour un nouveau trade
 
     async def run(self):

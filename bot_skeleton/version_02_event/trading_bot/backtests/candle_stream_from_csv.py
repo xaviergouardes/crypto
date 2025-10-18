@@ -101,20 +101,23 @@ class CandleStreamFromCSV:
                 start_time=start_time,
                 end_time=end_time
             )
-            await self.event_bus.publish(CandleClose(
-                symbol=self.symbol,
-                candle=candle
-            ))
-
+            
             # Envoyer un event Price avec le prix de Cloture
             await self.event_bus.publish(
                 PriceUpdated(
                     Price(
                         symbol=self.symbol.upper(), 
                         price=candle.close, 
-                        timestamp=datetime.now())
+                        timestamp=candle.end_time
+                        )
                     )
                 )
+            # Envoyer un event de femeture de candle
+            await self.event_bus.publish(CandleClose(
+                symbol=self.symbol,
+                candle=candle
+            ))
+
 
             # print(
             #     f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStreamFromCSV] - new candles : "

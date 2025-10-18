@@ -13,6 +13,7 @@ class RiskManager:
 
     def __init__(self, event_bus: EventBus, tp_percent: float = 1.0, sl_percent: float = 0.5):
         self.event_bus = event_bus
+
         self.max_position_size = 1.0  # taille fixe pour la simulation
         self.tp_percent = tp_percent
         self.sl_percent = sl_percent
@@ -32,7 +33,7 @@ class RiskManager:
             print("[RiskManager] Trade rejeté : position size non autorisée")
             return
 
-        entry_price = event.price
+        entry_price = event.price.price
 
         # Calcul TP et SL selon le type de trade
         if event.side == "BUY":
@@ -48,7 +49,7 @@ class RiskManager:
         await self.event_bus.publish(TradeApproved(
             side=event.side,
             size=self.max_position_size,
-            price=entry_price,
+            price=event.price,
             tp=tp,
             sl=sl
         ))

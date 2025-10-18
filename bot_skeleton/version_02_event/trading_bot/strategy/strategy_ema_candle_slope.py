@@ -90,7 +90,7 @@ class StrategyEmaCandleSlopeEngine:
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Réception d'un nouveau prix."""
-        self.entry_price = event.price.price
+        self.entry_price = event.price
 
 
     async def evaluate_strategy(self):

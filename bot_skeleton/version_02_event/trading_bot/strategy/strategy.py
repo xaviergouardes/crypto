@@ -9,6 +9,7 @@ class StrategyEngine:
         self.event_bus = event_bus
 
         # Valeurs en mémoire
+        self.current_price = None
         self.supports = []
         self.resistances = []
         self.last_price = None
@@ -27,6 +28,7 @@ class StrategyEngine:
         self.last_indicators = event.values
 
     async def on_price(self, event: PriceUpdated):
+        self.current_price = event.price
         self.last_price = event.price.price
         await self.evaluate_strategy()
 
@@ -52,7 +54,7 @@ class StrategyEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,  # confiance maximale pour la version simple
-                price= self.last_price
+                price= self.current_price
 
             ))
             # print(f"[StrategyEngine] Signal généré : {signal} entry_price {self.last_price:.2f}")

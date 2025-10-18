@@ -36,14 +36,14 @@ class TradeJournal:
         elif event.target == "SL":
             close_price = event.sl
         else:
-            close_price = event.price  # fallback
+            close_price = event.price.price  # fallback
 
         # Calcul du PnL en tenant compte du type de trade et de la taille
         pnl = 0.0
         if event.side == "BUY":
-            pnl = (close_price - event.price) * event.size
+            pnl = (close_price - event.price.price) * event.size
         elif event.side == "SELL":
-            pnl = (event.price - close_price) * event.size
+            pnl = (event.price.price - close_price) * event.size
 
         # Enregistrer le trade dans le journal
         trade_record = {
@@ -70,7 +70,7 @@ class TradeJournal:
 
         print(
             f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} TradeJournal [{color}] "
-            f"Trade [{trade_record["open_timestamp"]} / {trade_record["open_timestamp"]}] - : "
+            f"Trade [{trade_record["open_timestamp"]} / {trade_record["close_timestamp"]}] - : "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
         
     async def on_stop_bot(self, event: StopBot):

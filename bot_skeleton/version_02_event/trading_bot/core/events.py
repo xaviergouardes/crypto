@@ -42,7 +42,7 @@ class IndicatorUpdated(Event):
 class TradeSignalGenerated(Event):
     side: str   # "BUY" ou "SELL"
     confidence: float
-    price: float = None
+    price: Price = None
 
 
 # ✅ Trade validé par le Risk Manager
@@ -50,7 +50,7 @@ class TradeSignalGenerated(Event):
 class TradeApproved(Event):
     side: str
     size: float
-    price: float
+    price: Price
     tp: float
     sl: float
 
@@ -59,7 +59,7 @@ class TradeApproved(Event):
 class TradeClose(Event):
     side: str
     size: float
-    price: float
+    price: Price
     tp: float
     sl: float
     target: str # TP / SL

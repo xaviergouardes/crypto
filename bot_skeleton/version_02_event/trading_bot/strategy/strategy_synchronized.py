@@ -8,6 +8,7 @@ class StrategySynchronizedEngine:
         self.event_bus = event_bus
 
         # Valeurs en mémoire
+        self.current_price = None
         self.supports = []
         self.resistances = []
         self.last_price = None
@@ -33,6 +34,7 @@ class StrategySynchronizedEngine:
         self.received_indicator = True
 
     async def on_price(self, event: PriceUpdated):
+        self.current_price = event.price
         self.last_price = event.price.price
         self.received_price = True
         await self.evaluate_strategy()
@@ -56,7 +58,7 @@ class StrategySynchronizedEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.last_price
+                price=self.current_price
             ))
 
         # Réinitialiser les flags pour resynchroniser avec les trois événements les plus frais

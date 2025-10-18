@@ -120,7 +120,7 @@ class StrategyEmaCrossFastSlowEngine:
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Réception d'un nouveau prix."""
-        self.entry_price = event.price.price
+        self.entry_price = event.price
 
     async def on_indicator_update(self, event: IndicatorUpdated):
         
@@ -168,7 +168,7 @@ class StrategyEmaCrossFastSlowEngine:
             signal = "SELL"
         else :
             signal = None
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossFastSlowEngine] crossing={crossing} / signal={signal} / entry_price={self.entry_price}")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossFastSlowEngine] crossing={crossing} / signal={signal} / entry_price={self.entry_price.price}")
     
         if signal:
             await self.event_bus.publish(TradeSignalGenerated(

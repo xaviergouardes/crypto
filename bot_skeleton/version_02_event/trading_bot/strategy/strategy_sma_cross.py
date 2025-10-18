@@ -8,6 +8,9 @@ class StrategySmaCrossEngine:
         self.event_bus = event_bus
 
         self.threshold = threshold  # tolérance pour éviter les faux signaux
+
+        self.current_price = None # sauvegarde de la classe Prix
+
         # Valeurs en mémoire
         self.last_price = None
         self.last_sma = None
@@ -28,12 +31,13 @@ class StrategySmaCrossEngine:
         await self.evaluate_strategy()
 
     async def on_price(self, event: PriceUpdated):
+        self.current_price = event.price
         self.last_price = event.price.price
         self.received_price = True
         await self.evaluate_strategy()
 
     async def evaluate_strategy(self):
-        # On ne calcule un signal que si tous les trois événements ont été reçus au moins une fois
+        # On ne calcule un signal que si tous les événements ont été reçus au moins une fois
         if not (self.received_price and self.received_indicator):
             return
 
@@ -57,7 +61,7 @@ class StrategySmaCrossEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.last_price
+                price=self.current_price
             ))
             # print(f"[StrategySynchronizedEngine] Generated signal: {signal} => self.prev_price={self.prev_price}, self.prev_sma={self.prev_sma}, self.last_price={self.last_price}, self.last_sma={self.last_sma}")
 
