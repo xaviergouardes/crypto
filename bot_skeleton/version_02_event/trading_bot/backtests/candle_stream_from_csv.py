@@ -102,7 +102,60 @@ class CandleStreamFromCSV:
                 end_time=end_time
             )
             
-            # Envoyer un event Price avec le prix de Cloture
+
+            # Simuler les event Price en flux réel en envoyant les 4 point OLHC ou OHLC
+            await self.event_bus.publish(
+                PriceUpdated(
+                    Price(
+                        symbol=self.symbol.upper(), 
+                        price=candle.open, 
+                        timestamp=candle.end_time
+                        )
+                    )
+                )
+            
+            bearish = candle.open >= candle.close
+            bullish = candle.close >= candle.open
+            if bearish:
+                await self.event_bus.publish(
+                    PriceUpdated(
+                        Price(
+                            symbol=self.symbol.upper(), 
+                            price=candle.high, 
+                            timestamp=candle.end_time
+                            )
+                        )
+                    )
+                await self.event_bus.publish(
+                    PriceUpdated(
+                        Price(
+                            symbol=self.symbol.upper(), 
+                            price=candle.low, 
+                            timestamp=candle.end_time
+                            )
+                        )
+                    )
+                
+            if bullish:
+                await self.event_bus.publish(
+                    PriceUpdated(
+                        Price(
+                            symbol=self.symbol.upper(), 
+                            price=candle.low, 
+                            timestamp=candle.end_time
+                            )
+                        )
+                    )
+                await self.event_bus.publish(
+                    PriceUpdated(
+                        Price(
+                            symbol=self.symbol.upper(), 
+                            price=candle.high, 
+                            timestamp=candle.end_time
+                            )
+                        )
+                    )
+                
             await self.event_bus.publish(
                 PriceUpdated(
                     Price(
@@ -112,6 +165,7 @@ class CandleStreamFromCSV:
                         )
                     )
                 )
+                
             # Envoyer un event de femeture de candle
             await self.event_bus.publish(CandleClose(
                 symbol=self.symbol,
@@ -125,7 +179,7 @@ class CandleStreamFromCSV:
             #     f"{candle.symbol} | O:{candle.open:.2f} H:{candle.high:.2f} L:{candle.low:.2f} C:{candle.close:.2f}"
             # )
 
-        # Envoyer un event Price avec le prix de Cloture
+        # Envoyer un event Stop
         await self.event_bus.publish(StopBot(timestamp=datetime.now()))
         
     async def run(self):
