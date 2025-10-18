@@ -90,7 +90,7 @@ class StrategyEmaCandleSlopeEngine:
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Réception d'un nouveau prix."""
-        self.entry_price = event.price
+        self.entry_price = event.price.price
 
 
     async def evaluate_strategy(self):
@@ -113,7 +113,8 @@ class StrategyEmaCandleSlopeEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.entry_price,  # on peut utiliser la dernière SMA comme proxy
+                price=self.entry_price, 
+
             ))
 
     async def run(self):

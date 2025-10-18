@@ -25,7 +25,7 @@ class Trader:
     async def on_price(self, event: PriceUpdated):
         to_close = []
         for trade in self.active_trades:
-            price = event.price
+            price = event.price.price
             if trade["side"] == "BUY":
                 if price >= trade["tp"]:
                     print(f"[Trader] TP atteint ! Clôture trade BUY à {price:.2f}")

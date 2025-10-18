@@ -4,12 +4,17 @@ from typing import List, Tuple
 from .event_bus import Event
 from datetime import datetime, timedelta
 
-# 📈 Événement : nouveau prix reçu
+# 📈 Structure de type prix
 @dataclass
-class PriceUpdated(Event):
+class Price(Event):
     symbol: str
     price: float
     timestamp: datetime
+
+# 📈 Événement : nouveau prix reçu
+@dataclass
+class PriceUpdated(Event):
+    price: Price
 
 # 🪟 Événement : carnet d’ordre mis à jour
 @dataclass

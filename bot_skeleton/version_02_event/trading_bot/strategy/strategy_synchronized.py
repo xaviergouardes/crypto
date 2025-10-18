@@ -33,7 +33,7 @@ class StrategySynchronizedEngine:
         self.received_indicator = True
 
     async def on_price(self, event: PriceUpdated):
-        self.last_price = event.price
+        self.last_price = event.price.price
         self.received_price = True
         await self.evaluate_strategy()
 

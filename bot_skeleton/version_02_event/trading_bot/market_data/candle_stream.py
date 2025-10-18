@@ -51,8 +51,8 @@ class CandleStream:
             return
 
         # Vérification du symbole
-        if event.symbol.upper() != self.symbol:
-            raise ValueError(f"[CandleStream] Le symbole du flux {event.symbol.upper()} ne correspond pas à l'historique {self.symbol}")
+        if event.price.symbol.upper() != self.symbol:
+            raise ValueError(f"[CandleStream] Le symbole du flux {event.price.symbol.upper()} ne correspond pas à l'historique {self.symbol}")
 
         if self.current_candle is None:
             self._start_new_candle(event)
@@ -62,18 +62,18 @@ class CandleStream:
 
         # Si on dépasse la fin de la bougie -> on la clôture et on en démarre une nouvelle
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Bougie en cours : {event.timestamp} > {candle.end_time} = {event.timestamp >= candle.end_time} ")
-        if event.timestamp >= candle.end_time:
+        if event.price.timestamp >= candle.end_time:
             # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStream] Candle fermée : {candle}")
             await self.event_bus.publish(CandleClose(
-                symbol=event.symbol,
+                symbol=event.price.symbol,
                 candle=candle
             ))
             self._start_new_candle(event)
         else:
             # Mise à jour des valeurs OHLC
-            candle.high = max(candle.high, event.price)
-            candle.low = min(candle.low, event.price)
-            candle.close = event.price
+            candle.high = max(candle.high, event.price.price)
+            candle.low = min(candle.low, event.price.price)
+            candle.close = event.price.price
 
     # ─── Fonctions internes ─────────────────────────────────────────────
 
@@ -84,18 +84,18 @@ class CandleStream:
             raise ValueError("La période n'est pas initialisée depuis l'historique")
 
         aligned_timestamp = datetime.fromtimestamp(
-            (int(event.timestamp.timestamp()) // int(self._period)) * int(self._period)
+            (int(event.price.timestamp.timestamp()) // int(self._period)) * int(self._period)
         )
 
         start_time = aligned_timestamp
         end_time = start_time + timedelta(seconds=self._period)
 
         self.current_candle = Candle(
-            symbol=event.symbol,
-            open=event.price,
-            high=event.price,
-            low=event.price,
-            close=event.price,
+            symbol=event.price.symbol,
+            open=event.price.price,
+            high=event.price.price,
+            low=event.price.price,
+            close=event.price.price,
             start_time=start_time,
             end_time=end_time
         )

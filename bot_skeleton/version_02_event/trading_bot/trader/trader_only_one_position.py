@@ -35,7 +35,7 @@ class TraderOnlyOnePosition:
             return  # Aucun trade en cours
 
         trade = self.active_trade
-        price = event.price
+        price = event.price.price
         closed = False
         target = None
 

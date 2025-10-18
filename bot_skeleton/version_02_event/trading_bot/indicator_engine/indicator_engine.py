@@ -14,7 +14,7 @@ class IndicatorEngine:
         self.event_bus.subscribe(PriceUpdated, self.on_price)
 
     async def on_price(self, event: PriceUpdated):
-        self.prices.append(event.price)
+        self.prices.append(event.price.price)
         if len(self.prices) < self.window:
             return  # pas assez de données pour calculer l'indicateur
 
@@ -24,8 +24,8 @@ class IndicatorEngine:
 
         # Publier uniquement les valeurs calculées
         await self.event_bus.publish(IndicatorUpdated(
-            symbol=event.symbol,
-            timestamp=event.timestamp.timestamp(),
+            symbol=event.price.symbol,
+            timestamp=event.price.timestamp.timestamp(),
             values={"sma": sma, "momentum": momentum}
         ))
         # print(f"[IndicatorEngine] SMA: {sma:.2f}, Momentum: {momentum:.2f}")

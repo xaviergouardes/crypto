@@ -29,7 +29,7 @@ class StrategyEmaCrossPriceEngine:
 
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Réception d'un nouveau prix."""
-        self.entry_price = event.price
+        self.entry_price = event.price.price
         self.received_price = True
 
     async def on_indicator_update(self, event: IndicatorUpdated):

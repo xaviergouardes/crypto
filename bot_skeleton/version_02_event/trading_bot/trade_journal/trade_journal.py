@@ -65,11 +65,19 @@ class TradeJournal:
 
         # Journaliser avec couleur selon PnL
         color = "🟢" if pnl >= 0 else "🔴"
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [{color} Journal] Trade fermé - : {trade_record} | "
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [{color} Journal] Trade fermé - : {trade_record} | "
+        #     f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
+
+        print(
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} TradeJournal [{color}] "
+            f"Trade [{trade_record["open_timestamp"]} / {trade_record["open_timestamp"]}] - : "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
-          
+        
     async def on_stop_bot(self, event: StopBot):
-        self.summary()
+        print(
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} TradeJournal: Summary"
+            f" {self.summary()} "
+        )
 
 
 
@@ -82,7 +90,8 @@ class TradeJournal:
             "total_trades": total_trades,
             "wins": wins,
             "losses": losses,
-            "total_pnl": self.total_pnl
+            "total_pnl": self.total_pnl,
+            "win_rate": (wins / (wins + losses))*100
         }
 
     async def run(self):

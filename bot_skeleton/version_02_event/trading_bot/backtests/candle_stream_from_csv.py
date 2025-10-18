@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import math
 
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import Candle, CandleClose, CandleHistoryReady, PriceUpdated, StopBot
+from trading_bot.core.events import Candle, CandleClose, CandleHistoryReady, PriceUpdated, StopBot, Price
 
 class CandleStreamFromCSV:
 
@@ -107,7 +107,14 @@ class CandleStreamFromCSV:
             ))
 
             # Envoyer un event Price avec le prix de Cloture
-            await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=candle.close, timestamp=datetime.now()))
+            await self.event_bus.publish(
+                PriceUpdated(
+                    Price(
+                        symbol=self.symbol.upper(), 
+                        price=candle.close, 
+                        timestamp=datetime.now())
+                    )
+                )
 
             # print(
             #     f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleStreamFromCSV] - new candles : "

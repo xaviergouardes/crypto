@@ -5,7 +5,7 @@ import aiohttp
 import time
 from datetime import datetime
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import PriceUpdated
+from trading_bot.core.events import PriceUpdated, Price
 
 class PriceStream:
     def __init__(self, event_bus: EventBus, symbol: str = "ethusdc"):
@@ -22,7 +22,15 @@ class PriceStream:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         data = msg.json()
                         price = float(data["p"])  # prix de la transaction
-                        await self.event_bus.publish(PriceUpdated(symbol=self.symbol.upper(), price=price, timestamp=datetime.now()))
+                        await self.event_bus.publish(
+                            PriceUpdated(
+                                Price(
+                                    symbol=self.symbol.upper(), 
+                                    price=price, 
+                                    timestamp=datetime.now()) # toDo Récupérer le prix du msg et ne pas faire de datetime
+                                )
+                            )
+                        
                         # ✅ Afficher le prix toutes les 25 secondes
                         now = time.time()
                         if now - self.last_print_time >= 60*15:

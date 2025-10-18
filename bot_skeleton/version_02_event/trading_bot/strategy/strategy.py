@@ -27,7 +27,7 @@ class StrategyEngine:
         self.last_indicators = event.values
 
     async def on_price(self, event: PriceUpdated):
-        self.last_price = event.price
+        self.last_price = event.price.price
         await self.evaluate_strategy()
 
     async def evaluate_strategy(self):
