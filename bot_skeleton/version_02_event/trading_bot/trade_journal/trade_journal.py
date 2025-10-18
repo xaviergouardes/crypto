@@ -70,7 +70,7 @@ class TradeJournal:
 
         print(
             f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} TradeJournal [{color}] "
-            f"Trade [{trade_record["open_timestamp"]} / {trade_record["close_timestamp"]}] - : "
+            f"Trade {trade_record["side"]} [{trade_record["open_timestamp"]} / {trade_record["close_timestamp"]}] - : "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
         
     async def on_stop_bot(self, event: StopBot):
@@ -82,12 +82,22 @@ class TradeJournal:
 
 
     def summary(self):
-        """Retourne un résumé global du journal."""
+        """Retourne un résumé global du journal avec win rate par type de trade."""
         total_trades = len(self.trades)
         wins = len([t for t in self.trades if t["pnl"] > 0])
         losses = total_trades - wins
 
-        # Calcul du PnL cumulé au fil des trades
+        # Séparer BUY et SELL
+        buy_trades = [t for t in self.trades if t["side"] == "BUY"]
+        sell_trades = [t for t in self.trades if t["side"] == "SELL"]
+
+        wins_buy = len([t for t in buy_trades if t["pnl"] > 0])
+        wins_sell = len([t for t in sell_trades if t["pnl"] > 0])
+
+        win_rate_buy = (wins_buy / len(buy_trades) * 100) if buy_trades else 0
+        win_rate_sell = (wins_sell / len(sell_trades) * 100) if sell_trades else 0
+
+        # Calcul du PnL cumulé
         cumulative_pnls = []
         running_total = 0
         for t in self.trades:
@@ -105,6 +115,8 @@ class TradeJournal:
             "pnl_min": pnl_min,
             "pnl_max": pnl_max,
             "win_rate": (wins / total_trades) * 100 if total_trades > 0 else 0,
+            "win_rate_buy": win_rate_buy,
+            "win_rate_sell": win_rate_sell
         }
 
     async def run(self):

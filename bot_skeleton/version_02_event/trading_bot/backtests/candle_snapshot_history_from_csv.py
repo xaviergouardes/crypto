@@ -61,6 +61,7 @@ class CandleSnapShotHistoryFromCsv:
                 high=float(row["high"]),
                 low=float(row["low"]),
                 close=float(row["close"]),
+                volume=float(row["volume"]),
                 start_time=start_time,
                 end_time=end_time
             ))

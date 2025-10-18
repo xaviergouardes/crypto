@@ -79,6 +79,7 @@ class Candle(Event):
     high: float
     low: float
     close: float
+    volume: float
     start_time: datetime
     end_time: datetime
 

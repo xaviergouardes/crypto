@@ -156,11 +156,6 @@ class StrategyEmaCrossFastSlowEngine:
         if self.entry_price is None or self.on_candle_close is None:
             return
 
-        o, c = self.candle['open'], self.candle['close']
-        h, l = self.candle['high'], self.candle['low']
-        # c1, c2 = data[t-1]['close'], data[t-2]['close']
-        # e, e1, e2 = ema[t], ema[t-1], ema[t-2]
-
         crossing = self.moving_buffer.is_crossing(slope_threshold=self.slope_threshold)
         if crossing == "bullish":
             signal = "BUY"

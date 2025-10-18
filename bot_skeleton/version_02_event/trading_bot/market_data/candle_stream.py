@@ -96,6 +96,7 @@ class CandleStream:
             high=event.price.price,
             low=event.price.price,
             close=event.price.price,
+            volume=event.price.volume,
             start_time=start_time,
             end_time=end_time
         )

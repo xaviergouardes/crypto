@@ -1,128 +1,110 @@
 from datetime import datetime
-
-from collections import deque
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, CandleClose, PriceUpdated
 
 
 class StrategySweepSwingEngine:
     """
-    Stratégie : génère des signaux selon le croisement des prix avec l'EMA
+    Stratégie Sweep Swing compatible avec IndicatorSwingDetector :
+    ➤ Utilise les swings forts (strong_swings)
+    ➤ Génère un signal BUY ou SELL selon le sweep du dernier swing fort
+    ➤ Évite les signaux trop rapprochés via un espacement minimal
     """
 
-    def __init__(self, event_bus: EventBus):
+    def __init__(self, event_bus: EventBus, min_swing_distance: int = 5, strength_threshold: float = 1.9):
         self.event_bus = event_bus
+        self.min_swing_distance = min_swing_distance
+        self.strength_threshold = strength_threshold
 
+        # Données courantes
         self.entry_price = None
-        self.swings = None
         self.candle = None
-        self.last_swing_high = None
-        self.last_swing_low = None
-        self.last_swing_type = None
+        self.strong_swings = []
+        self.last_signal_index = None
+        self.candle_index = 0
 
-        # Flags pour savoir si on a reçu au moins un événement de chaque type
-        self.received_indicator = False
-        self.received_candle = False
-        self.received_price = False
-
-        # Abonnement aux SMA des chandelles
+        # Abonnements
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(PriceUpdated, self.on_price_update)
 
-    async def on_price_update(self, event: PriceUpdated) -> None:
-        """Réception d'un nouveau prix."""
+    async def on_price_update(self, event: PriceUpdated):
         self.entry_price = event.price
-        self.received_price = True
 
     async def on_indicator_update(self, event: IndicatorUpdated):
-        self.swings = event.values.get("swings")
-        self.last_swing_high = event.values.get("last_swing_high")
-        self.last_swing_low = event.values.get("last_swing_low")
-        self.last_swing_type = event.values.get("last_swing_type")
-        
-        if self.last_swing_low is None or self.last_swing_high is None:
-            self.received_indicator = False
+        """Récupère les swings forts émis par l'indicateur."""
+        swings = event.values.get("strong_swings", [])
+        if not swings:
             return
-        
-        self.received_indicator = True
+
+        # On garde uniquement les swings très forts (≥ threshold)
+        self.strong_swings = [
+            s for s in swings if s["strength"] >= self.strength_threshold
+        ]
 
     async def on_candle_close(self, event: CandleClose):
+        """Chaque clôture de bougie déclenche une évaluation de la stratégie."""
         self.candle = event.candle
-        self.received_candle = True
+        self.candle_index += 1
         await self.evaluate_strategy()
 
-
     async def evaluate_strategy(self):
-        #print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] Evaluer la stratégie")
-
-        # On ne calcule un signal que si tous les deux  événements ont été reçus au moins une fois
-        if not (self.received_price and self.received_candle and self.received_indicator):
-            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] Pas assez de données pour évaluer la stratégie")
+        if not self.strong_swings:
             return
 
-        signal = None
+        # Dernier swing fort connu
+        last_swing = self.strong_swings[-1]
+        swing_type = last_swing["type"]
+        swing_price = last_swing["price"]
+        swing_strength = last_swing["strength"]
+        swing_index = last_swing["index"]
 
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] bullish={bullish} / bearish={bearish} / open={self.candle.open} / close={self.candle.close} / ema={self.ema}")
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] / "
-              f"last_swing_high : {self.last_swing_high} / " 
-              f"last_swing_low : {self.last_swing_low} / " 
-              f"last_swing_type : {self.last_swing_type} / " 
-              )
+        # Vérifie l'espacement minimal avec le dernier signal
+        if self.last_signal_index is not None:
+            if self.candle_index - self.last_signal_index < self.min_swing_distance:
+                return
 
-        # Conditions de signal
-
-        # Déterminer le type de bougie
-        bullish = self.candle.close > self.candle.open
-        bearish = self.candle.close < self.candle.open
-        
-        o, c = self.candle.open, self.candle.close
-        h, l = self.candle.high, self.candle.low
-        # c1, c2 = data[t-1]['close'], data[t-2]['close']
-        # e, e1, e2 = ema[t], ema[t-1], ema[t-2]
-
-        corps = abs(c - o)
-        taille_bougie = h - l
-
-        # Corps >= 2/3 de la bougie
-        seuil_corps = 1/3
-        grand_corps = taille_bougie > 0 and (corps >= seuil_corps * taille_bougie)
+        o, c, h, l = self.candle.open, self.candle.close, self.candle.high, self.candle.low
+        bullish = c > o
+        bearish = c < o
 
         # Calcul des mèches
-        meche_haute = h - max(o, c)
-        meche_basse = min(o, c) - l
+        total_size = h - l
+        if total_size == 0:
+            return
+        upper_wick = h - max(c, o)
+        lower_wick = min(c, o) - l
 
-        bos_bullish = bullish and c > self.last_swing_high and self.last_swing_high > o
-        # corps_au_dessus = (min(o, c) >= self.ema)
+        bearish_wick = upper_wick >= total_size / 3
+        bullish_wick = lower_wick >= total_size / 3
 
-        bos_bearish = bearish and c < self.last_swing_low and self.last_swing_low < o
-        # corps_en_dessous = (max(o, c) <= self.ema)
+        # Détection des sweeps
+        sweep_high = swing_type == "high" and bearish and o < swing_price and h > swing_price
+        sweep_low = swing_type == "low" and bullish and o > swing_price and l < swing_price
 
-        sweep_last_swing_high = bearish and o < self.last_swing_high and h > self.last_swing_high
-        sweep_last_swing_low = bullish and o > self.last_swing_low and l < self.last_swing_low
+        signal = None
+        if sweep_high and bearish_wick:
+            signal = "SELL"
+        elif sweep_low and bullish_wick:
+            signal = "BUY"
 
-        # Conditions de signal
-        if bos_bullish :
-            signal = "BUY BOS"
-        elif bos_bearish :
-            signal = "SELL BOS"
-        if sweep_last_swing_high :
-            signal = "SELL SWEEP"
-        elif sweep_last_swing_low :
-            signal = "BUY WEEP"
-        else:
-            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] Signal {signal} / {self.candle} / {self.ema}")
+        if not signal:
             return
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] / "
-              f"signal : {signal} / "
-              f"candle : {self.candle} / " 
-              )
-        
-        self.received_indicator = False
-        self.received_candle = False
-        self.received_price = False
+        # Log clair
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] "
+              f"Signal {signal} | strength={swing_strength:.2f} | type={swing_type} | "
+              f"price={swing_price:.2f} | candle_index={self.candle_index}")
+
+        # Publication du signal
+        await self.event_bus.publish(TradeSignalGenerated(
+            side=signal,
+            confidence=1.0,
+            price=self.entry_price
+        ))
+
+        # Marquer le dernier signal
+        self.last_signal_index = self.candle_index
 
     async def run(self):
-        """Rien à faire ici : tout est événementiel."""
         pass
