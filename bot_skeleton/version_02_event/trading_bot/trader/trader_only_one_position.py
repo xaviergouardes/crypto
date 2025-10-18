@@ -1,5 +1,5 @@
 # trading_bot/trader/trader.py
-from datetime import datetime
+from datetime import timedelta
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
@@ -11,7 +11,10 @@ class TraderOnlyOnePosition:
         self.event_bus = event_bus
         self.event_bus.subscribe(TradeApproved, self.on_trade_approved)
         self.event_bus.subscribe(PriceUpdated, self.on_price)
+
         self.active_trade = None  # ✅ Une seule position à la fois
+        self.last_close_timestamp = None
+        self.cooldown = timedelta(minutes=3)
 
     async def on_trade_approved(self, event: TradeApproved):
         # Ignorer si une position est déjà ouverte
@@ -19,6 +22,13 @@ class TraderOnlyOnePosition:
             # print("[Trader] ⚠️ Signal ignoré : une position est déjà ouverte.")
             return
 
+        # Ignorer si la période de cooldown n'est pas écoulée
+        if self.last_close_timestamp is not None:
+            elapsed = event.price.timestamp - self.last_close_timestamp
+            if elapsed < self.cooldown:
+                # print(f"[Trader] ⚠️ Cooldown actif ({elapsed}). Signal ignoré.")
+                return
+            
         self.active_trade = {
             "side": event.side,
             "entry": event.price,
@@ -74,6 +84,7 @@ class TraderOnlyOnePosition:
             # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] 🛑  Position fermée : {event.price.timestamp}")
 
             self.active_trade = None  # ✅ prêt pour un nouveau trade
+            self.last_close_timestamp = event.price.timestamp
 
     async def run(self):
         # Tout est événementiel, rien à faire ici

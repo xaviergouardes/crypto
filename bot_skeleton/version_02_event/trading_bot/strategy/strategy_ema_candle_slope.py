@@ -54,8 +54,13 @@ class StrategyEmaCandleSlopeEngine:
 
     def __init__(self, event_bus: EventBus, threshold: float = 0.05, window_size: int = 20):
         self.event_bus = event_bus
+
+        # défini le seuil de la pente à partir duquel on commence à signaler
+        # petit => plus de signaux mais plus de faux positf => pas en dessus de 0.01
+        # grand => moins de signaux plus de fiablité => max 1
         self.threshold = threshold
         self.window_size = window_size
+        
         self.sma_buffer = SmaBuffer(window_size)
         self.state = "initializing"
         self.entry_price = None

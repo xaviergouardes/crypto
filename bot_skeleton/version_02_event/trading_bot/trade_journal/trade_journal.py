@@ -86,12 +86,25 @@ class TradeJournal:
         total_trades = len(self.trades)
         wins = len([t for t in self.trades if t["pnl"] > 0])
         losses = total_trades - wins
+
+        # Calcul du PnL cumulé au fil des trades
+        cumulative_pnls = []
+        running_total = 0
+        for t in self.trades:
+            running_total += t["pnl"]
+            cumulative_pnls.append(running_total)
+
+        pnl_min = min(cumulative_pnls) if cumulative_pnls else 0
+        pnl_max = max(cumulative_pnls) if cumulative_pnls else 0
+
         return {
             "total_trades": total_trades,
             "wins": wins,
             "losses": losses,
             "total_pnl": self.total_pnl,
-            "win_rate": (wins / (wins + losses))*100
+            "pnl_min": pnl_min,
+            "pnl_max": pnl_max,
+            "win_rate": (wins / total_trades) * 100 if total_trades > 0 else 0,
         }
 
     async def run(self):

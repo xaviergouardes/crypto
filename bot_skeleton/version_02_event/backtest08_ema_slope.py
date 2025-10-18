@@ -28,25 +28,25 @@ async def main():
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
         # csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique_court.csv",
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_3m_historique_20250901_20251017.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=3),
-        history_limit=25
+        history_limit=50
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
         # csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique_court.csv",
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique.csv",        period=timedelta(minutes=3),
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_3m_historique_20250901_20251017.csv",        period=timedelta(minutes=3),
         symbol="ETHBTC",
-        history_limit=25
+        history_limit=50
     )
 
-    indicator_ema_candle = IndicatorMovingAverage(event_bus, period=25, mode="EMA")  # SMA
+    indicator_ema_candle = IndicatorMovingAverage(event_bus, period=50, mode="EMA")  # SMA
     
-    strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=0.5, window_size=2)         # génère les signaux
+    strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=1, window_size=2)         # génère les signaux
     
     # risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
-    risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.25) # cible environ 6 usd pour 4000
+    risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.3) # cible environ 6 usd pour 4000
     #risk_manager = RiskManager(event_bus, tp_percent=0.40, sl_percent=0.20)   
 
     trader = TraderOnlyOnePosition(event_bus)

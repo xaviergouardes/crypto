@@ -1,22 +1,27 @@
 import pandas as pd
 from binance.client import Client
 import os
+from datetime import datetime
 
 # ==== CONFIG ====
 API_KEY = os.getenv("BINANCE_API_KEY")
 API_SECRET = os.getenv("BINANCE_API_SECRET")
 SYMBOL = "ETHUSDC"
-#INTERVAL = Client.KLINE_INTERVAL_1HOUR  # 1 minute, 5 minutes, 1h, 1d...
-INTERVAL = Client.KLINE_INTERVAL_3MINUTE  # 1 minute, 5 minutes, 1h, 1d...
-START_DATE = "1 Jan, 2025"
-END_DATE = "30 Jan, 2025"
+INTERVAL = Client.KLINE_INTERVAL_3MINUTE  # période dynamique
+START_DATE = "20250901"  # format AAAAMMJJ
+END_DATE = "20251017"    # format AAAAMMJJ
 
+# ==== Conversion pour Binance ====
+start_for_binance = datetime.strptime(START_DATE, "%Y%m%d").strftime("%d %b, %Y")
+end_for_binance = datetime.strptime(END_DATE, "%Y%m%d").strftime("%d %b, %Y")
+
+# ==== Connexion Binance ====
 client = Client(API_KEY, API_SECRET)
 
 # ==== Récupération historique ====
-print("klines ...")
-klines = client.get_historical_klines(SYMBOL, INTERVAL, START_DATE, END_DATE)
-print("klines ok.")
+print(f"Téléchargement de l'historique {SYMBOL} ({INTERVAL}) du {START_DATE} au {END_DATE} ...")
+klines = client.get_historical_klines(SYMBOL, INTERVAL, start_for_binance, end_for_binance)
+print("Téléchargement terminé.")
 
 # ==== Transformation en DataFrame ====
 df = pd.DataFrame(klines, columns=[
@@ -25,14 +30,19 @@ df = pd.DataFrame(klines, columns=[
     "taker_buy_base", "taker_buy_quote", "ignore"
 ])
 
-# Convertir timestamp et colonnes float
+# Conversion des timestamps et colonnes numériques
 df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-df[["open","high","low","close","volume"]] = df[["open","high","low","close","volume"]].astype(float)
+df[["open", "high", "low", "close", "volume"]] = df[["open", "high", "low", "close", "volume"]].astype(float)
+
+# ==== Construction dynamique du nom de fichier ====
+interval_clean = INTERVAL.lower().replace("kline_interval_", "").replace("client.", "")
+# Exemple : "3m", "1h", "1d", etc.
+interval_suffix = INTERVAL.replace("KLINE_INTERVAL_", "").lower()
 
 repertoire_script = os.path.dirname(os.path.abspath(__file__))
-chemin_csv = os.path.join(repertoire_script, "ETHBTC_historique.csv")
+nom_fichier = f"{SYMBOL}_{interval_suffix}_historique_{START_DATE}_{END_DATE}.csv"
+chemin_csv = os.path.join(repertoire_script, nom_fichier)
 
-# Sauvegarder en CSV
+# ==== Sauvegarde ====
 df.to_csv(chemin_csv, index=False)
-print("Historique téléchargé et sauvegardé dans ETHBTC_historique.csv")
-
+print(f"Historique sauvegardé dans : {nom_fichier}")
