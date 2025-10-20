@@ -57,7 +57,7 @@ class CandleSnapShotHistory:
                 high=float(k[2]),
                 low=float(k[3]),
                 close=float(k[4]),
-                volume=float(k["volume"]),
+                volume=float(k[5]),
                 start_time=datetime.fromtimestamp(k[0] / 1000),
                 end_time=datetime.fromtimestamp(k[6] / 1000)
             )

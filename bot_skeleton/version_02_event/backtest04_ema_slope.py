@@ -28,22 +28,23 @@ async def main():
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
         # csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique_court.csv",
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_3m_historique_20250901_20251017.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250901_20251017.csv",
         symbol="ETHBTC",
-        period=timedelta(minutes=3),
+        period=timedelta(minutes=5),
         history_limit=50
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
         # csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique_court.csv",
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_3m_historique_20250901_20251017.csv",        period=timedelta(minutes=3),
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250901_20251017.csv",        
+        period=timedelta(minutes=5),
         symbol="ETHBTC",
         history_limit=50
     )
 
     indicator_ema_candle = IndicatorMovingAverage(event_bus, period=50, mode="EMA")  # SMA
     
-    strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=1, window_size=2)         # génère les signaux
+    strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=2, window_size=2)         # génère les signaux
     
     # risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
     risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.3) # cible environ 6 usd pour 4000

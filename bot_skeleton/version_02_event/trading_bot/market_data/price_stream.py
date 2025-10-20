@@ -22,11 +22,13 @@ class PriceStream:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         data = msg.json()
                         price = float(data["p"])  # prix de la transaction
+                        volume = float(data["q"])  # volume de la transaction
                         await self.event_bus.publish(
                             PriceUpdated(
                                 Price(
                                     symbol=self.symbol.upper(), 
                                     price=price, 
+                                    volume=volume,    
                                     timestamp=datetime.now()) # toDo Récupérer le prix du msg et ne pas faire de datetime
                                 )
                             )

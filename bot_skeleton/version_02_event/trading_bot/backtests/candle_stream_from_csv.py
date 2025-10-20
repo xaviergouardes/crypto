@@ -105,16 +105,6 @@ class CandleStreamFromCSV:
             
 
             # Simuler les event Price en flux réel en envoyant les 4 point OLHC ou OHLC
-            await self.event_bus.publish(
-                PriceUpdated(
-                    Price(
-                        symbol=self.symbol.upper(), 
-                        price=candle.open, 
-                        timestamp=candle.end_time
-                        )
-                    )
-                )
-            
             # Déterminer la séquence d'évolution du prix à l'intérieur de la bougie
             if candle.close >= candle.open:  # bougie haussière
                 sequence = [candle.open, candle.low, candle.high, candle.close]
@@ -128,6 +118,7 @@ class CandleStreamFromCSV:
                         Price(
                             symbol=self.symbol.upper(),
                             price=price_value,
+                            volume=candle.volume,
                             timestamp=candle.end_time,
                         )
                     )

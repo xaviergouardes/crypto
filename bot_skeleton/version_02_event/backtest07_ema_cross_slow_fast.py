@@ -39,11 +39,11 @@ async def main():
     )
 
     indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  # SMA
-    indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=50, mode="EMA")  # SMA
+    indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=18, mode="EMA")  # SMA
     
-    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=200, periode_fast_ema=50, slope_threshold=0.2)         # génère les signaux
+    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=200, periode_fast_ema=18, slope_threshold=1)         # génère les signaux
     
-    risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.3) # cible environ 6 usd pour 4000 
+    risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.25) # cible environ 6 usd pour 4000 
 
     trader = TraderOnlyOnePosition(event_bus)
     

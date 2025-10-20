@@ -29,15 +29,14 @@ async def main():
     # Initialisation des modules
     price_stream = PriceStream(event_bus)               # récupère les prix 
     
-    candel_snapshot_history = CandleSnapShotHistory(event_bus, period=timedelta(minutes=1), history_limit=25)
+    candel_snapshot_history = CandleSnapShotHistory(event_bus, period=timedelta(minutes=1), history_limit=50)
     candel_stream = CandleStream(event_bus)
 
-    indicator_sma_candle = IndicatorMovingAverage(event_bus, period=25, mode="EMA")  # SMA
+    indicator_ema_candle = IndicatorMovingAverage(event_bus, period=30, mode="EMA")  # SMA
     
-    strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=0.01, window_size=2)         # génère les signaux
-    #strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=0.01, window_size=2)         # génère les signaux
+    strategy_engine = StrategyEmaCandleSlopeEngine(event_bus, threshold=2.3, window_size=2)         # génère les signaux
     
-    risk_manager = RiskManager(event_bus, tp_percent=0.02, sl_percent=0.02)
+    risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.3)
     #risk_manager = RiskManager(event_bus, tp_percent=0.15, sl_percent=0.10) # cible environ 6 usd pour 4000
     
     trader = TraderOnlyOnePosition(event_bus)
@@ -49,7 +48,7 @@ async def main():
         price_stream.run(),
         candel_snapshot_history.run(),
         candel_stream.run(),
-        indicator_sma_candle.run(),
+        indicator_ema_candle.run(),
         strategy_engine.run(),
         risk_manager.run(),
         trader.run(),

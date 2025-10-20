@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 class Price(Event):
     symbol: str
     price: float
+    volume: float
     timestamp: datetime
 
 # 📈 Événement : nouveau prix reçu
