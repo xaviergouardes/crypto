@@ -61,7 +61,17 @@ class StrategySmaCrossEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.current_price
+                price=self.current_price,
+                strategie = self.__class__.__name__,
+                strategie_parameters = {
+                    "threshold": self.threshold,
+                },
+                strategie_values = {
+                    "prev_sma": self.prev_sma,
+                    "last_sma": self.last_sma,
+                    "prev_price": self.prev_price,
+                    "last_price": self.last_price,
+                },
             ))
             # print(f"[StrategySynchronizedEngine] Generated signal: {signal} => self.prev_price={self.prev_price}, self.prev_sma={self.prev_sma}, self.last_price={self.last_price}, self.last_sma={self.last_sma}")
 

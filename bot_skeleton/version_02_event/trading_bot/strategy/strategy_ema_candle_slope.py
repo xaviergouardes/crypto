@@ -124,10 +124,18 @@ class StrategyEmaCandleSlopeEngine:
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCandleSlopeEngine] Signal {signal} | slope={slope:.5f}")
         if signal:
             await self.event_bus.publish(TradeSignalGenerated(
-                side=signal,
-                confidence=1.0,
-                price=self.entry_price, 
-
+                side = signal,
+                confidence = 1.0,
+                price = self.entry_price, 
+                strategie = self.__class__.__name__,
+                strategie_parameters = {
+                    "threshold": self.threshold,
+                    "window_size": self.window_size,
+                },
+                strategie_values = {
+                    "slope": slope,
+                    "buffer_slope": self.sma_buffer.buffer,
+                },
             ))
 
     async def run(self):

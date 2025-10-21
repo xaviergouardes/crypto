@@ -101,6 +101,17 @@ class StrategySweepSwingEngine:
             side=signal,
             confidence=1.0,
             price=self.entry_price
+            strategie = self.__class__.__name__,
+            strategie_parameters = {
+                "min_swing_distance": self.min_swing_distance,
+                "strength_threshold": self.strength_threshold,
+            },
+            strategie_values = {
+                "sweep_high": sweep_high,
+                "sweep_low": sweep_low,
+                "bearish_wick": bearish_wick,
+                "bullish_wick": bullish_wick,
+            },
         ))
 
         # Marquer le dernier signal

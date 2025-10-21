@@ -169,7 +169,18 @@ class StrategyEmaCrossFastSlowEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.entry_price,  
+                price=self.entry_price, 
+                strategie = self.__class__.__name__,
+                strategie_parameters = {
+                    "periode_slow_ema": self.periode_slow_ema,
+                    "periode_fast_ema": self.periode_fast_ema,                    
+                    "slope_threshold": self.slope_threshold,
+                },
+                strategie_values = {
+                    "crossing": crossing,
+                    "buffer_fast_slope": self.moving_buffer.fast_ma_buffer,
+                    "buffer_slow_slope": self.moving_buffer.slow_ma_buffer,
+                }, 
             ))
 
         # self.received_indicator = False

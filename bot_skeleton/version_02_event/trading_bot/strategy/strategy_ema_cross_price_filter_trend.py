@@ -34,6 +34,8 @@ class StrategyEmaCrossPriceFilterTrendsEngine:
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(PriceUpdated, self.on_price_update)
 
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceFilterTrendsEngine] Initialisation Terminée ema_trend_period={self.ema_trend_period} / ema_band_with={self.ema_band_with}")
+
     async def on_price_update(self, event: PriceUpdated) -> None:
         """Réception d'un nouveau prix."""
         self.entry_price = event.price
@@ -125,7 +127,26 @@ class StrategyEmaCrossPriceFilterTrendsEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.entry_price,  
+                price=self.entry_price,
+                strategie = self.__class__.__name__,
+                strategie_parameters = {
+                    "ema_trend_period": self.ema_trend_period,
+                    "ema_band_with": self.ema_band_with,                    
+                },
+                strategie_values = {
+                    "cross_down": cross_down,
+                    "cross_up": cross_up,
+                    "grand_corps": grand_corps,
+                    "meche_basse": meche_basse,
+                    "meche_haute": meche_haute, 
+                    "ema": self.ema,
+                    "ema_high_band": ema_high_band,
+                    "ema_low_band": ema_low_band,
+                    "candle": self.candle,
+                    "ema_trend": self.ema_trend,
+                    "bearish_trend": bearish_trend,
+                    "bullish_trend": bullish_trend
+                }, 
             ))
 
         self.received_indicator = False

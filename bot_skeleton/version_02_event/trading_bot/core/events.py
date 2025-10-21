@@ -43,7 +43,10 @@ class IndicatorUpdated(Event):
 class TradeSignalGenerated(Event):
     side: str   # "BUY" ou "SELL"
     confidence: float
-    price: Price = None
+    price: Price
+    strategie: str
+    strategie_parameters: dict
+    strategie_values: dict
 
 
 # ✅ Trade validé par le Risk Manager

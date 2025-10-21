@@ -103,6 +103,17 @@ class StrategyEmaCrossPriceEngine:
                 side=signal,
                 confidence=1.0,
                 price=self.entry_price,  
+                strategie = self.__class__.__name__,
+                strategie_parameters = None,
+                strategie_values = {
+                    "cross_down": cross_down,
+                    "cross_up": cross_up,
+                    "grand_corps": grand_corps,
+                    "meche_basse": meche_basse,
+                    "meche_haute": meche_haute, 
+                    "ema": self.ema,
+                    "candle": self.candle
+                }, 
             ))
 
         self.received_indicator = False

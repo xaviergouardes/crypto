@@ -111,6 +111,15 @@ class StrategySmaCandleSlopeEngine:
                 side=signal,
                 confidence=1.0,
                 price=self.entry_price,  # on peut utiliser la dernière SMA comme proxy
+                strategie = self.__class__.__name__,
+                strategie_parameters = {
+                    "threshold": self.threshold,
+                    "window_size": self.window_size,
+                },
+                strategie_values = {
+                    "slope": slope,
+                    "buffer_slope": self.sma_buffer.buffer,
+                },
             ))
 
     async def run(self):

@@ -54,8 +54,12 @@ class StrategyEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,  # confiance maximale pour la version simple
-                price= self.current_price
-
+                price= self.current_price,
+                strategie = self.__class__.__name__,
+                strategie_parameters = None,
+                strategie_values = {
+                    "sma": sma,
+                },
             ))
             # print(f"[StrategyEngine] Signal généré : {signal} entry_price {self.last_price:.2f}")
 

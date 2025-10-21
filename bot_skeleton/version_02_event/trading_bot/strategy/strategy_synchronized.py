@@ -58,7 +58,12 @@ class StrategySynchronizedEngine:
             await self.event_bus.publish(TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=self.current_price
+                price=self.current_price,
+                strategie = self.__class__.__name__,
+                strategie_parameters = None,
+                strategie_values = {
+                    "sma": sma,
+                },
             ))
 
         # Réinitialiser les flags pour resynchroniser avec les trois événements les plus frais

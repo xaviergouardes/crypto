@@ -141,14 +141,26 @@ class StrategyBreakoutEMA200:
         # ---------------------------------------
         # Confirmation du signal : prix sort de la bande
         # ---------------------------------------
-        if self.pending_signal and self.price_out_of_ema_band(self.entry_price.price):
+        is_price_out_of_ema_band = self.price_out_of_ema_band(self.entry_price.price)
+        if self.pending_signal and is_price_out_of_ema_band:
             print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyBreakoutEMA] "
                   f"Signal confirmé : {self.pending_signal} à prix {self.entry_price}")
             await self.event_bus.publish(
                 TradeSignalGenerated(
                     side=self.pending_signal,
                     confidence=1.0,
-                    price=self.entry_price
+                    price=self.entry_price,
+                    strategie = self.__class__.__name__,
+                    strategie_parameters = {
+                        "atr_multiple": self.atr_multiple
+                    },
+                    strategie_values = {
+                        "ema200": self.ema200,
+                        "atr ": self.atr,
+                        "avg_volume": self.avg_volume,
+                        "last_strong_swings": self.last_strong_swings,
+                        "is_price_out_of_ema_band": is_price_out_of_ema_band,
+                    }
                 )
             )
             self.pending_signal = None  # reset après confirmation
