@@ -12,10 +12,14 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.backtests.candle_snapshot_history_from_csv import CandleSnapShotHistoryFromCsv
 from trading_bot.backtests.candle_stream_from_csv import CandleStreamFromCSV
 
+from trading_bot.indicator_engine.indicator_atr import IndicatorATR
 from trading_bot.indicator_engine.indicator_moving_average import IndicatorMovingAverage
+
 from trading_bot.strategy.strategy_ema_cross_price import StrategyEmaCrossPriceEngine
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
+from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
+
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 from trading_bot.trade_journal.trade_journal import TradeJournal
 
@@ -38,11 +42,13 @@ async def main():
         history_limit=200
     )
 
-    indicator_ema_candle = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  # SMA
-    
+    indicator_ema = IndicatorMovingAverage(event_bus, period=25, mode="EMA")  
+    indicator_atr = IndicatorATR(event_bus, period=14)
+
     strategy_engine = StrategyEmaCrossPriceEngine(event_bus)         # génère les signaux
 
-    risk_manager = RiskManager(event_bus, tp_percent=0.3, sl_percent=0.15) # cible environ 6 usd pour 4000 
+    # risk_manager = RiskManager(event_bus, tp_percent=0.3, sl_percent=0.15) # cible environ 6 usd pour 4000 
+    risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25) # cible environ 6 usd pour 4000
 
     trader = TraderOnlyOnePosition(event_bus)
     
@@ -52,7 +58,8 @@ async def main():
     await asyncio.gather(
         candel_snapshot_history_csv.run(),
         candel_stream_csv.run(),
-        indicator_ema_candle.run(),
+        indicator_ema.run(),
+        indicator_atr.run(),
         strategy_engine.run(),
         risk_manager.run(),
         trader.run(),

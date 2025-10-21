@@ -64,7 +64,7 @@ class CandleSnapShotHistory:
             candles.append(candle)
 
         # Publier l'événement avec l'historique des bougies
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot reçu {len(candles)}")
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSnapShotHistory] Snapshot reçu {len(candles)} - periode = {self.period}")
         # self._dump_candles(candles)
         await self.event_bus.publish(CandleHistoryReady(
             symbol=self.symbol,

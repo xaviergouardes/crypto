@@ -33,7 +33,11 @@ class StrategyEmaCrossPriceEngine:
         self.received_price = True
 
     async def on_indicator_update(self, event: IndicatorUpdated):
-        self.ema = event.values.get("ema_candle")
+        ema_value = event.values.get("ema_candle")
+
+        if ema_value is not None:
+            self.ema = ema_value
+
         self.received_indicator = True
 
     async def on_candle_close(self, event: CandleClose):
@@ -46,7 +50,7 @@ class StrategyEmaCrossPriceEngine:
         #print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] Evaluer la stratégie")
 
         # On ne calcule un signal que si tous les deux  événements ont été reçus au moins une fois
-        if not (self.received_price and self.received_candle and self.received_price):
+        if not (self.received_price and self.received_candle and self.received_indicator):
             print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] Pas assez de données pour évaluer la stratégie")
             return
 
@@ -72,10 +76,10 @@ class StrategyEmaCrossPriceEngine:
         meche_haute = h - max(o, c)
         meche_basse = min(o, c) - l
 
-        cross_up = self.candle.close > self.ema and self.ema > self.candle.open
+        cross_up = self.candle.close > self.ema > self.candle.open
         # corps_au_dessus = (min(o, c) >= self.ema)
 
-        cross_down = self.candle.close < self.ema and self.ema < self.candle.open
+        cross_down = self.candle.close < self.ema < self.candle.open
         # corps_en_dessous = (max(o, c) <= self.ema)
 
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] bullish={bullish} / bearish={bearish} / open={self.candle.open} / close={self.candle.close} / ema={self.ema}")
@@ -85,9 +89,9 @@ class StrategyEmaCrossPriceEngine:
         #       f"cross_up {cross_up} / "
         #       f"cross_down {cross_down}")
         # Conditions de signal
-        if cross_down and (grand_corps or (meche_haute > meche_basse) ):
+        if cross_down and (grand_corps and (meche_haute > meche_basse) ):
             signal = "SELL"
-        elif cross_up and (grand_corps or (meche_basse > meche_haute) ):
+        elif cross_up and (grand_corps and (meche_basse > meche_haute) ):
             signal = "BUY"
         else:
             # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCrossPriceEngine] Signal {signal} / {self.candle} / {self.ema}")

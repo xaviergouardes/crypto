@@ -1,4 +1,5 @@
 from datetime import datetime
+import numpy as np
 
 from collections import deque
 from trading_bot.core.event_bus import EventBus
@@ -30,7 +31,14 @@ class SmaBuffer:
             print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCandleSlopeEngine] Impossible calculer la pente - Initialisation en cours")
             return None
         # calcula de la pente si    
-        return self.buffer[-1] - self.buffer[0]
+        y = np.array(self.buffer, dtype=float)
+        x = np.arange(len(y))  # indices équidistants
+        try:
+            m, b = np.polyfit(x, y, 1)
+            return m
+        except Exception as e:
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategyEmaCandleSlopeEngine] Erreur lors du calcul de la pente : {e}")
+            return None
 
     def latest(self):
         return self.buffer[-1] if self.buffer else None

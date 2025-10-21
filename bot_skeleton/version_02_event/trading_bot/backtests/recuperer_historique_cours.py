@@ -6,11 +6,11 @@ from datetime import datetime
 # ==== CONFIG ====
 API_KEY = os.getenv("BINANCE_API_KEY")
 API_SECRET = os.getenv("BINANCE_API_SECRET")
-SYMBOL = "ETHUSDC"
+SYMBOL = "BTCUSDC"
 # INTERVAL = Client.KLINE_INTERVAL_3MINUTE  # période dynamique
 INTERVAL = Client.KLINE_INTERVAL_5MINUTE  # période dynamique
-START_DATE = "20250901"  # format AAAAMMJJ
-END_DATE = "20251017"    # format AAAAMMJJ
+START_DATE = "20250701"  # format AAAAMMJJ
+END_DATE = "20251019"    # format AAAAMMJJ
 
 # ==== Conversion pour Binance ====
 start_for_binance = datetime.strptime(START_DATE, "%Y%m%d").strftime("%d %b, %Y")
