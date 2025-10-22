@@ -20,6 +20,7 @@ from trading_bot.strategy.strategy_ema_cross_fast_slow import StrategyEmaCrossFa
 from trading_bot.risk_manager.risk_manager import RiskManager 
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 from trading_bot.trade_journal.trade_journal import TradeJournal
+from trading_bot.trade_journal.keyboard_event import KeyboardEvent
 
 
 async def main():
@@ -42,6 +43,7 @@ async def main():
     trader = TraderOnlyOnePosition(event_bus)
     
     trader_journal = TradeJournal(event_bus)
+    keyboard_event = KeyboardEvent(event_bus)
 
     # Lancer tous les modules
     await asyncio.gather(
@@ -53,7 +55,8 @@ async def main():
         strategy_engine.run(),
         risk_manager.run(),
         trader.run(),
-        trader_journal.run()
+        trader_journal.run(),
+        keyboard_event.run()
     )
 
 if __name__ == "__main__":

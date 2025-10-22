@@ -69,13 +69,13 @@ class TradeJournal:
         #     f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
 
         print(
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} TradeJournal [{color}] "
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal] [{color}] "
             f"Trade {trade_record["side"]} [{trade_record["open_timestamp"]} / {trade_record["close_timestamp"]}] - : "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
         
     async def on_stop_bot(self, event: StopBot):
         print(
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} TradeJournal: Summary"
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal]: Summary"
             f" {self.summary()} "
         )
 
