@@ -13,9 +13,10 @@ from trading_bot.backtests.candle_snapshot_history_from_csv import CandleSnapSho
 from trading_bot.backtests.candle_stream_from_csv import CandleStreamFromCSV
 
 from trading_bot.indicator_engine.indicator_moving_average import IndicatorMovingAverage
+from trading_bot.indicator_engine.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 from trading_bot.indicator_engine.indicator_atr import IndicatorATR
 
-from trading_bot.strategy.strategy_ema_cross_fast_slow import StrategyEmaCrossFastSlowEngine 
+from trading_bot.strategy.strategy_ema_cross_fast_slow_v2 import StrategyEmaCrossFastSlowEngine 
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
 from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
@@ -27,28 +28,33 @@ from trading_bot.trade_journal.keyboard_event import KeyboardEvent
 async def main():
     event_bus = EventBus()
     
+    fast_period = 21
+    slow_period = 200
+
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20251021_20251024.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250701_20251023.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=5),
-        history_limit=200
+        history_limit=slow_period
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20251021_20251024.csv",        
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250701_20251023.csv",        
         period=timedelta(minutes=5),
         symbol="ETHBTC",
-        history_limit=200
+        history_limit=slow_period
     )
 
-    indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  # SMA
-    indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=50, mode="EMA")  # SMA
+
+    indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=fast_period, mode="EMA")  # SMA
+    indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=slow_period, mode="EMA")  # SMA
+    indicator_cross_detector = IndicatorEmaCrossDetector(event_bus, fast_period=fast_period, slow_period=slow_period, buffer_size=2, slope_threshold=3.5)
+     
     indicator_atr = IndicatorATR(event_bus, period=14)
 
-    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=200, periode_fast_ema=50, slope_threshold=0.1)         # génère les signaux
+    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=slow_period, periode_fast_ema=fast_period)         # génère les signaux
     
-    # risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6) # cible environ 6 usd pour 4000 
     risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25)
 
     trader = TraderOnlyOnePosition(event_bus)
@@ -62,6 +68,7 @@ async def main():
         candel_stream.run(),
         indicator_ema_slow_candle.run(),
         indicator_ema_fast_candle.run(),
+        indicator_cross_detector.run(),
         indicator_atr.run(),
         strategy_engine.run(),
         risk_manager.run(),

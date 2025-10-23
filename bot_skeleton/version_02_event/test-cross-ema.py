@@ -13,16 +13,8 @@ from trading_bot.backtests.candle_snapshot_history_from_csv import CandleSnapSho
 from trading_bot.backtests.candle_stream_from_csv import CandleStreamFromCSV
 
 from trading_bot.indicator_engine.indicator_moving_average import IndicatorMovingAverage
-from trading_bot.indicator_engine.indicator_atr import IndicatorATR
+from trading_bot.indicator_engine.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 
-from trading_bot.strategy.strategy_ema_cross_fast_slow import StrategyEmaCrossFastSlowEngine 
-
-from trading_bot.risk_manager.risk_manager import RiskManager 
-from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
-
-from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
-from trading_bot.trade_journal.trade_journal import TradeJournal
-from trading_bot.trade_journal.keyboard_event import KeyboardEvent
 
 async def main():
     event_bus = EventBus()
@@ -42,30 +34,18 @@ async def main():
         history_limit=200
     )
 
-    # indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  # SMA
-    indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  # SMA
-
-    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=200, periode_fast_ema=50, slope_threshold=1.75)         # génère les signaux
-    
-    # risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6) # cible environ 6 usd pour 4000 
-    # risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25)
-
-    # trader = TraderOnlyOnePosition(event_bus)
-    
-    # trader_journal = TradeJournal(event_bus)
-    # keyboard_event = KeyboardEvent(event_bus)
+    indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=100, mode="EMA")  # SMA
+    indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=21, mode="EMA")  # SMA
+    indicator_cross_detector = IndicatorEmaCrossDetector(event_bus, fast_period=21, slow_period=100, buffer_size=2, slope_threshold=1)
 
     # Lancer tous les modules
     await asyncio.gather(
         candel_snapshot_history.run(),
         candel_stream.run(),
-        # indicator_ema_slow_candle.run(),
+        indicator_ema_slow_candle.run(),
         indicator_ema_fast_candle.run(),
-        strategy_engine.run(),
-        # risk_manager.run(),
-        # trader.run(),
-        # trader_journal.run(),
-        # keyboard_event.run()
+        indicator_cross_detector.run(),
+
     )
 
 if __name__ == "__main__":
