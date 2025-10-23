@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import List, Tuple
 from .event_bus import Event
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 # 📈 Structure de type prix
 @dataclass
@@ -86,6 +87,18 @@ class Candle(Event):
     volume: float
     start_time: datetime
     end_time: datetime
+
+    def __str__(self):
+        # Conversion UTC → Paris
+        paris_tz = ZoneInfo("Europe/Paris")
+        start_paris = self.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+        end_paris = self.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+
+        return (f"Candle({self.symbol}) | "
+                f"o: {self.open:.2f}, h: {self.high:.2f}, l: {self.low:.2f}, c: {self.close:.2f}, "
+                f"v: {self.volume:.3f} | "
+                f"{start_paris:%Y-%m-%d %H:%M:%S} / {end_paris:%Y-%m-%d %H:%M:%S})")
+
 
 # Event émis a chaque fermeture de bougie
 @dataclass

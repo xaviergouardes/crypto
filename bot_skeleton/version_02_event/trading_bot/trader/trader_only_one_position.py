@@ -1,5 +1,5 @@
 # trading_bot/trader/trader.py
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
@@ -38,7 +38,9 @@ class TraderOnlyOnePosition:
             "open_timestamp": event.price.timestamp,
             "close_timestamp": None
         }
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] ✅ Nouvelle position ouverte : {self.active_trade}")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] ✅ Nouvelle position ouverte : {self.active_trade}"
+        #       f"TradeApproved={event}"
+        #       )
 
     async def on_price(self, event: PriceUpdated):
         if self.active_trade is None:

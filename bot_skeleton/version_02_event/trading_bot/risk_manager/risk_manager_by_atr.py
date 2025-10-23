@@ -62,7 +62,7 @@ class RiskManagerByAtr:
             # print(f"[RiskManager] ⚠️ Type de trade inconnu : {event.side}")
             return
 
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé avec ATR")
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé avec ATR / TradeSignalGenerated={event}")
         # print(f"  ➤ {event.side} | Entry: {entry_price:.5f} | TP: {tp:.5f} | SL: {sl:.5f}")
 
         await self.event_bus.publish(TradeApproved(
@@ -72,6 +72,7 @@ class RiskManagerByAtr:
             tp=tp,
             sl=sl
         ))
+
 
     async def run(self):
         pass

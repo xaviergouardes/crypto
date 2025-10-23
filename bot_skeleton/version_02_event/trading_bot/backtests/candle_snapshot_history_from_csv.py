@@ -40,7 +40,7 @@ class CandleSnapShotHistoryFromCsv:
         df = pd.read_csv(self.csv_path)
 
         # Vérification des colonnes
-        expected_cols = {"timestamp", "open", "high", "low", "close"}
+        expected_cols = {"timestamp", "open", "high", "low", "close", "volume"}
         if not expected_cols.issubset(df.columns):
             raise ValueError(f"Le fichier CSV doit contenir les colonnes : {expected_cols}")
 

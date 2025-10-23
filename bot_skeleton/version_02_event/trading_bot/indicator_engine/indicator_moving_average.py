@@ -1,6 +1,7 @@
 from collections import deque
 from typing import Deque, Optional
 from datetime import datetime
+import numpy as np
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
@@ -27,6 +28,7 @@ class IndicatorMovingAverage:
         self.symbol: Optional[str] = None
         self._initialized = False
         self.current_value: Optional[float] = None
+        self._sum: float = 0.0  # cumul pour SMA
 
         # Multiplier pour EMA
         self.multiplier = 2 / (period + 1)
@@ -35,74 +37,92 @@ class IndicatorMovingAverage:
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(CandleHistoryReady, self.on_history_ready)
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] mode={self.mode} period={self.period}")
- 
 
-    # -----------------------------------------------------
-    # Historique
-    # -----------------------------------------------------
+    # ------------------- Historique -------------------
     async def on_history_ready(self, event: CandleHistoryReady):
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Initialisation ...")
+        print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Initialisation ...")
 
-        """Initialise le buffer à partir de l'historique reçu."""
         if not event.candles:
             return
 
         self.symbol = event.symbol.upper()
-        for candle in event.candles[-self.period:]:
-            self.candles.append(candle.close)
+        candles_slice = event.candles[-self.period:]
+        if not candles_slice:
+            print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Pas de bougies disponibles pour {self.symbol}")
+            return
+
+        first_candle = candles_slice[0]
+        last_candle = candles_slice[-1]
+        # print(f"==> EMA period={self.period} Première bougie: {first_candle.start_time} / close={first_candle.close}")
+        # print(f"==> EMA period={self.period} Dernière bougie: {last_candle.start_time} / close={last_candle.close}")
+
+        closes = np.array([c.close for c in candles_slice], dtype=np.float64)
+        self.candles = deque(closes, maxlen=self.period)
+
+        if len(closes) < self.period:
+            print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Pas assez de données ({len(closes)}/{self.period})")
+            return
+
+        if self.mode == "SMA":
+            self.current_value = float(closes.mean())
+            self._sum = float(closes.sum())
+        elif self.mode == "EMA":
+            alpha = self.multiplier
+            weights = (1 - alpha) ** np.arange(len(closes) - 1, -1, -1)
+            weights /= weights.sum()
+            self.current_value = float(np.dot(closes, weights))
 
         self._initialized = True
+        await self._publish(last_candle.end_time)
 
-        if len(self.candles) == self.period:
-            # Calcul initial
-            if self.mode == "SMA":
-                self.current_value = sum(self.candles) / self.period
-            elif self.mode == "EMA":
-                self.current_value = sum(self.candles) / self.period  # première EMA = SMA
-            await self._publish(event.candles[-1].end_time)
+        # print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Bougies utilisées pour le calcul initial de {self.mode}:")
+        # for c in candles_slice:
+        #     print(f"    {c}")
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Initialisation Terminée {self.current_value}")
+        print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Initialisation Terminée — "
+              f"{last_candle} "
+              f"{self.mode}({self.period}) = {self.current_value:.5f}"
+              )
+        
 
-    # -----------------------------------------------------
-    # Temps réel
-    # -----------------------------------------------------
+    # ------------------- Temps réel -------------------
     async def on_candle_close(self, event: CandleClose):
         """Met à jour la moyenne mobile à chaque clôture de bougie."""
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] onCandleClose {event}")
- 
+
         if not self._initialized or event.symbol.upper() != self.symbol:
             return
 
         close_price = event.candle.close
 
         if self.mode == "SMA":
+            if len(self.candles) == self.period:
+                self._sum -= self.candles[0]
             self.candles.append(close_price)
+            self._sum += close_price
             if len(self.candles) < self.period:
                 return
-            self.current_value = sum(self.candles) / self.period
+            self.current_value = self._sum / self.period
+            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] SMA mise à jour = {self.current_value:.5f}")
 
         elif self.mode == "EMA":
-            if self.current_value is None:
-                # EMA non initialisée : attendre le buffer plein pour init SMA
+            if self.current_value is None and len(self.candles) < self.period:
                 self.candles.append(close_price)
                 if len(self.candles) == self.period:
                     self.current_value = sum(self.candles) / self.period
-                    # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] EMA = {self.current_value}")
+                    # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] EMA initialisée = {self.current_value:.5f}")
             else:
-                # EMA récursive
+                old_value = self.current_value
                 self.current_value = (close_price - self.current_value) * self.multiplier + self.current_value
-                # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Récursive EMA = {self.current_value}")
+                # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] EMA({self.period})"
+                #       f" mise à jour {old_value:.5f} → {self.current_value:.5f}"              
+                #       f"{event.candle} "
+                #       )
 
         if self.current_value is not None:
             await self._publish(event.candle.end_time)
 
-    # -----------------------------------------------------
-    # Publication
-    # -----------------------------------------------------
+    # ------------------- Publication -------------------
     async def _publish(self, timestamp: datetime):
-        """Publie l'événement IndicatorUpdated avec la valeur calculée."""
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] Event Publich  {self.mode.lower()}_candle={self.current_value}")
-
         await self.event_bus.publish(
             IndicatorUpdated(
                 symbol=self.symbol,
@@ -115,5 +135,4 @@ class IndicatorMovingAverage:
         )
 
     async def run(self):
-        # Tout est événementiel
         pass
