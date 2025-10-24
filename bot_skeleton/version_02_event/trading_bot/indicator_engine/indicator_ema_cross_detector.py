@@ -92,7 +92,7 @@ class IndicatorEmaCrossDetector:
                         symbol=event.symbol,
                         timestamp=event.timestamp,
                         values={
-                            "type": "ema_cross",
+                            "type": self.__class__.__name__,
                             "signal": cross,
                             "fast_period": self.fast_period,
                             "slow_period": self.slow_period,

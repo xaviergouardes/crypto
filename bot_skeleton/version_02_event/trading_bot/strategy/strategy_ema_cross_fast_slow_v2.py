@@ -5,7 +5,7 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, PriceUpdated
 
 
-class StrategyEmaCrossFastSlowEngine:
+class StrategyEmaCrossFastSlowEngineV2:
     """
     Stratégie : génère un signal de trade à partir des événements 'ema_cross'
     émis par IndicatorEmaCrossDetector.
@@ -39,7 +39,7 @@ class StrategyEmaCrossFastSlowEngine:
         """
         Réagit uniquement aux événements de type 'ema_cross' produits par IndicatorEmaCrossDetector.
         """
-        if event.values.get("type") != "ema_cross":
+        if event.values.get("type") != "IndicatorEmaCrossDetector":
             return
 
         cross = event.values.get("signal")

@@ -14,11 +14,13 @@ from trading_bot.backtests.candle_stream_from_csv import CandleStreamFromCSV
 
 from trading_bot.indicator_engine.indicator_moving_average import IndicatorMovingAverage
 from trading_bot.indicator_engine.indicator_ema_cross_detector import IndicatorEmaCrossDetector
+from trading_bot.indicator_engine.indicator_simple_swing_detector import IndicatorSimpleSwingDetector
+from trading_bot.indicator_engine.indicator_premium_discount import IndicatorPremiumDiscount 
 from trading_bot.indicator_engine.indicator_atr import IndicatorATR
 
-from trading_bot.strategy.strategy_ema_cross_fast_slow import StrategyEmaCrossFastSlowEngine 
+from trading_bot.strategy.strategy_ema_cross_fast_slow_filter_prem_dis import  StrategyEmaCrossFastSlowFilterPremDisEngine
+from trading_bot.strategy.strategy_ema_cross_fast_slow_v2 import  StrategyEmaCrossFastSlowEngineV2
 
-from trading_bot.risk_manager.risk_manager import RiskManager 
 from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
 
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
@@ -29,18 +31,18 @@ async def main():
     event_bus = EventBus()
     
     fast_period = 21
-    slow_period = 200
+    slow_period = 100
 
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250701_20251023.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251019.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=5),
         history_limit=slow_period
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250701_20251023.csv",        
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251019.csv",        
         period=timedelta(minutes=5),
         symbol="ETHBTC",
         history_limit=slow_period
@@ -49,10 +51,15 @@ async def main():
 
     indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=fast_period, mode="EMA")  # SMA
     indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=slow_period, mode="EMA")  # SMA
-     
+    indicator_cross_detector = IndicatorEmaCrossDetector(event_bus, fast_period=fast_period, slow_period=slow_period, buffer_size=2, slope_threshold=3.25)
+    
+    indicator_swing_detector = IndicatorSimpleSwingDetector(event_bus, lookback= 5, history_window=50)
+    indicator_zone = IndicatorPremiumDiscount(event_bus)
+
     indicator_atr = IndicatorATR(event_bus, period=14)
 
-    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=slow_period, periode_fast_ema=fast_period, slope_threshold=3.5)
+    #strategy_engine = StrategyEmaCrossFastSlowFilterPremDisEngine(event_bus, periode_slow_ema=slow_period, periode_fast_ema=fast_period)         # génère les signaux
+    strategy_engine = StrategyEmaCrossFastSlowEngineV2(event_bus, periode_slow_ema=slow_period, periode_fast_ema=fast_period)         # génère les signaux
     
     risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25)
 
@@ -67,6 +74,9 @@ async def main():
         candel_stream.run(),
         indicator_ema_slow_candle.run(),
         indicator_ema_fast_candle.run(),
+        indicator_cross_detector.run(),
+        indicator_swing_detector.run(),
+        indicator_zone.run(),
         indicator_atr.run(),
         strategy_engine.run(),
         risk_manager.run(),
