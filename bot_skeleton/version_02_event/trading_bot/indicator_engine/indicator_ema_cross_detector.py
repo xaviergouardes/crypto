@@ -16,7 +16,7 @@ class IndicatorEmaCrossDetector:
     - Ne déclenche le calcul du croisement que lorsqu’on a reçu une nouvelle EMA fast ET une nouvelle EMA slow
     """
 
-    def __init__(self, event_bus: EventBus, fast_period: int, slow_period: int, buffer_size: int = 5, slope_threshold: float = 0.0):
+    def __init__(self, event_bus: EventBus, fast_period: int, slow_period: int, buffer_size: int = 2, slope_threshold: float = 1):
         self.event_bus = event_bus
 
         self.fast_period = fast_period
@@ -34,6 +34,12 @@ class IndicatorEmaCrossDetector:
 
         # Inscription à l’EventBus
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_updated)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorEmaCrossDetector] "
+              f"fast_period={self.fast_period} slow_period={self.slow_period} / "
+              f"buffer_size={self.buffer_size} slope_threshold={self.slope_threshold}"
+
+              )
+
 
     async def on_indicator_updated(self, event: IndicatorUpdated):
         """
