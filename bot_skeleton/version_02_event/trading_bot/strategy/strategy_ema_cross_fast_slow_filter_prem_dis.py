@@ -53,7 +53,7 @@ class StrategyEmaCrossFastSlowFilterPremDisEngine:
 
         if event_type == "IndicatorPremiumDiscount":
             self.zone = event.values.get("zone")
-            return  # rien à publier ici
+            return 
 
         if event_type == "IndicatorEmaCrossDetector":
             # Filtrer les périodes pour ne traiter que le détecteur voulu
@@ -99,7 +99,8 @@ class StrategyEmaCrossFastSlowFilterPremDisEngine:
         # print(
         #     f"{now} [StrategyEmaCrossFastSlowFilterPremDisEngine] ✅ Signal détecté : "
         #     f"{signal} | zone={zone}, cross={cross} "
-        #     f"(fast={self.periode_fast_ema}, slow={self.periode_slow_ema})"
+        #     f"(fast={self.periode_fast_ema}, slow={self.periode_slow_ema}) | "
+        #     f"price={self.entry_price}"
         # )
 
         # --- Publication du signal de trade ---

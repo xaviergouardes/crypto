@@ -33,8 +33,27 @@ explorateur uniswap sur telnet : https://app.uniswap.org/?utm_source=chatgpt.com
 adresse de la factory de pool uniswap v3 sur sepolia : https://sepolia.etherscan.io/address/0x0227628f3F023bb0B980b67D528571c95c6DaC1c#events
 => aller voir dans les events les création de pool avec leur adresse et l'adresse des deux jetons.
 
-## Nettoyer l'hitory de la consile
+## Nettoyer l'hitory de la console
 
 ```
 history -c && history -w
 ```
+
+
+# Commandes Unix pour screen
+
+## Screen
+Lister les screens : ```screen -list```
+Créer un scréeen : ```screen -S toto```
+Detacher un screens : ```Ctrl a + d```
+Detacher un screens : ```Ctrl a + d```
+
+## Lancer les robot en redirigant les logs
+Lancer le robot : 
+```python -u main04.py >> /home/bot-trading/20251023/logs/20251025_main04.log 2>&1 &```
+
+Consulter les logs :
+```tail - f /home/bot-trading/20251023/logs/20251025_main04.log```
+
+Superviser le robot : 
+```ps aux | grep python```

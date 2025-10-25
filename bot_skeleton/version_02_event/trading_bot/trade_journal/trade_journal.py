@@ -1,5 +1,6 @@
 # trading_bot/trader/trader.py
 from datetime import datetime
+from zoneinfo import ZoneInfo 
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose, StopBot
@@ -68,11 +69,19 @@ class TradeJournal:
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [{color} Journal] Trade fermé - : {trade_record} | "
         #     f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
 
+        paris_tz = ZoneInfo("Europe/Paris")
+
+        # Conversion des timestamps en heure de Paris
+        open_time_paris = trade_record["open_timestamp"].astimezone(paris_tz)
+        close_time_paris = trade_record["close_timestamp"].astimezone(paris_tz)
+
         print(
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal] [{color}] "
-            f"Trade {trade_record["side"]} [{trade_record["open_timestamp"]} / {trade_record["close_timestamp"]}] - : "
-            f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
-        
+            f"{datetime.now(tz=paris_tz).strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal] [{color}] "
+            f"Trade {trade_record['side']} [{open_time_paris.strftime('%Y-%m-%d %H:%M:%S')} / "
+            f"{close_time_paris.strftime('%Y-%m-%d %H:%M:%S')}] - : "
+            f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}"
+        )
+                
     async def on_stop_bot(self, event: StopBot):
         print(
             f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal]: Summary"

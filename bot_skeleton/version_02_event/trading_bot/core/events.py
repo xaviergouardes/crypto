@@ -13,6 +13,18 @@ class Price(Event):
     volume: float
     timestamp: datetime
 
+    def __str__(self):
+        # Conversion UTC → Paris
+        paris_tz = ZoneInfo("Europe/Paris")
+        time_paris = self.timestamp.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+
+        return (f"Price ({self.symbol}) | "
+                f"p: {self.price:.2f} | "
+                f"v: {self.volume:.3f} | "
+                f"{time_paris:%Y-%m-%d %H:%M:%S}"
+                )
+
+
 # 📈 Événement : nouveau prix reçu
 @dataclass
 class PriceUpdated(Event):
