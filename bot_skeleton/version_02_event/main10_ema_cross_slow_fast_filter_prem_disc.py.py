@@ -38,7 +38,7 @@ async def main():
     # Initialisation des modules
     price_stream = PriceStream(event_bus)               # récupère les prix 
     
-    candel_snapshot_history = CandleSnapShotHistory(event_bus, period=timedelta(minutes=5), history_limit=21)
+    candel_snapshot_history = CandleSnapShotHistory(event_bus, period=timedelta(minutes=5), history_limit=22)
     candel_stream = CandleStream(event_bus)
 
     fast_period = 7

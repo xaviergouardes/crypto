@@ -230,6 +230,7 @@ class IndicatorSwingDetector:
                 symbol=self.symbol,
                 timestamp=timestamp,
                 values={
+                    "type": self.__class__.__name__,
                     "last_swing_high": self.last_swing_high,
                     "last_swing_low": self.last_swing_low,
                     "last_swing_type": self.last_swing_type,

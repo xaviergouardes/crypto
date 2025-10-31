@@ -79,7 +79,11 @@ class IndicatorATR:
             IndicatorUpdated(
                 symbol=self.symbol,
                 timestamp=timestamp,
-                values={"atr": self.atr, "period": self.period}
+                values={
+                    "type": self.__class__.__name__,
+                    "atr": self.atr, 
+                    "period": self.period
+                }
             )
         )
 

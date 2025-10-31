@@ -1,7 +1,5 @@
 # trading_bot/main.py
 #
-# Test avec les bougies et historique sur 25 bougie d'une minutes
-# Stratégie basée sur la pente de la SMA avec une période de 25 bougie de 1 minutes
 #
 
 import asyncio
@@ -31,7 +29,7 @@ async def main():
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
         # csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique_court.csv",
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250901_20251017.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251031.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=5),
         history_limit=200
@@ -39,7 +37,7 @@ async def main():
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
         # csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHBTC_historique_court.csv",
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250901_20251017.csv",        
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251031.csv",        
         period=timedelta(minutes=5),
         symbol="ETHBTC",
         history_limit=200

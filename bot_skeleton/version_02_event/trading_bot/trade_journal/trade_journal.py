@@ -89,7 +89,6 @@ class TradeJournal:
         )
 
 
-
     def summary(self):
         """Retourne un résumé global du journal avec win rate par type de trade."""
         total_trades = len(self.trades)

@@ -37,14 +37,14 @@ async def main():
         csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251019.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=5),
-        history_limit=200
+        history_limit=22
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
         csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251019.csv",        
         period=timedelta(minutes=5),
         symbol="ETHBTC",
-        history_limit=200
+        history_limit=22
     )
 
     fast_period = 7

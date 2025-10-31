@@ -106,63 +106,62 @@ class IndicatorSimpleSwingDetector:
 
     async def _compute_and_publish(self, timestamp: datetime):
         self._detect_swings_in_history()
+        self._update_current_swings()
 
-        # Ajuste les swings en fonction du dernier prix pour plus de réactivité
-        last_candle = self.candles[-1]
+        if self._swings_changed():
+            await self._publish_swings(timestamp)
+            self._remember_current_swings()
+    
+    def _update_current_swings(self):
+        self.max_swing_high = self.swing_highs[-1] if self.swing_highs else None
+        self.min_swing_low = self.swing_lows[-1] if self.swing_lows else None
 
-        # Swing Low
-        if self.min_swing_low and last_candle.low < self.min_swing_low.low:
-            self.min_swing_low = last_candle
+    def _swings_changed(self):
+        # Si avant il n'y en avait pas et maintenant oui
+        if self.max_swing_high is None or self.min_swing_low is None:
+            return not (self._prev_max_swing_high is None and self._prev_min_swing_low is None)
 
-        # Swing High
-        if self.max_swing_high and last_candle.high > self.max_swing_high.high:
-            self.max_swing_high = last_candle
-
-        # Vérifie si le max/min ont changé (en comparant prix et timestamp)
-        max_changed = (
-            self._prev_max_swing_high is None or
-            self.max_swing_high.high != self._prev_max_swing_high.high or
+        # Si on passe de None à quelque chose ou inverse
+        if self._prev_max_swing_high is None or self._prev_min_swing_low is None:
+            return True
+        
+        return (
             self.max_swing_high.end_time != self._prev_max_swing_high.end_time
+            or self.min_swing_low.end_time != self._prev_min_swing_low.end_time
         )
+    
+    def _remember_current_swings(self):
+        self._prev_max_swing_high = self.max_swing_high
+        self._prev_min_swing_low = self.min_swing_low
 
-        min_changed = (
-            self._prev_min_swing_low is None or
-            self.min_swing_low.low != self._prev_min_swing_low.low or
-            self.min_swing_low.end_time != self._prev_min_swing_low.end_time
-        )
 
-        # Publie l'event uniquement si un swing a changé
-        if (self.max_swing_high is not None and self.min_swing_low is not None) and (max_changed or min_changed):
-            await self.event_bus.publish(
-                IndicatorUpdated(
-                    symbol=self.symbol,
-                    timestamp=timestamp,
-                    values={
-                        "type": self.__class__.__name__,
-                        "max_swing_high": {
-                            "price": self.max_swing_high.high,
-                            "timestamp": self.max_swing_high.end_time,
-                            "candle": self.max_swing_high,
-                        },
-                        "min_swing_low": {
-                            "price": self.min_swing_low.low,
-                            "timestamp": self.min_swing_low.end_time,
-                            "candle": self.min_swing_low,
-                        },
-                    }
-                )
+    async def _publish_swings(self, timestamp: datetime):
+        if self.max_swing_high is None or self.min_swing_low is None:
+            return
+        
+        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] | "
+        #       f"current candle={self.candles[-1]} | "
+        #       f"swing high={self.max_swing_high} | swing low={self.min_swing_low} "
+        #       )
+  
+        await self.event_bus.publish(
+            IndicatorUpdated(
+                symbol=self.symbol,
+                timestamp=timestamp,
+                values={
+                    "type": self.__class__.__name__,
+                    "max_swing_high": {
+                        "price": self.max_swing_high.high,
+                        "timestamp": self.max_swing_high.end_time,
+                    },
+                    "min_swing_low": {
+                        "price": self.min_swing_low.low,
+                        "timestamp": self.min_swing_low.end_time,
+                    },
+                }
             )
-            # Met à jour les valeurs précédentes pour le prochain calcul
-            self._prev_max_swing_high = self.max_swing_high
-            self._prev_min_swing_low = self.min_swing_low
-
-            # Les logs restent inchangés
-            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] "
-            #     f"max_swing_high: {self.max_swing_high if self.max_swing_high else None}")
-            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] "
-            #     f"min_swing_low: {self.min_swing_low if self.min_swing_low else None}")
+        )
 
 
     async def run(self):
         pass
-    

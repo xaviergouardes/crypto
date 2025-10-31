@@ -128,6 +128,7 @@ class IndicatorMovingAverage:
                 symbol=self.symbol,
                 timestamp=timestamp,
                 values={
+                    "type": self.__class__.__name__,
                     f"{self.mode.lower()}_candle": self.current_value,
                     f"{self.mode.lower()}_candle_period": self.period,
                 }

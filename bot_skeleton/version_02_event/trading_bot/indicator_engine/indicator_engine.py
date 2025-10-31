@@ -29,7 +29,11 @@ class IndicatorEngine:
         await self.event_bus.publish(IndicatorUpdated(
             symbol=event.price.symbol,
             timestamp=event.price.timestamp.timestamp(),
-            values={"sma": sma, "momentum": momentum}
+            values={
+                "type": self.__class__.__name__,
+                "sma": sma, 
+                "momentum": momentum
+            }
         ))
         # print(f"[IndicatorEngine] SMA: {sma:.2f}, Momentum: {momentum:.2f}")
 

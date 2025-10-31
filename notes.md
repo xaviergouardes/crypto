@@ -57,3 +57,12 @@ Consulter les logs :
 
 Superviser le robot : 
 ```ps aux | grep python```
+
+## Compresser et déployer les robots
+
+```
+tar -czvf 20251025_bot.tar.gz ./version_02_event
+
+tar -xzvf 20251025_bot.tar.gz -C /chemin
+
+```

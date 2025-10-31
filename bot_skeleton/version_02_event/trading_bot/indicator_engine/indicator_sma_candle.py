@@ -42,6 +42,7 @@ class IndicatorSmaCandle:
                 symbol=self.symbol,
                 timestamp=event.candles[-1].end_time,
                 values={
+                    "type": self.__class__.__name__,
                     "sma_candle": sma_value,
                     "sma_candle_period": self.period
                 }
@@ -67,6 +68,7 @@ class IndicatorSmaCandle:
             symbol=self.symbol,
             timestamp=event.candle.end_time,
             values={
+                "type": self.__class__.__name__,
                 "sma_candle": sma_value,
                 "sma_candle_period": self.period
             }

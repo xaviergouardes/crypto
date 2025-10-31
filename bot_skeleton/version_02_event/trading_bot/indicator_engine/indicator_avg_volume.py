@@ -70,7 +70,11 @@ class IndicatorAvgVolume:
             IndicatorUpdated(
                 symbol=self.symbol,
                 timestamp=timestamp,
-                values={"avg_volume": self.avg_volume, "period": self.period}
+                values={
+                    "type": self.__class__.__name__,
+                    "avg_volume": self.avg_volume, 
+                    "period": self.period
+                }
             )
         )
 

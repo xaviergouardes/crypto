@@ -16,7 +16,7 @@ from trading_bot.indicator_engine.indicator_moving_average import IndicatorMovin
 from trading_bot.indicator_engine.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 from trading_bot.indicator_engine.indicator_atr import IndicatorATR
 
-from trading_bot.strategy.strategy_ema_cross_fast_slow_v2 import StrategyEmaCrossFastSlowEngine 
+from trading_bot.strategy.strategy_ema_cross_fast_slow_v2 import StrategyEmaCrossFastSlowEngineV2 
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
 from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
@@ -49,11 +49,11 @@ async def main():
 
     indicator_ema_fast_candle = IndicatorMovingAverage(event_bus, period=fast_period, mode="EMA")  # SMA
     indicator_ema_slow_candle = IndicatorMovingAverage(event_bus, period=slow_period, mode="EMA")  # SMA
-    indicator_cross_detector = IndicatorEmaCrossDetector(event_bus, fast_period=fast_period, slow_period=slow_period, buffer_size=2, slope_threshold=3.5)
+    indicator_cross_detector = IndicatorEmaCrossDetector(event_bus, fast_period=fast_period, slow_period=slow_period, buffer_size=2, slope_threshold=2.2)
      
     indicator_atr = IndicatorATR(event_bus, period=14)
 
-    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=slow_period, periode_fast_ema=fast_period)         # génère les signaux
+    strategy_engine = StrategyEmaCrossFastSlowEngineV2(event_bus, periode_slow_ema=slow_period, periode_fast_ema=fast_period)         # génère les signaux
     
     risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25)
 
