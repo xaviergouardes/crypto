@@ -130,3 +130,11 @@ class CandleHistoryReady(Event):
 @dataclass
 class StopBot(Event):
     timestamp: datetime
+
+# ❌ Trade rejeté
+@dataclass
+class NewSoldes(Event):
+    usdc: float
+    eth: float
+
+    

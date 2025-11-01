@@ -8,16 +8,16 @@ class MissingPriceError(Exception):
     """Exception levée lorsqu'un TradeSignalGenerated ne contient pas de prix."""
     pass
 
-class RiskManager:
+class RiskManagerPortefolio:
     """Valide ou rejette les signaux de trading et calcule TP/SL."""
 
-    def __init__(self, event_bus: EventBus, tp_percent: float = 1.0, sl_percent: float = 0.5, solde_disponible: float = None):
+    def __init__(self, event_bus: EventBus, tp_percent: float = 1.0, sl_percent: float = 0.5, solde_inital_disponible: float = None):
         self.event_bus = event_bus
 
         self.max_position_size = 1.0  # taille fixe pour la simulation
         self.tp_percent = tp_percent
         self.sl_percent = sl_percent
-        self.solde_disponible = solde_disponible
+        self.solde_disponible = solde_inital_disponible
 
         # S'abonner aux signaux de la stratégie
         self.event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal)

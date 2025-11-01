@@ -77,8 +77,9 @@ class TradeJournal:
 
         print(
             f"{datetime.now(tz=paris_tz).strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal] [{color}] "
-            f"Trade {trade_record['side']} [{open_time_paris.strftime('%Y-%m-%d %H:%M:%S')} / "
-            f"{close_time_paris.strftime('%Y-%m-%d %H:%M:%S')}] - : "
+            f"Trade {trade_record['side'].ljust(4)} [{open_time_paris.strftime('%Y-%m-%d %H:%M:%S')} / "
+            f"{close_time_paris.strftime('%Y-%m-%d %H:%M:%S')}] : "
+            f"Qty = {trade_record["size"]} | "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}"
         )
                 
