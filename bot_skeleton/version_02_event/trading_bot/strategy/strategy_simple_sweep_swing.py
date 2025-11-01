@@ -14,10 +14,8 @@ class StrategySimpleSweepSwingEngine:
         # Données courantes
         self.entry_price = None
         self.candle = None
-        self.last_swing_high_price = None
-        self.last_swing_low_price = None
-        self.last_swing_high_time = None
-        self.last_swing_low_time = None
+        self.last_swing_high = None
+        self.last_swing_low = None
 
         # Abonnements
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
@@ -33,11 +31,9 @@ class StrategySimpleSweepSwingEngine:
         if event_type not in ("IndicatorSimpleSwingDetector",):
             return
         
-        self.last_swing_high_price = event.values["max_swing_high"]["price"]
-        self.last_swing_low_price = event.values["min_swing_low"]["price"]
-        
-        self.last_swing_high_time = event.values["max_swing_high"]["timestamp"]
-        self.last_swing_low_time = event.values["min_swing_low"]["timestamp"]
+        self.last_swing_high = event.values["last_swing_high"]
+        self.last_swing_low = event.values["last_swing_low"]
+
         
     async def on_candle_close(self, event: CandleClose):
         """Chaque clôture de bougie déclenche une évaluation de la stratégie."""
@@ -46,9 +42,9 @@ class StrategySimpleSweepSwingEngine:
 
     async def evaluate_strategy(self):
 
-        if not self.last_swing_high_price or not self.last_swing_low_price:
+        if not self.last_swing_low or not self.last_swing_high:
             return
-
+        
         o, c, h, l = self.candle.open, self.candle.close, self.candle.high, self.candle.low
         bullish = c > o
         bearish = c < o
@@ -64,8 +60,10 @@ class StrategySimpleSweepSwingEngine:
         bullish_wick = lower_wick >= total_size / 3
 
         # Détection des sweeps
-        sweep_high = bearish and o < self.last_swing_high_price and h > self.last_swing_high_price 
-        sweep_low = bullish and o > self.last_swing_low_price and l < self.last_swing_low_price
+        last_swing_high_price = self.last_swing_high.high
+        last_swing_low_price = self.last_swing_low.low
+        sweep_high = bearish and o < last_swing_high_price < h 
+        sweep_low = bullish and l < last_swing_low_price < o
 
         signal = None
         if sweep_high and bearish_wick:
@@ -78,8 +76,9 @@ class StrategySimpleSweepSwingEngine:
 
         # Log clair
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySimpleSweepSwingEngine] "
-        #       f"Signal {signal} | candle={self.candle} | swing high={self.last_swing_high_price} [{self.last_swing_high_time} ] "
-        #       f"swing low={self.last_swing_low_price} [{self.last_swing_low_time} ] "
+        #       f"Signal {signal} | candle={self.candle} | "
+        #       f"swing high={self.last_swing_high} | "
+        #       f"swing  low={self.last_swing_low}"
         # )
 
         # Publication du signal
@@ -95,14 +94,8 @@ class StrategySimpleSweepSwingEngine:
                 "bearish_wick": bearish_wick,
                 "bullish_wick": bullish_wick,
                 "candle": self.candle,
-                "last_swing_high": {
-                    "price": self.last_swing_high_price,
-                    "timestamp": self.last_swing_high_time,
-                },
-                "last_swing_low": {
-                    "price": self.last_swing_low_price,
-                    "timestamp": self.last_swing_low_time,
-                }
+                "last_swing_high": self.last_swing_high,
+                "last_swing_low": self.last_swing_low,
             },
         ))
 
