@@ -18,9 +18,10 @@ class MissingPriceError(Exception):
 class RiskManagerByAtr:
     """Gère le risque et calcule TP/SL dynamiquement à partir de l’ATR."""
 
-    def __init__(self, event_bus: EventBus, atr_tp_mult: float = 2.0, atr_sl_mult: float = 1.0):
+    def __init__(self, event_bus: EventBus, atr_tp_mult: float = 2.0, atr_sl_mult: float = 1.0, solde_disponible: float = None):
         self.event_bus = event_bus
         self.max_position_size = 1.0
+        self.solde_disponible = solde_disponible
 
         # Multiplicateurs ATR
         self.atr_tp_mult = atr_tp_mult
@@ -62,12 +63,17 @@ class RiskManagerByAtr:
             # print(f"[RiskManager] ⚠️ Type de trade inconnu : {event.side}")
             return
 
+        if self.solde_disponible is not None:
+            size = self.solde_disponible / entry_price
+        else:
+            size = self.max_position_size
+
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Trade approuvé avec ATR / TradeSignalGenerated={event}")
         # print(f"  ➤ {event.side} | Entry: {entry_price:.5f} | TP: {tp:.5f} | SL: {sl:.5f}")
 
         await self.event_bus.publish(TradeApproved(
             side=event.side,
-            size=self.max_position_size,
+            size=size,
             price=event.price,
             tp=tp,
             sl=sl

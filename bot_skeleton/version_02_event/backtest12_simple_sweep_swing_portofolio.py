@@ -14,13 +14,13 @@ from trading_bot.indicator_engine.indicator_atr import IndicatorATR
 from trading_bot.indicator_engine.indicator_simple_swing_detector import IndicatorSimpleSwingDetector
 from trading_bot.strategy.strategy_simple_sweep_swing import  StrategySimpleSweepSwingEngine
 
-from trading_bot.risk_manager.risk_manager_portefolio import RiskManagerPortefolio 
 from trading_bot.risk_manager.risk_manager import RiskManager 
+from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr 
 
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 
 from trading_bot.trade_journal.trade_journal import TradeJournal
-from trading_bot.trade_journal.portefolio_manager import PortefolioManager
+from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 from trading_bot.trade_journal.keyboard_event import KeyboardEvent
 
 async def main():
@@ -42,17 +42,17 @@ async def main():
     )
 
     indicator_atr = IndicatorATR(event_bus, period=14)
-    indicator_swing_detector = IndicatorSimpleSwingDetector(event_bus, lookback=5, history_window=150)
+    indicator_swing_detector = IndicatorSimpleSwingDetector(event_bus, lookback=5, history_window=100)
 
     strategy_engine = StrategySimpleSweepSwingEngine(event_bus)      
     
-    # risk_manager = RiskManagerPortefolio(event_bus, tp_percent=1, sl_percent=0.6, solde_inital_disponible=None) 
-    risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6, solde_disponible=1000) 
+    #risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=4, atr_sl_mult=2, solde_disponible=1000) 
+    risk_manager = RiskManager(event_bus, tp_percent=1.5, sl_percent=0.6, solde_disponible=1000) 
  
     trader = TraderOnlyOnePosition(event_bus)
     
     trader_journal = TradeJournal(event_bus)
-    portefolio_manager = PortefolioManager(event_bus, starting_usdc=1000)
+    portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
     keyboard_event = KeyboardEvent(event_bus)
 
     # Lancer tous les modules
@@ -65,7 +65,7 @@ async def main():
         risk_manager.run(),
         trader.run(),
         trader_journal.run(),
-        # portefolio_manager.run(),
+        portefolio_manager.run(),
         keyboard_event.run()
     )
 
