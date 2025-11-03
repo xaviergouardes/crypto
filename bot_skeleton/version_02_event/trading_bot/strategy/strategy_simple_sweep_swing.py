@@ -16,6 +16,8 @@ class StrategySimpleSweepSwingEngine:
         self.candle = None
         self.last_swing_high = None
         self.last_swing_low = None
+        self.window_low = None
+        self.window_high = None
 
         # Abonnements
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
@@ -33,8 +35,9 @@ class StrategySimpleSweepSwingEngine:
         
         self.last_swing_high = event.values["last_swing_high"]
         self.last_swing_low = event.values["last_swing_low"]
+        self.window_low = event.values["window_low"]
+        self.window_high = event.values["window_high"]
 
-        
     async def on_candle_close(self, event: CandleClose):
         """Chaque clôture de bougie déclenche une évaluation de la stratégie."""
         self.candle = event.candle
@@ -44,7 +47,12 @@ class StrategySimpleSweepSwingEngine:
 
         if not self.last_swing_low or not self.last_swing_high:
             return
-        
+
+        # Si le max de la fenetre n'est pas un swing high on trade pas
+        # idem i le min de la fentre n'est pas un swing low on trade pas
+        if self.last_swing_high.high < self.window_high or self.last_swing_low.low> self.window_low:
+            return
+
         o, c, h, l = self.candle.open, self.candle.close, self.candle.high, self.candle.low
         bullish = c > o
         bearish = c < o
@@ -64,6 +72,8 @@ class StrategySimpleSweepSwingEngine:
         last_swing_low_price = self.last_swing_low.low
         sweep_high = bearish and o < last_swing_high_price < h 
         sweep_low = bullish and l < last_swing_low_price < o
+        # sweep_high = o < last_swing_high_price < h 
+        # sweep_low = l < last_swing_low_price < o
 
         signal = None
         if sweep_high and bearish_wick:

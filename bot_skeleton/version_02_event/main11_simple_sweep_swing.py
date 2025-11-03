@@ -52,6 +52,7 @@ async def main():
 
     # Lancer tous les modules
     await asyncio.gather(
+        price_stream.run(),
         candel_snapshot_history.run(),
         candel_stream.run(),
         indicator_atr.run(),

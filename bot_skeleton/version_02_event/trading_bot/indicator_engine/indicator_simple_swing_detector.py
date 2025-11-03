@@ -107,6 +107,9 @@ class IndicatorSimpleSwingDetector:
         #       f"swing high={self.max_swing_high} | swing low={self.min_swing_low} "
         #       )
 
+        # compute highest/lowest of history window
+        window_high = max(c.high for c in self.candles)
+        window_low = min(c.low for c in self.candles)
 
         await self.event_bus.publish(
             IndicatorUpdated(
@@ -115,7 +118,9 @@ class IndicatorSimpleSwingDetector:
                 values={
                     "type": self.__class__.__name__,
                     "last_swing_high": new_high,
-                    "last_swing_low": new_low
+                    "last_swing_low": new_low,
+                    "window_high": window_high,
+                    "window_low": window_low
                 }
             )
         )

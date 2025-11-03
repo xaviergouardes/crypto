@@ -9,7 +9,7 @@ API_SECRET = os.getenv("BINANCE_API_SECRET")
 SYMBOL = "ETHUSDC"
 INTERVAL = Client.KLINE_INTERVAL_5MINUTE  # Ex : 5 minutes
 START_DATE = "20250901"
-END_DATE = "20251031"
+END_DATE = "20251104"
 TIMEZONE = "Europe/Paris"  # Fuseau horaire local
 
 # ==== Conversion pour Binance ====

@@ -28,17 +28,17 @@ async def main():
     
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251031.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=5),
-        history_limit=200
+        history_limit=100
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251031.csv",        
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv",        
         period=timedelta(minutes=5),
         symbol="ETHBTC",
-        history_limit=200
+        history_limit=100
     )
 
     indicator_atr = IndicatorATR(event_bus, period=14)
@@ -46,8 +46,8 @@ async def main():
 
     strategy_engine = StrategySimpleSweepSwingEngine(event_bus)      
     
-    #risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=4, atr_sl_mult=2, solde_disponible=1000) 
-    risk_manager = RiskManager(event_bus, tp_percent=1.5, sl_percent=0.6, solde_disponible=1000) 
+    # risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=4, atr_sl_mult=2.2, solde_disponible=1000) 
+    risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6, solde_disponible=1000) 
  
     trader = TraderOnlyOnePosition(event_bus)
     
