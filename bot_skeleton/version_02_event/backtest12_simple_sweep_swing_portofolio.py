@@ -21,7 +21,6 @@ from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 
 from trading_bot.trade_journal.trade_journal import TradeJournal
 from trading_bot.trade_journal.portfolio_manager import PortfolioManager
-from trading_bot.trade_journal.keyboard_event import KeyboardEvent
 
 async def main():
     event_bus = EventBus()
@@ -53,7 +52,6 @@ async def main():
     
     trader_journal = TradeJournal(event_bus)
     portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
-    keyboard_event = KeyboardEvent(event_bus)
 
     # Lancer tous les modules
     await asyncio.gather(
@@ -65,8 +63,7 @@ async def main():
         risk_manager.run(),
         trader.run(),
         trader_journal.run(),
-        portefolio_manager.run(),
-        keyboard_event.run()
+        portefolio_manager.run()
     )
 
 
