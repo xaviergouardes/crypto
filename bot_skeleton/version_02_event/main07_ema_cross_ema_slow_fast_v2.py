@@ -18,13 +18,19 @@ from trading_bot.indicator_engine.indicator_moving_average import IndicatorMovin
 from trading_bot.indicator_engine.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 from trading_bot.indicator_engine.indicator_atr import IndicatorATR
 
-from trading_bot.strategy.strategy_ema_cross_fast_slow_v2 import StrategyEmaCrossFastSlowEngine 
+from trading_bot.strategy.strategy_ema_cross_fast_slow_v2 import StrategyEmaCrossFastSlowEngineV2 
 
 from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
 
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
-from trading_bot.trade_journal.trade_journal import TradeJournal
 
+from trading_bot.trade_journal.trade_journal import TradeJournal
+from trading_bot.trade_journal.telegram_notifier import TelegramNotifier
+from trading_bot.trade_journal.portfolio_manager import PortfolioManager
+
+import sys
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
 
 async def main():
     event_bus = EventBus()
@@ -40,14 +46,16 @@ async def main():
     indicator_cross_detector = IndicatorEmaCrossDetector(event_bus, fast_period=21, slow_period=200, buffer_size=2, slope_threshold=3.5)
     indicator_atr = IndicatorATR(event_bus, period=14)
 
-    strategy_engine = StrategyEmaCrossFastSlowEngine(event_bus, periode_slow_ema=200, periode_fast_ema=21)         # génère les signaux
+    strategy_engine = StrategyEmaCrossFastSlowEngineV2(event_bus, periode_slow_ema=200, periode_fast_ema=21)         # génère les signaux
     
     risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25)
     
     trader = TraderOnlyOnePosition(event_bus)
     
     trader_journal = TradeJournal(event_bus)
-
+    portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
+    telegram_notifier = TelegramNotifier(event_bus)
+    
     # Lancer tous les modules
     await asyncio.gather(
         price_stream.run(),

@@ -27,14 +27,14 @@ async def main():
     
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20251101_20251103.csv",
         symbol="ETHBTC",
         period=timedelta(minutes=5),
         history_limit=100
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv",        
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20251101_20251103.csv",        
         period=timedelta(minutes=5),
         symbol="ETHBTC",
         history_limit=100

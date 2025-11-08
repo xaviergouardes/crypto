@@ -20,7 +20,6 @@ from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 
 from trading_bot.trade_journal.trade_journal import TradeJournal
-from trading_bot.trade_journal.telegram_notifier import TelegramNotifier
 from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 
 async def main():
@@ -28,32 +27,31 @@ async def main():
     
     candel_snapshot_history =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20251101_20251103.csv",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_1m_historique_20251101_20251108.csv",
         symbol="ETHBTC",
-        period=timedelta(minutes=5),
-        history_limit=200
+        period=timedelta(minutes=1),
+        history_limit=100
     )
     candel_stream = CandleStreamFromCSV(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20251101_20251103.csv",        
-        period=timedelta(minutes=5),
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_1m_historique_20251101_20251108.csv",        
+        period=timedelta(minutes=1),
         symbol="ETHBTC",
-        history_limit=200
+        history_limit=100
     )
 
     indicator_atr = IndicatorATR(event_bus, period=14)
-    indicator_swing_detector = IndicatorSimpleSwingDetector(event_bus, lookback=5, history_window=150)
+    indicator_swing_detector = IndicatorSimpleSwingDetector(event_bus, lookback=5, history_window=100)
 
     strategy_engine = StrategySimpleSweepSwingEngine(event_bus)      
     
-    risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6) 
-    # risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25)
+    # risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=4, atr_sl_mult=2.2, solde_disponible=1000) 
+    risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6, solde_disponible=1000) 
  
     trader = TraderOnlyOnePosition(event_bus)
     
     trader_journal = TradeJournal(event_bus)
     portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
-    telegram_notifier = TelegramNotifier(event_bus)
 
     # Lancer tous les modules
     await asyncio.gather(
@@ -64,7 +62,8 @@ async def main():
         strategy_engine.run(),
         risk_manager.run(),
         trader.run(),
-        trader_journal.run()
+        trader_journal.run(),
+        portefolio_manager.run()
     )
 
 

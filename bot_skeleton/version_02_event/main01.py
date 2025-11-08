@@ -13,7 +13,12 @@ from trading_bot.risk_manager.risk_manager import RiskManager
 # from trading_bot.trader.trader import Trader
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 from trading_bot.trade_journal.trade_journal import TradeJournal
+from trading_bot.trade_journal.telegram_notifier import TelegramNotifier
+from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 
+import sys
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
 
 async def main():
     event_bus = EventBus()
@@ -26,10 +31,12 @@ async def main():
     # strategy_engine = StrategyEngine(event_bus)         # génère les signaux
     strategy_engine = StrategySynchronizedEngine(event_bus)         # génère les signaux
     # risk_manager = RiskManager(event_bus, tp_percent=1.0, sl_percent=0.5)
-    risk_manager = RiskManager(event_bus, tp_percent=0.03, sl_percent=0.03)
+    risk_manager = RiskManager(event_bus, tp_percent=1, sl_percent=0.6)
     # trader = Trader(event_bus)
     trader = TraderOnlyOnePosition(event_bus)
     trader_journal = TradeJournal(event_bus)
+    portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
+    telegram_notifier = TelegramNotifier(event_bus)
 
     # Lancer tous les modules
     await asyncio.gather(

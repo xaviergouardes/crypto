@@ -25,8 +25,12 @@ from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 
 from trading_bot.trade_journal.trade_journal import TradeJournal
+from trading_bot.trade_journal.telegram_notifier import TelegramNotifier
 from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 
+import sys
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
 
 async def main():
     event_bus = EventBus()
@@ -49,6 +53,7 @@ async def main():
     
     trader_journal = TradeJournal(event_bus)
     portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
+    telegram_notifier = TelegramNotifier(event_bus)
 
     # Lancer tous les modules
     await asyncio.gather(

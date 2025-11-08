@@ -100,7 +100,7 @@ class StrategySweepSwingEngine:
         await self.event_bus.publish(TradeSignalGenerated(
             side=signal,
             confidence=1.0,
-            price=self.entry_price
+            price=self.entry_price,
             strategie = self.__class__.__name__,
             strategie_parameters = {
                 "min_swing_distance": self.min_swing_distance,
