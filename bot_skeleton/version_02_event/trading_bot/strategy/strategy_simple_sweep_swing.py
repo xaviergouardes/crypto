@@ -23,6 +23,7 @@ class StrategySimpleSweepSwingEngine:
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(PriceUpdated, self.on_price_update)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] Initisé") 
 
     async def on_price_update(self, event: PriceUpdated):
         self.entry_price = event.price

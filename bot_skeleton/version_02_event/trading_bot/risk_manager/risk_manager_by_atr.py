@@ -5,7 +5,7 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import (
     TradeSignalGenerated,
     TradeApproved,
-    TradeRejected,
+    NewSoldes,
     IndicatorUpdated,
 )
 
@@ -33,8 +33,12 @@ class RiskManagerByAtr:
         # Abonnement aux événements
         self.event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal)
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_updated)
+        self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
 
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Initialisé avec ATR multipliers : TP={atr_tp_mult}x / SL={atr_sl_mult}x")
+
+    async def on_new_soldes(self, event: NewSoldes):
+        self.solde_disponible = event.usdc
 
     async def on_indicator_updated(self, event: IndicatorUpdated):
         """Met à jour la valeur de l’ATR quand elle change."""

@@ -27,6 +27,7 @@ class StrategySweepSwingEngine:
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(PriceUpdated, self.on_price_update)
+        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] Initilisé - min_swing_distance={self.min_swing_distance} / strength_threshold={self.strength_threshold} ") 
 
     async def on_price_update(self, event: PriceUpdated):
         self.entry_price = event.price

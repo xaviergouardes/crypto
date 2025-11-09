@@ -22,39 +22,39 @@ from trading_bot.risk_manager.risk_manager_by_atr import RiskManagerByAtr
 
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
 from trading_bot.trade_journal.trade_journal import TradeJournal
-from trading_bot.trade_journal.keyboard_event import KeyboardEvent
+from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 
 async def main():
     event_bus = EventBus()
     
     candel_snapshot_history_csv =  CandleSnapShotHistoryFromCsv(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251031.csv",
-        symbol="ETHBTC",
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/SOLUSDC_5m_historique_20250901_20251109.csv",
+        symbol="SOLUSDC",
         period=timedelta(minutes=5),
-        history_limit=300
+        history_limit=100
     )
     candel_stream_csv = CandleStreamFromCSV(
         event_bus=event_bus,
-        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251031.csv",       
+        csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/SOLUSDC_5m_historique_20250901_20251109.csv",       
         period=timedelta(minutes=5),
-        symbol="ETHBTC",
-        history_limit=300
+        symbol="SOLUSDC",
+        history_limit=100
     )
 
-    indicator_ema_trend = IndicatorMovingAverage(event_bus, period=300, mode="EMA")  
-    indicator_ema = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  
+    indicator_ema_trend = IndicatorMovingAverage(event_bus, period=100, mode="EMA")  
+    indicator_ema = IndicatorMovingAverage(event_bus, period=21, mode="EMA")  
     indicator_atr = IndicatorATR(event_bus, period=14)
 
-    strategy_engine = StrategyEmaCrossPriceFilterTrendsEngine(event_bus, ema_trend_period=300, ema_band_with=0.001)         # génère les signaux
+    strategy_engine = StrategyEmaCrossPriceFilterTrendsEngine(event_bus, ema_trend_period=100, ema_band_with=0.001)         # génère les signaux
 
-    #risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.25) # cible environ 6 usd pour 4000 
-    risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25) # cible environ 6 usd pour 4000
+    risk_manager = RiskManager(event_bus, tp_percent=2, sl_percent=1, solde_disponible=1000)  # cible environ 6 usd pour 4000 
+    #risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25, solde_disponible=1000) # cible environ 6 usd pour 4000
 
     trader = TraderOnlyOnePosition(event_bus)
     
     trader_journal = TradeJournal(event_bus)
-    keyboard_event = KeyboardEvent(event_bus)
+    portefolio_manager = PortfolioManager(event_bus, starting_usdc=1000)
 
     # Lancer tous les modules
     await asyncio.gather(
@@ -66,32 +66,11 @@ async def main():
         strategy_engine.run(),
         risk_manager.run(),
         trader.run(),
-        trader_journal.run(),
-        keyboard_event.run()
+        trader_journal.run()
     )
 
 if __name__ == "__main__":
     asyncio.run(main())
 
 
-
-    # candel_stream_csv = CandleStreamFromCSV(
-    #     event_bus=event_bus,
-    #     csv_path="/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_02_event/trading_bot/backtests/ETHUSDC_5m_historique_20250701_20251019.csv",        
-    #     period=timedelta(minutes=5),
-    #     symbol="ETHBTC",
-    #     history_limit=300
-    # )
-
-    # indicator_ema_trend = IndicatorMovingAverage(event_bus, period=300, mode="EMA")  
-    # indicator_ema = IndicatorMovingAverage(event_bus, period=200, mode="EMA")  
-    # indicator_atr = IndicatorATR(event_bus, period=14)
-
-    # strategy_engine = StrategyEmaCrossPriceFilterTrendsEngine(event_bus, ema_trend_period=300, ema_band_with=0.001)         # génère les signaux
-
-    # #risk_manager = RiskManager(event_bus, tp_percent=0.5, sl_percent=0.25) # cible environ 6 usd pour 4000 
-    # risk_manager = RiskManagerByAtr(event_bus, atr_tp_mult=2, atr_sl_mult=1.25) # cible environ 6 usd pour 4000
-
-    # trader = TraderOnlyOnePosition(event_bus)
-    # trader_journal = TradeJournal(event_bus)
 

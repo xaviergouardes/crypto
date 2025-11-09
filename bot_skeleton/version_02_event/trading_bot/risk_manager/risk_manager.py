@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, TradeApproved, TradeRejected
+from trading_bot.core.events import TradeSignalGenerated, TradeApproved, TradeRejected, NewSoldes
 
 class MissingPriceError(Exception):
     """Exception levée lorsqu'un TradeSignalGenerated ne contient pas de prix."""
@@ -21,8 +21,11 @@ class RiskManager:
 
         # S'abonner aux signaux de la stratégie
         self.event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal)
+        self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
         print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Initialisation terminée, riskmanager opérationnel. tp_percent={self.tp_percent} / sl_percent={self.sl_percent}")
 
+    async def on_new_soldes(self, event: NewSoldes):
+        self.solde_disponible = event.usdc
 
     async def on_trade_signal(self, event: TradeSignalGenerated):
         # Vérifier la présence du prix
