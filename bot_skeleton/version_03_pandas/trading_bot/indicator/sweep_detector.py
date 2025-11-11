@@ -5,7 +5,7 @@ class SweepDetector:
         """
         df : DataFrame contenant au moins les colonnes ['open','high','low','close','swing_high','swing_low']
         """
-        self.df = df
+        self.df = df.copy()
 
     def detect(self):
         sweep_high = []
@@ -22,7 +22,7 @@ class SweepDetector:
                 sweep_high.append(False)
 
             # Sweep Low : bougie bullish et la meche basse dépasse le swing low
-            if not pd.isna(sl) and row['close'] > row['open'] and row['low'] < sl < row['close']:
+            if not pd.isna(sl) and row['close'] > row['open'] and row['low'] < sl < row['open']:
                 sweep_low.append(True)
             else:
                 sweep_low.append(False)

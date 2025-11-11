@@ -1,10 +1,10 @@
 import pandas as pd
+import numpy as np
 
 class SweepStrategy:
     def __init__(self, df: pd.DataFrame):
         """
-        df : DataFrame contenant au moins ['close','sweep_high','sweep_low', ema_column]
-        ema_column : nom de la colonne EMA21
+        df : DataFrame contenant au moins ['close','sweep_high','sweep_low']
         """
         self.df = df
 
@@ -15,8 +15,8 @@ class SweepStrategy:
             row = self.df.iloc[i]
             signal = None
 
-            # Pour la première bougie, on ne peut pas comparer EMA
-            if i == 0:
+            # On ne peut pas évaluer si l'un des deux swings est manquant
+            if pd.isna(row.get('sweep_high')) or pd.isna(row.get('sweep_low')):
                 signals.append(None)
                 continue
 
