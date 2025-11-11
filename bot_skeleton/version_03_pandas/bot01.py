@@ -47,17 +47,17 @@ if __name__ == "__main__":
     # wick_filter = WickFilter(df)
     # df = wick_filter.apply_filter()
 
-    # risk_manager = RiskManager(df, tp_pct=1.0, sl_pct=0.6)
-    # df = risk_manager.calculate_risk()
+    risk_manager = RiskManager(df, tp_pct=1.0, sl_pct=0.6)
+    df = risk_manager.calculate_risk()
 
-    # trader = OnlyOnePositionTrader(df)
-    # df = trader.run_trades()
+    trader = OnlyOnePositionTrader(df)
+    df = trader.run_trades()
 
-    # portefolio = Portfolio(df, initial_capital=1000)
-    # df = portefolio.run_portfolio()
+    portefolio = Portfolio(df, initial_capital=1000)
+    df = portefolio.run_portfolio()
 
-    # stats = Statistiques(df, initial_capital=1000)
-    # print(stats.summary())
+    stats = Statistiques(df, initial_capital=1000)
+    print(stats.summary())
 
 
     # print(list(df.columns)) # affiche une vraie liste Python
@@ -79,4 +79,4 @@ if __name__ == "__main__":
     # print(filtered_df[['timestamp_paris', 'close', 'signal', 'original_signal', 'entry_price', 'zone']])
     # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 'position', 'trade_id']])
 
-    # print(stats.summary())
+    print(stats.summary())

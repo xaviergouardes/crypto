@@ -2,11 +2,18 @@ import pandas as pd
 import numpy as np
 
 class Statistiques:
+    REQUIRED_COLUMNS = ['position', 'entry_price', 'close']
+
     def __init__(self, df: pd.DataFrame, initial_capital: float = 1000.0):
         """
         df : DataFrame contenant au moins ['position', 'entry_price', 'close']
         initial_capital : solde initial en USDC
         """
+        # Vérification des colonnes essentielles
+        missing_cols = [col for col in self.REQUIRED_COLUMNS if col not in df.columns]
+        if missing_cols:
+            raise ValueError(f"Le DataFrame ne contient pas les colonnes nécessaires pour calculer les statistiques : {missing_cols}")
+
         self.df = df.copy()
         self.initial_capital = initial_capital
 
@@ -25,7 +32,6 @@ class Statistiques:
         self.df['equity'] = self.initial_capital + self.df['trade_pnl'].cumsum()
 
     # --- Métriques principales ---
-
     def compute_win_rate(self) -> float:
         wins = (self.df['trade_pnl'] > 0).sum()
         total = (self.df['trade_pnl'] != 0).sum()
@@ -45,41 +51,29 @@ class Statistiques:
         return round(abs(gains / losses), 2)
 
     def compute_max_drawdown(self) -> float:
-        """
-        Calcule le drawdown maximal en %.
-        """
         equity = self.df['equity']
         rolling_max = equity.cummax()
         drawdown = (equity - rolling_max) / rolling_max
         max_dd = drawdown.min() * 100
         return round(max_dd, 2)
 
-    # --- PnL moyen et statistiques détaillées ---
-
     def compute_average_pnl(self) -> float:
-        """Retourne le PnL moyen sur les trades valides uniquement."""
         valid_trades = self.df[self.df['trade_pnl'] != 0]['trade_pnl'].dropna()
         if valid_trades.empty:
             return 0.0
         return round(valid_trades.mean(), 4)
 
     def compute_pnl_stats(self):
-        """Retourne les moyennes globales, gagnantes et perdantes."""
         valid_trades = self.df[self.df['trade_pnl'] != 0]['trade_pnl'].dropna()
-
         if valid_trades.empty:
             return {"average": 0.0, "average_win": 0.0, "average_loss": 0.0}
-
         wins = valid_trades[valid_trades > 0]
         losses = valid_trades[valid_trades < 0]
-
         return {
             "average": round(valid_trades.mean(), 4),
             "average_win": round(wins.mean(), 4) if not wins.empty else 0.0,
             "average_loss": round(losses.mean(), 4) if not losses.empty else 0.0,
         }
-
-    # --- Résumé complet ---
 
     def summary(self) -> pd.DataFrame:
         win_rate = self.compute_win_rate()
@@ -99,5 +93,4 @@ class Statistiques:
             'Solde max': [round(max_balance, 2)],
             'Solde min': [round(min_balance, 2)],
         }
-
         return pd.DataFrame(data)
