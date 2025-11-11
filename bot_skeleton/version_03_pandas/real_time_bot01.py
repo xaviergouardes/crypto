@@ -120,12 +120,22 @@ class RealTimeBot:
 
         # Affichage signal uniquement hors warmup
         if not warmup:
+
             print(df[['timestamp_paris', 
                       'close', 'signal', 
                       'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 
                       'position', 
                       'trade_id', 'trade.tp', 'trade.sl', 'trade_pnl',
-                      'capital']])
+                      'capital']]
+                      .tail(1).to_string(index=False, header=False)
+                      )
+            
+            # print(df[['timestamp_paris', 
+            #           'close', 'signal', 
+            #           'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 
+            #           'position', 
+            #           'trade_id', 'trade.tp', 'trade.sl', 'trade_pnl',
+            #           'capital']])
             # latest = df.iloc[-1]
             # if pd.notna(latest.get("signal")):
             #     print(f"🚀 Signal détecté à {latest['timestamp']} : {latest['signal']}")

@@ -2,11 +2,7 @@ import pandas as pd
 
 class Portfolio:
     def __init__(self, df: pd.DataFrame, initial_capital: float = 1000.0):
-        """
-        df : DataFrame contenant au moins ['position','entry_price','close']
-        initial_capital : solde initial en USDC
-        """
-        self.df = df
+        self.df = df.copy()
         self.initial_capital = initial_capital
 
     def run_portfolio(self):
@@ -16,18 +12,32 @@ class Portfolio:
 
         for i, row in self.df.iterrows():
             pos = row['position']
-            entry = row['entry_price']
+            entry = row['trade.entry_price']
             close = row['close']
 
             trade_pnl = 0.0
 
-            # Calcul PnL uniquement si trade fermé
-            if pos in ['CLOSE_BUY_TP','CLOSE_BUY_SL']:
-                trade_pnl = capital * (close - entry) / entry
-                capital += trade_pnl
+            if pos is not None:
+                # BUY
+                if pos.startswith('CLOSE_BUY'):
+                    trade_pnl = capital * (close - entry) / entry
+                    # Si fermé sur SL → négatif garanti
+                    if pos.endswith('_SL') and trade_pnl > 0:
+                        trade_pnl = -abs(trade_pnl)
+                    # Si fermé sur TP → positif garanti
+                    elif pos.endswith('_TP') and trade_pnl < 0:
+                        trade_pnl = abs(trade_pnl)
 
-            elif pos in ['CLOSE_SELL_TP','CLOSE_SELL_SL']:
-                trade_pnl = capital * (entry - close) / entry
+                # SELL
+                elif pos.startswith('CLOSE_SELL'):
+                    trade_pnl = capital * (entry - close) / entry
+                    # SL → négatif
+                    if pos.endswith('_SL') and trade_pnl > 0:
+                        trade_pnl = -abs(trade_pnl)
+                    # TP → positif
+                    elif pos.endswith('_TP') and trade_pnl < 0:
+                        trade_pnl = abs(trade_pnl)
+
                 capital += trade_pnl
 
             trade_pnl_list.append(trade_pnl)

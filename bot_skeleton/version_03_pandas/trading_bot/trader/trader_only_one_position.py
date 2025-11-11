@@ -21,6 +21,11 @@ class OnlyOnePositionTrader:
         trade_tp_list = []
         trade_sl_list = []
 
+        # Valeurs figées du trade en cours
+        trade_entry_price = None
+        trade_tp = None
+        trade_sl = None
+
         # Parcours des lignes
         for i, row in self.df.iterrows():
             sig = row['signal']
@@ -28,16 +33,12 @@ class OnlyOnePositionTrader:
             high = row['high']
             low = row['low']
 
-            entry_price = row['entry_price']
-            tp_price = row['tp']
-            sl_price = row['sl']
-
             # Si une position est ouverte
             if position == 'BUY':
-                if low <= sl_price <= high:
+                if low <= trade_sl <= high:
                     position_list.append('CLOSE_BUY_SL')
                     position = None
-                elif low <= tp_price <= high:
+                elif low <= trade_tp <= high:
                     position_list.append('CLOSE_BUY_TP')
                     position = None
                 else:
@@ -49,10 +50,10 @@ class OnlyOnePositionTrader:
                 trade_sl_list.append(trade_sl)
 
             elif position == 'SELL':
-                if low <= tp_price <= high:
+                if low <= trade_tp <= high:
                     position_list.append('CLOSE_SELL_TP')
                     position = None
-                elif low <= sl_price <= high:
+                elif low <= trade_sl <= high:
                     position_list.append('CLOSE_SELL_SL')
                     position = None
                 else:
@@ -67,9 +68,9 @@ class OnlyOnePositionTrader:
             elif position is None and sig in ['BUY', 'SELL']:
                 trade_counter += 1
                 position = sig
-                trade_entry_price = entry_price
-                trade_tp = tp_price
-                trade_sl = sl_price
+                trade_entry_price = row['entry_price']
+                trade_tp = row['tp']
+                trade_sl = row['sl']
 
                 if sig == 'BUY':
                     position_list.append('OPEN_BUY')
@@ -89,7 +90,7 @@ class OnlyOnePositionTrader:
                 trade_tp_list.append(None)
                 trade_sl_list.append(None)
 
-        # Création des colonnes
+        # Création des colonnes figées
         self.df['position'] = position_list
         self.df['trade_id'] = trade_id_list
         self.df['trade.entry_price'] = trade_entry_price_list
