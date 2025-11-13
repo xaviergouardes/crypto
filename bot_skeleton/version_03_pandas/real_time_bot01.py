@@ -93,15 +93,27 @@ class RealTimeBot:
 
         # Exemple simple avec tous les indicateurs et stratégie
 
-        # df = Ema(df).add_ema(7)
-        # df = Ema(df).add_ema(21)
-        # df = SwingDetector(df, window=25, side=2).detect()
-        # df = SweepDetector(df).detect()
+        df = Ema(df).add_ema(7)
+        df = Ema(df).add_ema(21)
+        df = SwingDetector(df, window=100, side=2).detect()
+        df = SweepDetector(df).detect()
 
-        # df = SweepStrategy(df).generate_signals()
-        df = RandomAlternatingStrategy(df).generate_signals()
+        df = SweepStrategy(df).generate_signals()
+        # pd.set_option('display.max_rows', None)
+        # Détecter uniquement les nouveaux swings par rapport à la ligne précédente
+        df['new_swing_high'] = df['last_swing_high'].ne(df['last_swing_high'].shift(1))
+        df['new_swing_low']  = df['last_swing_low'].ne(df['last_swing_low'].shift(1))
 
-        df = RiskManager(df, tp_pct=0.2, sl_pct=0.1).calculate_risk()
+        # Filtrer les lignes où il y a un swing high ou low
+        new_swings = df[df['new_swing_high'] | df['new_swing_low']]
+
+        # Afficher les 10 premiers swings détectés
+        print(new_swings[['timestamp_paris', 'last_swing_high', 'last_swing_low']])
+
+
+        # df = RandomAlternatingStrategy(df).generate_signals()
+
+        df = RiskManager(df, tp_pct=2, sl_pct=0.6).calculate_risk()
         df = OnlyOnePositionTrader(df).run_trades()
 
         df = Portfolio(df, initial_capital=self.initial_capital).run_portfolio()
@@ -147,12 +159,12 @@ if __name__ == "__main__":
     # Exemple CSV
 
     # Bot backtest
-    # source = CandleSourceCsv(
-    #     "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv"
-    # )
-    # bot = RealTimeBot(source, mode="backtest")
+    source = CandleSourceCsv(
+        "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv"
+    )
+    bot = RealTimeBot(source, mode="backtest")
 
     # Bot temps réel
-    source = CandleSourceBinance(symbol="ethusdc", interval="1m", warmup_count=1)
-    bot = RealTimeBot(source, warmup_count=1, mode="realtime")
-    asyncio.run(bot.start())
+    # source = CandleSourceBinance(symbol="ethusdc", interval="1m", warmup_count=1)
+    # bot = RealTimeBot(source, warmup_count=1, mode="realtime")
+    # asyncio.run(bot.start())

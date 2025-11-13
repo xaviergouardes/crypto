@@ -9,26 +9,35 @@ class SweepStrategy:
         self.df = df
 
     def generate_signals(self):
-        signals = []
+        # Copie pour éviter les effets de bord
+        df = self.df.copy()
 
-        for i in range(len(self.df)):
-            row = self.df.iloc[i]
-            signal = None
+        # Par sécurité : convertir en booléen ou NaN
+        df['sweep_high'] = df['sweep_high'].where(df['sweep_high'].notna(), np.nan)
+        df['sweep_low'] = df['sweep_low'].where(df['sweep_low'].notna(), np.nan)
 
-            # On ne peut pas évaluer si l'un des deux swings est manquant
-            if pd.isna(row.get('sweep_high')) or pd.isna(row.get('sweep_low')):
-                signals.append(None)
-                continue
+        # Conditions logiques
+        cond_sell = df['sweep_high'] == True
+        cond_buy = df['sweep_low'] == True
+        cond_nan = df['sweep_high'].isna() | df['sweep_low'].isna()
+        cond_conflict = cond_sell & cond_buy  # Les deux détectés en même temps
 
-            # Sweep high → potentiel SELL
-            if row['sweep_high']:
-                signal = 'SELL'
+        # Attribution vectorisée
+        df['signal'] = np.select(
+            condlist=[
+                cond_conflict,
+                cond_nan,
+                cond_sell,
+                cond_buy
+            ],
+            choicelist=[
+                'CONFLICT',
+                None,
+                'SELL',
+                'BUY'
+            ],
+            default=None
+        )
 
-            # Sweep low → potentiel BUY
-            if row['sweep_low']:
-                signal = 'BUY'
-
-            signals.append(signal)
-
-        self.df['signal'] = signals
-        return self.df
+        self.df = df
+        return df
