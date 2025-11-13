@@ -25,21 +25,61 @@ from trading_bot.journal.telegram_notifier_async import AsyncTelegramNotifier
 from trading_bot.journal.telegram_notifier import TelegramNotifier
 
 class RealTimeBot:
-    def __init__(self, candle_source: CandleSource, warmup_count=0, mode="realtime", initial_capital=1000):
+    def __init__(self, params: dict = None, mode="realtime"):
         """
         mode: 'realtime' ou 'backtest'
         """
-        self.candle_source = candle_source
-        self.warmup_count = warmup_count
+
         self.mode = mode  # "realtime" ou "backtest"
-        self.initial_capital = initial_capital
+        default_params = {
+            "realtime": {
+                "symbol": "ethusdc",
+                "interval": "5m",
+                "warmup_count": None,
+            },
+            "backtest": {
+                "path": None,
+            },
+            "initial_capital": 1000,
+            "ema_fast": 7,
+            "ema_slow": 21,
+            "swing_window": 200,
+            "swing_side": 2,
+            "tp_pct": 2.5,
+            "sl_pct": 1
+        }
+        self.params = {**default_params, **(params or {})}
+
+        if self.mode == "realtime" :               
+            # Warmup = max de tous les paramètres numériques (sauf initial_capital)
+            excluded = {"initial_capital", "swing_side", "tp_pct", "sl_pct"}  # si tu veux en exclure d’autres
+            numeric_values = [v for k, v in self.params.items() if k not in excluded and isinstance(v,(int,float))]
+            print("==>", max(numeric_values))
+            self.params["realtime"]["warmup_count"] = max(numeric_values)
+            self.params.pop("backtest", None)
+
+            self.candle_source = CandleSourceBinance(symbol=self.params["realtime"]["symbol"], 
+                                                     interval=self.params["realtime"]["interval"], 
+                                                     warmup_count=self.params["realtime"]["warmup_count"])
+
+        else:
+            self.params.pop("realtime", None)
+
+            self.candle_source = CandleSourceCsv(self.params["backtest"]["path"])
 
         self.df = None
         self.statistiques = None
 
+        print(f"✅ Bot en mode {self.mode} initilisation ....")
+        print(f"{self.params}")
+         
+
         self._initialize_bot()
 
     def _initialize_bot(self):
+        
+        p = self.params
+
         if self.mode == "backtest":
             # On charge tout le CSV pour le backtest
             df = self.candle_source.get_initial_data().copy()
@@ -54,7 +94,7 @@ class RealTimeBot:
 
         elif self.mode == "realtime":
             # On charge seulement le warmup pour initialiser les indicateurs
-            df = self.candle_source.get_initial_data().head(self.warmup_count).copy()
+            df = self.candle_source.get_initial_data().head(p["realtime"]["warmup_count"]).copy()
             df, _ = self._run_pipeline(df, warmup=True)
             self.df = df
             print(f"✅ Bot temps réel initialisé avec {len(df)} bougies de warmup")
@@ -91,13 +131,15 @@ class RealTimeBot:
         
 
     def _run_pipeline(self, df, warmup=False):
+        p = self.params
+
         df = df.copy()
 
         # Exemple simple avec tous les indicateurs et stratégie
 
-        df = Ema(df).add_ema(7)
-        df = Ema(df).add_ema(21)
-        df = SwingDetector(df, window=200, side=2).detect()
+        df = Ema(df).add_ema(p["ema_fast"])
+        df = Ema(df).add_ema(p["ema_slow"])
+        df = SwingDetector(df, window=p["swing_window"], side=p["swing_side"]).detect()
         df = SweepDetector(df).detect()
 
         df = SweepStrategy(df).generate_signals()
@@ -106,10 +148,10 @@ class RealTimeBot:
         # wick_filter = WickFilter(df)
         # df = wick_filter.apply_filter()
 
-        df = RiskManager(df, tp_pct=2.5, sl_pct=1).calculate_risk()
+        df = RiskManager(df, tp_pct=p["tp_pct"], sl_pct=p["tp_pct"]).calculate_risk()
         df = OnlyOnePositionTrader(df).run_trades()
 
-        df = Portfolio(df, initial_capital=self.initial_capital).run_portfolio()
+        df = Portfolio(df, initial_capital=p["initial_capital"]).run_portfolio()
 
         # notifier = TelegramNotifier(token="8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA", chat_id="6070936106")
         # df = notifier.notify(df)
@@ -120,10 +162,10 @@ class RealTimeBot:
         stats = None
         if self.mode == "backtest":
             filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
-            # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade_id']])
-            stats = Statistiques(df, initial_capital=self.initial_capital)
+            print(filtered_df[['timestamp_paris', 'close','high', 'low', 'entry_price', 'trade_id', 'trade.tp', 'trade.sl', 'position', 'trade_pnl', 'capital']])
+            stats = Statistiques(df, initial_capital=p["initial_capital"])
 
-        # Affichage signal uniquement hors warmup
+        # Affichage de la dernièr eligne calculé en fonctin de la dernière bougie close uniquement hors warmup
         if not warmup:
 
             print(df[['timestamp_paris', 
@@ -152,12 +194,33 @@ if __name__ == "__main__":
     # Exemple CSV
 
     # Bot backtest
-    source = CandleSourceCsv(
-        "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv"
-    )
-    bot = RealTimeBot(source, mode="backtest")
+    params = {
+        "backtest": {
+            "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv"
+        },
+        "initial_capital": 1000,
+        "ema_fast": 7,
+        "ema_slow": 21,
+        "swing_window": 21,
+        "swing_side": 2,
+        "tp_pct": 1.6,
+        "sl_pct": 1
+    }
+    bot = RealTimeBot(params=params, mode="backtest")
 
     # Bot temps réel
-    # source = CandleSourceBinance(symbol="ethusdc", interval="1m", warmup_count=1)
-    # bot = RealTimeBot(source, warmup_count=1, mode="realtime")
+    # params = {
+    #     "realtime": {
+    #         "symbol": "ethusdc",
+    #         "interval": "1m"
+    #     },
+    #     "initial_capital": 1000,
+    #     "ema_fast": 7,
+    #     "ema_slow": 21,
+    #     "swing_window": 100,
+    #     "swing_side": 2,
+    #     "tp_pct": 0.2,
+    #     "sl_pct": 0.1
+    # }
+    # bot = RealTimeBot(params=params, mode="realtime")
     # asyncio.run(bot.start())
