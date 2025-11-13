@@ -14,6 +14,8 @@ from trading_bot.indicator.sweep_detector import SweepDetector
 from trading_bot.strategie.sweep import SweepStrategy
 from trading_bot.strategie.alternating import RandomAlternatingStrategy
 
+from trading_bot.filter.wick_filter import WickFilter
+
 from trading_bot.risk_manager.risk_manager import RiskManager
 from trading_bot.trader.trader_only_one_position import OnlyOnePositionTrader
 
@@ -95,25 +97,16 @@ class RealTimeBot:
 
         df = Ema(df).add_ema(7)
         df = Ema(df).add_ema(21)
-        df = SwingDetector(df, window=100, side=2).detect()
+        df = SwingDetector(df, window=200, side=2).detect()
         df = SweepDetector(df).detect()
 
         df = SweepStrategy(df).generate_signals()
-        # pd.set_option('display.max_rows', None)
-        # Détecter uniquement les nouveaux swings par rapport à la ligne précédente
-        df['new_swing_high'] = df['last_swing_high'].ne(df['last_swing_high'].shift(1))
-        df['new_swing_low']  = df['last_swing_low'].ne(df['last_swing_low'].shift(1))
-
-        # Filtrer les lignes où il y a un swing high ou low
-        new_swings = df[df['new_swing_high'] | df['new_swing_low']]
-
-        # Afficher les 10 premiers swings détectés
-        print(new_swings[['timestamp_paris', 'last_swing_high', 'last_swing_low']])
-
-
         # df = RandomAlternatingStrategy(df).generate_signals()
 
-        df = RiskManager(df, tp_pct=2, sl_pct=0.6).calculate_risk()
+        # wick_filter = WickFilter(df)
+        # df = wick_filter.apply_filter()
+
+        df = RiskManager(df, tp_pct=2.5, sl_pct=1).calculate_risk()
         df = OnlyOnePositionTrader(df).run_trades()
 
         df = Portfolio(df, initial_capital=self.initial_capital).run_portfolio()
@@ -127,7 +120,7 @@ class RealTimeBot:
         stats = None
         if self.mode == "backtest":
             filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
-            print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade_id']])
+            # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade_id']])
             stats = Statistiques(df, initial_capital=self.initial_capital)
 
         # Affichage signal uniquement hors warmup
@@ -160,7 +153,7 @@ if __name__ == "__main__":
 
     # Bot backtest
     source = CandleSourceCsv(
-        "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv"
+        "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv"
     )
     bot = RealTimeBot(source, mode="backtest")
 

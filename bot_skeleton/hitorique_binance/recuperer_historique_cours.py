@@ -6,10 +6,10 @@ from binance.client import Client
 # ==== CONFIG ====
 API_KEY = os.getenv("BINANCE_API_KEY")
 API_SECRET = os.getenv("BINANCE_API_SECRET")
-SYMBOL = "SOLUSDC"
+SYMBOL = "ETHUSDC"
 INTERVAL = Client.KLINE_INTERVAL_5MINUTE  # Ex : 5 minutes
-START_DATE = "20250901"
-END_DATE = "20251109"
+START_DATE = "20250914"
+END_DATE = "20251114"
 TIMEZONE = "Europe/Paris"  # Fuseau horaire local
 
 # ==== Conversion pour Binance ====

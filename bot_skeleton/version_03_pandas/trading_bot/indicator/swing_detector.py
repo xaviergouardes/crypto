@@ -43,18 +43,16 @@ class SwingDetector:
 
         self.df = df
 
+        # filtred = self.df.head(200)
+        # # filtred = df[df['high'] == df['rolling_max']]
+        # # filtred = df[df['is_swing_low'] == True]
+        # filtred = self.df.query("index >= 780 and index < 900")
+        # pd.set_option('display.max_rows', None)
+        # print(filtred[['timestamp_paris', 'high', 'low','is_swing_high', 'is_swing_low', 'last_swing_high', 'last_swing_low']].head(300))
 
+        # # print(filtred[['timestamp_paris', 'high', 'low', 'is_swing_high', 'is_swing_low']].head(300))
 
-        filtred = self.df.head(200)
-        # filtred = df[df['high'] == df['rolling_max']]
-        # filtred = df[df['is_swing_low'] == True]
-        filtred = self.df.query("index >= 780 and index < 900")
-        pd.set_option('display.max_rows', None)
-        print(filtred[['timestamp_paris', 'high', 'low','is_swing_high', 'is_swing_low', 'last_swing_high', 'last_swing_low']].head(300))
-
-        # print(filtred[['timestamp_paris', 'high', 'low', 'is_swing_high', 'is_swing_low']].head(300))
-
-        raise Exception()
+        # raise Exception()
 
         return self.df
  

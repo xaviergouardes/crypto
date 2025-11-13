@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class SweepDetector:
     def __init__(self, df: pd.DataFrame):
@@ -8,26 +9,27 @@ class SweepDetector:
         self.df = df.copy()
 
     def detect(self):
-        sweep_high = []
-        sweep_low = []
+        df = self.df
 
-        for i, row in self.df.iterrows():
-            sh = row['last_swing_high']
-            sl = row['last_swing_low']
+        # Conditions Sweep High
+        cond_sh = (
+            df['last_swing_high'].notna() &
+            (df['close'] < df['open']) &
+            (df['open'] < df['last_swing_high']) &
+            (df['last_swing_high'] < df['high'])
+        )
 
-            # Sweep High : bougie bearish et la meche haute dépasse le swing high
-            if not pd.isna(sh) and row['close'] < row['open'] and row['open'] < sh < row['high']:
-                sweep_high.append(True)
-            else:
-                sweep_high.append(False)
+        # Conditions Sweep Low
+        cond_sl = (
+            df['last_swing_low'].notna() &
+            (df['close'] > df['open']) &
+            (df['low'] < df['last_swing_low']) &
+            (df['last_swing_low'] < df['open'])
+        )
 
-            # Sweep Low : bougie bullish et la meche basse dépasse le swing low
-            if not pd.isna(sl) and row['close'] > row['open'] and row['low'] < sl < row['open']:
-                sweep_low.append(True)
-            else:
-                sweep_low.append(False)
+        # Assignation vectorisée
+        df['sweep_high'] = cond_sh
+        df['sweep_low'] = cond_sl
 
-        self.df['sweep_high'] = sweep_high
-        self.df['sweep_low'] = sweep_low
-
+        self.df = df
         return self.df
