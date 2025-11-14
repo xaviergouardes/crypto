@@ -118,7 +118,7 @@ class RealTimeBot:
 
         # last_row = self.df.iloc[-1]
         # if last_row['position'] in ["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]:
-        #     print(last_row[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade_id']])
+        #     print(last_row[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade.id']])
 
         # Affichage uniquement de la dernière bougie
         # latest = self.df.iloc[-1]
@@ -162,7 +162,10 @@ class RealTimeBot:
         stats = None
         if self.mode == "backtest":
             filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
-            print(filtered_df[['timestamp_paris', 'close','high', 'low', 'entry_price', 'trade_id', 'trade.tp', 'trade.sl', 'position', 'trade_pnl', 'capital']])
+            print(filtered_df[['timestamp_paris', 'close', 'position',
+                               'trade.begin', 'trade.end', 
+                               'trade.entry_price', 'trade.id', 'trade.tp', 'trade.sl', 
+                               'trade_pnl', 'capital']])
             stats = Statistiques(df, initial_capital=p["initial_capital"])
 
         # Affichage de la dernièr eligne calculé en fonctin de la dernière bougie close uniquement hors warmup
@@ -172,7 +175,7 @@ class RealTimeBot:
                       'close', 'signal', 
                       'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 
                       'position', 
-                      'trade_id', 'trade.tp', 'trade.sl', 'trade_pnl',
+                      'trade.id', 'trade.tp', 'trade.sl', 'trade_pnl',
                       'capital']]
                       .tail(1).to_string(index=False, header=False)
                       )
@@ -181,7 +184,7 @@ class RealTimeBot:
             #           'close', 'signal', 
             #           'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 
             #           'position', 
-            #           'trade_id', 'trade.tp', 'trade.sl', 'trade_pnl',
+            #           'trade.id', 'trade.tp', 'trade.sl', 'trade_pnl',
             #           'capital']])
             # latest = df.iloc[-1]
             # if pd.notna(latest.get("signal")):
@@ -207,6 +210,7 @@ if __name__ == "__main__":
         "sl_pct": 1
     }
     bot = RealTimeBot(params=params, mode="backtest")
+    
 
     # Bot temps réel
     # params = {

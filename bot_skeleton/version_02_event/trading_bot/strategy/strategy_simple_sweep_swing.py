@@ -76,6 +76,9 @@ class StrategySimpleSweepSwingEngine:
         # sweep_high = o < last_swing_high_price < h 
         # sweep_low = l < last_swing_low_price < o
 
+        bearish_wick = True
+        bullish_wick = True
+        
         signal = None
         if sweep_high and bearish_wick:
             signal = "SELL"

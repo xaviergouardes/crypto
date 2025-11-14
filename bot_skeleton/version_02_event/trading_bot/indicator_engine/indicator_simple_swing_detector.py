@@ -14,7 +14,7 @@ class IndicatorSimpleSwingDetector:
     Conserve le max swing high et le min swing low dans cette fenêtre.
     """
 
-    def __init__(self, event_bus: EventBus, lookback: int = 5, history_window: int = 100):
+    def __init__(self, event_bus: EventBus, lookback: int = 2, history_window: int = 21):
         self.event_bus = event_bus
         self.lookback = lookback
         self.history_window = history_window
@@ -65,26 +65,56 @@ class IndicatorSimpleSwingDetector:
     # =====================================================
     # Calculs internes
     # =====================================================
+    # def _find_swings(self):
+    #     """Retourne (max_swing_high, min_swing_low)"""
+    #     candles = list(self.candles)
+    #     n = self.lookback
+
+    #     swing_high = None
+    #     swing_low = None
+
+    #     for i in range(n, len(candles) - n):
+    #         window = candles[i-n:i+n+1]
+
+    #         if candles[i].high == max(c.high for c in window):
+    #             if swing_high is None or candles[i].high > swing_high.high:
+    #                 swing_high = candles[i]
+
+    #         if candles[i].low == min(c.low for c in window):
+    #             if swing_low is None or candles[i].low < swing_low.low:
+    #                 swing_low = candles[i]
+
+    #     return swing_high, swing_low
     def _find_swings(self):
-        """Retourne (max_swing_high, min_swing_low)"""
+        """
+        Identifie, dans tout l'historique self.candles, 
+        le swing high le plus haut et le swing low le plus bas.
+        Retourne (max_swing_high, min_swing_low).
+        """
         candles = list(self.candles)
         n = self.lookback
 
         swing_high = None
         swing_low = None
 
+        # Parcours des bougies avec une marge avant/après pour analyser les swings
         for i in range(n, len(candles) - n):
-            window = candles[i-n:i+n+1]
 
-            if candles[i].high == max(c.high for c in window):
-                if swing_high is None or candles[i].high > swing_high.high:
-                    swing_high = candles[i]
+            c = candles[i]
+            window = candles[i - n : i + n + 1]
 
-            if candles[i].low == min(c.low for c in window):
-                if swing_low is None or candles[i].low < swing_low.low:
-                    swing_low = candles[i]
+            # --- Swing High ---
+            if c.high == max(x.high for x in window):
+                if swing_high is None or c.high > swing_high.high:
+                    swing_high = c
+
+            # --- Swing Low ---
+            if c.low == min(x.low for x in window):
+                if swing_low is None or c.low < swing_low.low:
+                    swing_low = c
 
         return swing_high, swing_low
+
     
 
     async def _update_and_publish(self):

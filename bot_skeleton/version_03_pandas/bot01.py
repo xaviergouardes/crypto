@@ -70,13 +70,13 @@ if __name__ == "__main__":
 
 
     # filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
-    # filtered_df = df[df['trade_id'].isin((1,2,3))]
-    # filtered_df = df[df['trade_id'] == 22]
-    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade_id']])
+    # filtered_df = df[df['trade.id'].isin((1,2,3))]
+    # filtered_df = df[df['trade.id'] == 22]
+    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade.id']])
           
 
     # filtered_df = df[df['original_signal'].notna() & df['signal'].isna()]
     # print(filtered_df[['timestamp_paris', 'close', 'signal', 'original_signal', 'entry_price', 'zone']])
-    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 'position', 'trade_id']])
+    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 'position', 'trade.id']])
 
     print(stats.summary())

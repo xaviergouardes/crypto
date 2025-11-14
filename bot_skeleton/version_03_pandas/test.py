@@ -27,4 +27,4 @@ df = rm.calculate_risk()
 trader = OnlyOnePositionTrader(df)
 result = trader.run_trades()
 
-print(result[['close','signal','entry_price','tp','sl','position','trade_id']])
+print(result[['close','signal','entry_price','tp','sl','position','trade.id']])
