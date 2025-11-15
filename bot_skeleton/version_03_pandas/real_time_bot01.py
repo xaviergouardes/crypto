@@ -21,7 +21,7 @@ from trading_bot.trader.trader_only_one_position import OnlyOnePositionTrader
 
 from trading_bot.journal.portefolio import Portfolio
 from trading_bot.journal.statistiques import Statistiques
-from trading_bot.journal.telegram_notifier_async import AsyncTelegramNotifier
+
 from trading_bot.journal.telegram_notifier import TelegramNotifier
 
 class RealTimeBot:
@@ -99,7 +99,9 @@ class RealTimeBot:
             self.df = df
             print(f"✅ Bot temps réel initialisé avec {len(df)} bougies de warmup")
             # print(df.tail(2))
-            print(df)
+            # pd.set_option('display.max_rows', None)
+            # print(df)
+            # raise Exception("toto")
 
     async def start(self):
         if self.mode == "backtest":
@@ -143,7 +145,7 @@ class RealTimeBot:
         df = SweepDetector(df).detect()
 
         df = SweepStrategy(df).generate_signals()
-        # df = RandomAlternatingStrategy(df).generate_signals()
+        # df = RandomAlternatingStrategy(df).generate_signals(p["realtime"]["warmup_count"])
 
         # wick_filter = WickFilter(df)
         # df = wick_filter.apply_filter()
@@ -153,42 +155,32 @@ class RealTimeBot:
 
         df = Portfolio(df, initial_capital=p["initial_capital"]).run_portfolio()
 
-        # notifier = TelegramNotifier(token="8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA", chat_id="6070936106")
-        # df = notifier.notify(df)
-
         # print(list(df.columns)) # affiche une vraie liste Python
 
         # # Crée les statistiques seulement si mode backtest
         stats = None
         if self.mode == "backtest":
             filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
-            print(filtered_df[['timestamp_paris', 'close', 'position',
-                               'trade.begin', 'trade.end', 
-                               'trade.entry_price', 'trade.id', 'trade.tp', 'trade.sl', 
-                               'trade_pnl', 'capital']])
+            # print(filtered_df[['timestamp_paris', 'close', 'position',
+            #                    'trade.begin', 'trade.end', 
+            #                    'trade.entry_price', 'trade.id', 'trade.tp', 'trade.sl', 
+            #                    'trade_pnl', 'capital']])
             stats = Statistiques(df, initial_capital=p["initial_capital"])
 
-        # Affichage de la dernièr eligne calculé en fonctin de la dernière bougie close uniquement hors warmup
+        # Affichage de la dernièr eligne calculé en fonction de la dernière bougie close uniquement hors warmup
         if not warmup:
+            filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
+            if not filtered_df.empty:
+                last_row = filtered_df[['timestamp_paris', 'trade.id', 'position', 
+                                'trade.begin', 'trade.end', 
+                                'trade.entry_price', 'trade.tp', 'trade.sl', 
+                                'trade_pnl', 'capital']].tail(1)
+                csv_line = last_row.to_csv(index=False, header=False, sep=';')
+                print(csv_line.strip())
 
-            print(df[['timestamp_paris', 
-                      'close', 'signal', 
-                      'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 
-                      'position', 
-                      'trade.id', 'trade.tp', 'trade.sl', 'trade_pnl',
-                      'capital']]
-                      .tail(1).to_string(index=False, header=False)
-                      )
-            
-            # print(df[['timestamp_paris', 
-            #           'close', 'signal', 
-            #           'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 
-            #           'position', 
-            #           'trade.id', 'trade.tp', 'trade.sl', 'trade_pnl',
-            #           'capital']])
-            # latest = df.iloc[-1]
-            # if pd.notna(latest.get("signal")):
-            #     print(f"🚀 Signal détecté à {latest['timestamp']} : {latest['signal']}")
+                last_trade = last_row.iloc[0].to_dict()
+                notifier = TelegramNotifier(token="8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA", chat_id="6070936106")
+                df = notifier.notify(last_trade)
 
         return df, stats
 
@@ -196,35 +188,34 @@ class RealTimeBot:
 if __name__ == "__main__":
     # Exemple CSV
 
-    # Bot backtest
+    # # Bot backtest
+    # params = {
+    #     "backtest": {
+    #         "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv"
+    #     },
+    #     "initial_capital": 1000,
+    #     "ema_fast": 7,
+    #     "ema_slow": 21,
+    #     "swing_window": 21,
+    #     "swing_side": 2,
+    #     "tp_pct": 1.6,
+    #     "sl_pct": 1
+    # }
+    # bot = RealTimeBot(params=params, mode="backtest")
+
+    # Bot temps réel
     params = {
-        "backtest": {
-            "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv"
+        "realtime": {
+            "symbol": "ethusdc",
+            "interval": "1m"
         },
         "initial_capital": 1000,
         "ema_fast": 7,
         "ema_slow": 21,
         "swing_window": 21,
         "swing_side": 2,
-        "tp_pct": 1.6,
-        "sl_pct": 1
+        "tp_pct": 0.2,
+        "sl_pct": 0.1
     }
-    bot = RealTimeBot(params=params, mode="backtest")
-    
-
-    # Bot temps réel
-    # params = {
-    #     "realtime": {
-    #         "symbol": "ethusdc",
-    #         "interval": "1m"
-    #     },
-    #     "initial_capital": 1000,
-    #     "ema_fast": 7,
-    #     "ema_slow": 21,
-    #     "swing_window": 100,
-    #     "swing_side": 2,
-    #     "tp_pct": 0.2,
-    #     "sl_pct": 0.1
-    # }
-    # bot = RealTimeBot(params=params, mode="realtime")
-    # asyncio.run(bot.start())
+    bot = RealTimeBot(params=params, mode="realtime")
+    asyncio.run(bot.start())

@@ -12,10 +12,15 @@ class RandomAlternatingStrategy:
     def __init__(self, df: pd.DataFrame):
         self.df = df.copy()
 
-    def generate_signals(self):
+    def generate_signals(self, warmup_count):
         signals = []
 
         for i in range(len(self.df)):
+
+            if i < warmup_count:
+                signals.append(None)
+                continue
+
             timestamp = self.df.at[i, 'timestamp']
             minute = timestamp.minute
             signal = None

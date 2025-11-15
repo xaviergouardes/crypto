@@ -22,35 +22,18 @@ class TelegramNotifier:
         except Exception as e:
             print(f"⚠️ Erreur envoi Telegram : {e}")
 
-    def notify(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Parcourt le DataFrame et envoie un message pour les trades clôturés non notifiés.
-        Retourne le DataFrame mis à jour avec la colonne 'telegram'.
-        """
-        df = df.copy()
+    def notify(self, trade: dict):
+        ts = trade['timestamp_paris']
+        close_price = trade.get('trade.sl') if 'SL' in trade['position'] else trade.get('trade.tp')
 
-        if 'telegram' not in df.columns:
-            df['telegram'] = False
-
-        # Sélectionne uniquement les trades clôturés non encore notifiés
-        mask = (
-            df['position'].isin(['CLOSE_BUY_TP', 'CLOSE_BUY_SL', 'CLOSE_SELL_TP', 'CLOSE_SELL_SL'])
-            & (df['telegram'] == False)
+        msg = (
+            f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]} \n"
+            f"💰 *Trade clôturé* : {trade['position']}\n"
+            f"📅 {ts}\n"
+            f"🎯 Entry: {trade['trade.entry_price']:.4f}\n"
+            f"💎 Close: {close_price:.4f}\n"
+            f"📈 PnL: {trade['trade_pnl']:.2f} USDC\n"
+            f"💼 Solde: {trade['capital']:.2f} USDC"
         )
-        closed_trades = df[mask]
+        self.send_message(msg)
 
-        for i, row in closed_trades.iterrows():
-            ts = row.get('timestamp_paris', row['timestamp'])
-            msg = (
-                f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]} \n"
-                f"💰 *Trade clôturé* : {row['position']}\n"
-                f"📅 {ts}\n"
-                f"🎯 Entry: {row['entry_price']:.4f}\n"
-                f"💎 Close: {row['close']:.4f}\n"
-                f"📈 PnL: {row['trade_pnl']:.2f} USDC\n"
-                f"💼 Solde: {row['capital']:.2f} USDC"
-            )
-            self.send_message(msg)
-            df.at[i, 'telegram'] = True  # Marque le trade comme notifié
-
-        return df
