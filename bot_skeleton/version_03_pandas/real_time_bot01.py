@@ -98,10 +98,7 @@ class RealTimeBot:
             df, _ = self._run_pipeline(df, warmup=True)
             self.df = df
             print(f"✅ Bot temps réel initialisé avec {len(df)} bougies de warmup")
-            # print(df.tail(2))
-            # pd.set_option('display.max_rows', None)
-            # print(df)
-            # raise Exception("toto")
+
 
     async def start(self):
         if self.mode == "backtest":
