@@ -1,10 +1,13 @@
 # trading_bot/trader/trader.py
+
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
 
 class Trader:
     """Simule l'exécution d'un trade approuvé avec TP et SL."""
-
+    logger = Logger.get("Trader")
+    
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
         self.event_bus.subscribe(TradeApproved, self.on_trade_approved)

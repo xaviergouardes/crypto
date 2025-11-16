@@ -24,12 +24,6 @@ class Price(Event):
                 f"{time_paris:%Y-%m-%d %H:%M:%S}"
                 )
 
-
-# 📈 Événement : nouveau prix reçu
-@dataclass
-class PriceUpdated(Event):
-    price: Price
-
 # 🪟 Événement : carnet d’ordre mis à jour
 @dataclass
 class OrderBookUpdated(Event):

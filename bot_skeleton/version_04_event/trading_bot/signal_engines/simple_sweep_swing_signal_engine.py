@@ -1,12 +1,15 @@
-from datetime import datetime
+from datetime import datetime, timezone
+
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, CandleClose, PriceUpdated
+from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, CandleClose, Price
 
 
 class SimpleSweepSwingSignalEngine:
     """
     Stratégie Sweep Swing compatible avec IndicatorSimpleSwingDetector :
     """
+    logger = Logger.get("SimpleSweepSwingSignalEngine")
 
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
@@ -22,11 +25,7 @@ class SimpleSweepSwingSignalEngine:
         # Abonnements
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
-        self.event_bus.subscribe(PriceUpdated, self.on_price_update)
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [StrategySweepSwingEngine] Initisé") 
-
-    async def on_price_update(self, event: PriceUpdated):
-        self.entry_price = event.price
+        self.logger.info("[StrategySweepSwingEngine] Initisé") 
 
     async def on_indicator_update(self, event: IndicatorUpdated):
         """Récupère les swings forts émis par l'indicateur. IndicatorSimpleSwingDetector"""
@@ -95,11 +94,19 @@ class SimpleSweepSwingSignalEngine:
         #       f"swing  low={self.last_swing_low}"
         # )
 
+        now_ts = datetime.now(timezone.utc)
+        price = Price(
+            symbol=self.candle.symbol,
+            price=self.candle.close,  # valeur du prix
+            volume=0,            # volume à zéro
+            timestamp=now_ts     # timestamp maintenant
+        )
+
         # Publication du signal
         await self.event_bus.publish(TradeSignalGenerated(
             side=signal,
             confidence=1.0,
-            price=self.entry_price,
+            price=price,
             strategie = self.__class__.__name__,
             strategie_parameters = None,
             strategie_values = {

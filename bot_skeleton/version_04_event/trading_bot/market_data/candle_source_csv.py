@@ -1,9 +1,10 @@
 import pandas as pd
-from typing import List
+from typing import List, override
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from trading_bot.core.events import Candle, CandleHistoryReady, PriceUpdated, Price, CandleClose
+from trading_bot.core.logger import Logger
+from trading_bot.core.events import Candle, CandleHistoryReady, Price, CandleClose
 from trading_bot.market_data.candle_source import CandleSource
 from trading_bot.core.event_bus import EventBus
 
@@ -13,6 +14,7 @@ class CandleSourceCsv(CandleSource):
     Fournit les bougies soit en bloc (warmup),
     soit sous forme de flux simulé (stream).
     """
+    logger = Logger.get("CandleSourceCsv")
 
     REQUIRED_COLS = {"timestamp", "open", "high", "low", "close", "volume"}
 
@@ -41,7 +43,8 @@ class CandleSourceCsv(CandleSource):
             start_time=start_time,
             end_time=end_time
         )
-
+    
+    @override
     async def warmup(self):
         p = self.params
         df = self._read_csv()
@@ -54,7 +57,7 @@ class CandleSourceCsv(CandleSource):
         seconds = int(p["interval"][:-1]) * 60
         candles: List[Candle] = [self._create_candle(row, seconds) for _, row in df.iterrows()]
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [CandleSourceCsv] Snapshot CSV chargé ({len(candles)} bougies)")
+        self.logger.info(f"Snapshot CSV chargé ({len(candles)} bougies)")
 
         await self.event_bus.publish(
             CandleHistoryReady(
@@ -65,6 +68,7 @@ class CandleSourceCsv(CandleSource):
             )
         )
 
+    @override
     async def stream(self):
         p = self.params
         df = self._read_csv()
@@ -79,28 +83,6 @@ class CandleSourceCsv(CandleSource):
 
         for _, row in df.iterrows():
             candle = self._create_candle(row, seconds)
-
-            # Générer la séquence de prix à l'intérieur de la bougie
-            sequence = (
-                [candle.open, candle.low, candle.high, candle.close]
-                if candle.close >= candle.open
-                else [candle.open, candle.high, candle.low, candle.close]
-            )
-
-            # Publier les prix
-            for price_value in sequence:
-                await self.event_bus.publish(
-                    PriceUpdated(
-                        Price(
-                            symbol=p["symbol"],
-                            price=price_value,
-                            volume=candle.volume,
-                            timestamp=candle.end_time,
-                        )
-                    )
-                )
-
-            # Publier la fermeture de la bougie
             await self.event_bus.publish(CandleClose(symbol=p["symbol"], candle=candle))
 
     def _dump_candles(self, candles):

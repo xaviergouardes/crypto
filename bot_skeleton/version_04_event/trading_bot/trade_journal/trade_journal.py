@@ -2,11 +2,13 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo 
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose, StopBot
 
 class TradeJournal:
     """Journalise tous les trades fermés et calcule le P&L total."""
+    logger = Logger.get("TradeJournal")
 
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
@@ -75,17 +77,14 @@ class TradeJournal:
         open_time_paris = trade_record["open_timestamp"].astimezone(paris_tz)
         close_time_paris = trade_record["close_timestamp"].astimezone(paris_tz)
 
-        print(
-            f"{datetime.now(tz=paris_tz).strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal] [{color}] "
+        self.logger.info(
+            f"[{color}] "
             f"Trade {trade_record['side'].ljust(4)} [{open_time_paris.strftime('%Y-%m-%d %H:%M:%S')} / "
             f"{close_time_paris.strftime('%Y-%m-%d %H:%M:%S')}] : "
             f"Qty = {trade_record["size"]} | "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}"
         )
-        print(
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal]: Summary"
-            f" {self.summary()} "
-        )
+        self.logger.info(f"Summary {self.summary()} ")
                         
     async def on_stop_bot(self, event: StopBot):
         print(

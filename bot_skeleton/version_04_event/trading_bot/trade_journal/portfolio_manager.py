@@ -1,11 +1,13 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo 
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose, StopBot, NewSoldes
 
 class PortfolioManager:
     """Journalise tous les trades fermés et calcule le P&L total, ainsi que le solde max et min."""
+    logger = Logger.get("PortfolioManager")
 
     def __init__(self, event_bus: EventBus, starting_usdc: float = 1000):
         self.event_bus = event_bus
@@ -19,8 +21,7 @@ class PortfolioManager:
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
         self.event_bus.subscribe(StopBot, self.on_stop_bot)
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} "
-              f"[PortfolioManager] Initialisé | USDC={self.usdc_balance:.2f} "
+        self.logger.info(f"Initialisé | USDC={self.usdc_balance:.2f} "
               f"(max={self.max_balance:.2f}, min={self.min_balance:.2f})")
 
     async def on_trade_close(self, event: TradeClose) -> None:
@@ -50,8 +51,7 @@ class PortfolioManager:
             self.min_balance = self.usdc_balance
 
         # Log clair
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [PortfolioManager] "
-              f"Solde={self.usdc_balance:.2f} | "
+        self.logger.info(f"Solde={self.usdc_balance:.2f} | "
               f"Max={self.max_balance:.2f} | Min={self.min_balance:.2f}")
 
         # Publication de l'état du portefeuille
@@ -61,7 +61,6 @@ class PortfolioManager:
         ))
 
     async def on_stop_bot(self, event: StopBot):
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [PortfolioManager] "
-              f"Soldes finaux | USDC={self.usdc_balance:.2f} | "
+        self.logger.info(f"Soldes finaux | USDC={self.usdc_balance:.2f} | "
               f"Max={self.max_balance:.2f} | Min={self.min_balance:.2f}")
 

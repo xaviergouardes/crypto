@@ -4,6 +4,7 @@ from datetime import datetime
 import numpy as np
 import json
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
 
@@ -13,6 +14,7 @@ class IndicatorSimpleSwingDetector:
     Détecte les swings highs/lows sur une fenêtre historique de N bougies.
     Conserve le max swing high et le min swing low dans cette fenêtre.
     """
+    logger = Logger.get("IndicatorSimpleSwingDetector")
 
     def __init__(self, event_bus: EventBus, swing_side: int = 2, swing_window: int = 21):
         self.event_bus = event_bus
@@ -29,15 +31,14 @@ class IndicatorSimpleSwingDetector:
         event_bus.subscribe(CandleHistoryReady, self.on_history_ready)
         event_bus.subscribe(CandleClose, self.on_candle_close)
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] "
-              f"init swing_side={self.swing_side} swing_window={self.swing_window}")
+        self.logger.info(f"init swing_side={self.swing_side} swing_window={self.swing_window}")
 
 
     # =====================================================
     # Initialisation avec l'historique
     # =====================================================
     async def on_history_ready(self, event: CandleHistoryReady):
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] Initialisation ...")
+        self.logger.info("Initialisation ...")
         
         if not event.candles:
             return
@@ -51,7 +52,7 @@ class IndicatorSimpleSwingDetector:
         
         await self._update_and_publish()
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] Initialisation terminée ({self.swing_window})")
+        self.logger.info(f"Initialisation terminée ({self.swing_window})")
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] Première bougie: {self.candles[0]} ")
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] Dernière bougie: {self.candles[-1]}")
 

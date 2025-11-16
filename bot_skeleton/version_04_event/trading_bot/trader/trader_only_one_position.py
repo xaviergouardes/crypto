@@ -1,16 +1,18 @@
 # trading_bot/trader/trader.py
 from datetime import timedelta, datetime
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
+from trading_bot.core.events import TradeApproved, TradeClose, CandleClose
 
 class TraderOnlyOnePosition:
     """Exécute un seul trade à la fois avec TP/SL et envoie un événement TradeClose."""
+    logger = Logger.get("TraderOnlyOnePosition")
 
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
         self.event_bus.subscribe(TradeApproved, self.on_trade_approved)
-        self.event_bus.subscribe(PriceUpdated, self.on_price)
+        self.event_bus.subscribe(CandleClose, self.on_candle_close)
 
         self.active_trade = None  # ✅ Une seule position à la fois
         self.last_close_timestamp = None
@@ -38,55 +40,45 @@ class TraderOnlyOnePosition:
             "open_timestamp": event.price.timestamp,
             "close_timestamp": None
         }
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] ✅ Nouvelle position ouverte : {self.active_trade}"
-        #       f"TradeApproved={event}"
-        #       )
+        self.logger.info(f"✅ Nouvelle position ouverte : {self.active_trade}"
+              f"TradeApproved={event}"
+              )
 
-    async def on_price(self, event: PriceUpdated):
-        if self.active_trade is None:
-            return  # Aucun trade en cours
+    async def on_candle_close(self, event: CandleClose):
+        """Vérifie si le trade actif atteint le TP ou SL à chaque bougie close (high/low inclus)."""
+        if not self.active_trade:
+            return
 
         trade = self.active_trade
-        price = event.price.price
-        closed = False
+        side = trade["side"]
+
+        # Vérifie si TP ou SL a été touché pendant la bougie
         target = None
-
-        if trade["side"] == "BUY":
-            if price >= trade["tp"]:
+        if side == "BUY":
+            if event.candle.high >= trade["tp"]:
                 target = "TP"
-                closed = True
-                # print(f"[Trader] ✅ TP atteint ! Clôture BUY à {price:.2f}")
-            elif price <= trade["sl"]:
+            elif event.candle.low <= trade["sl"]:
                 target = "SL"
-                closed = True
-                # print(f"[Trader] 🛑 SL atteint ! Clôture BUY à {price:.2f}")
-
-        elif trade["side"] == "SELL":
-            if price <= trade["tp"]:
+        elif side == "SELL":
+            if event.candle.low <= trade["tp"]:
                 target = "TP"
-                closed = True
-                # print(f"[Trader] ✅ TP atteint ! Clôture SELL à {price:.2f}")
-            elif price >= trade["sl"]:
+            elif event.candle.high >= trade["sl"]:
                 target = "SL"
-                closed = True
-                # print(f"[Trader] 🛑 SL atteint ! Clôture SELL à {price:.2f}")
 
-        # Si le trade est clôturé, on publie l'événement et on réinitialise l'état
-        if closed:
+        if target:
             await self.event_bus.publish(TradeClose(
-                side=trade["side"],
+                side=side,
                 price=trade["entry"],
                 tp=trade["tp"],
                 sl=trade["sl"],
                 size=trade["size"],
                 target=target,
                 open_timestamp=trade["open_timestamp"],
-                close_timestamp=event.price.timestamp
+                close_timestamp=event.candle.end_time
             ))
-            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [Trader] 🛑  Position fermée : {event.price.timestamp}")
 
-            self.active_trade = None  # ✅ prêt pour un nouveau trade
-            self.last_close_timestamp = event.price.timestamp
+            self.active_trade = None
+            self.last_close_timestamp = event.candle.end_time
 
 
 

@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo 
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose, NewSoldes
 
@@ -11,6 +12,7 @@ class TelegramNotifier:
     """
     Envoie une notification Telegram quand un trade se ferme et que le solde a été mis à jour.
     """
+    logger = Logger.get("TelegramNotifier")
 
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
@@ -31,7 +33,7 @@ class TelegramNotifier:
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
         self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
 
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TelegramNotifier] Initialisé  - {self.token}")
+        self.logger.info(f"Initialisé  - {self.token}")
 
     async def on_new_soldes(self, event: NewSoldes):
         """Reçoit la mise à jour du solde."""

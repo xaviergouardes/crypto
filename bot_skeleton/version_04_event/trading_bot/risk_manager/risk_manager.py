@@ -1,6 +1,7 @@
 # trading_bot/risk/risk_manager.py
 from datetime import datetime
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeSignalGenerated, TradeApproved, TradeRejected, NewSoldes
 
@@ -10,7 +11,8 @@ class MissingPriceError(Exception):
 
 class RiskManager:
     """Valide ou rejette les signaux de trading et calcule TP/SL."""
-
+    logger = Logger.get("RiskManager")
+    
     def __init__(self, event_bus: EventBus, tp_percent: float = 1.0, sl_percent: float = 0.5, solde_disponible: float = None):
         self.event_bus = event_bus
 
@@ -22,7 +24,7 @@ class RiskManager:
         # S'abonner aux signaux de la stratégie
         self.event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal)
         self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RiskManager] Initialisation terminée, riskmanager opérationnel. tp_percent={self.tp_percent} / sl_percent={self.sl_percent}")
+        self.logger.info(f"Initialisation terminée, riskmanager opérationnel. tp_percent={self.tp_percent} / sl_percent={self.sl_percent}")
 
     async def on_new_soldes(self, event: NewSoldes):
         self.solde_disponible = event.usdc
@@ -34,7 +36,7 @@ class RiskManager:
 
         if self.max_position_size <= 0:
             await self.event_bus.publish(TradeRejected(reason="Position size non autorisée"))
-            print("[RiskManager] Trade rejeté : position size non autorisée")
+            self.logger.error("[RiskManager] Trade rejeté : position size non autorisée")
             return
 
         entry_price = event.price.price

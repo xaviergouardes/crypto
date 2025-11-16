@@ -2,12 +2,19 @@
 import asyncio
 from trading_bot.core.event_bus import EventBus
 
+from trading_bot.core.logger import Logger
 from trading_bot.market_data.candle_source_csv import CandleSourceCsv
 from trading_bot.market_data.candle_source_binance import CandleSourceBinance
 
 from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSystemTrading
 
+import sys
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 class TradingBot:
+
+    logger = Logger.get("TradingBot")
 
     def __init__(self, params, mode):
 
@@ -71,7 +78,21 @@ if __name__ == "__main__":
     #     "sl_pct": 0.05
     # }
 
+    # params = {
+    #     "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+    #     "symbol": "ethusdc",
+    #     "interval": "1m",
+    #     "warmup_count": 21,
+    #     "initial_capital": 1000,
+    #     "ema_fast": 7,
+    #     "ema_slow": 21,
+    #     "swing_window": 21,
+    #     "swing_side": 2,
+    #     "tp_pct": 1.6,
+    #     "sl_pct": 1
+    # }
+
     # bot = TradingBot(params, "realtime")
-    # bot.run()
+    # asyncio.run(bot.run())
 
     print("\n=== ✅ Bot terminé ===\n")
