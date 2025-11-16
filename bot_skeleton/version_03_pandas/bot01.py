@@ -1,82 +1,58 @@
-import pandas as pd
 
-from trading_bot.data_market.candel_snapshot_csv import CandelSnapshotCsv
+import argparse
+import yaml
+import sys
 
-from trading_bot.indicator.ema import Ema
-from trading_bot.indicator.swing_detector import SwingDetector
-from trading_bot.indicator.sweep_detector import SweepDetector
+# from trading_bot.systems.sweep_system import SweepSystem
+from trading_bot.systems.alea_system import AleaSystem
 
-from trading_bot.strategie.sweep import SweepStrategy
+from trading_bot.engine.backtest_engine import BacktestEngine
+from trading_bot.engine.realtime_engine import RealTimeEngine
 
-from trading_bot.filter.ema_trend_filter import EmaTrendFilter
-from trading_bot.filter.premium_discount_filter import PremiumDiscountFilter
-from trading_bot.filter.wick_filter import WickFilter
+class TradingBot:
+    def __init__(self, params, mode):
+        self.params = params
+        # self.system = SweepSystem(params)
+        self.system = AleaSystem(params)
 
-from trading_bot.risk_manager.risk_manager import RiskManager
+        if mode == "backtest":
+            self.engine = BacktestEngine(self.system, path=params["backtest"]["path"])
+        else:
+            self.engine = RealTimeEngine(self.system, self.params)
 
-from trading_bot.trader.trader_only_one_position import OnlyOnePositionTrader
+    def run(self):
+        self.engine.run()
 
-from trading_bot.journal.portefolio import Portfolio
-from trading_bot.journal.statistiques import Statistiques
 
 if __name__ == "__main__":
-    path = "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250901_20251104.csv"
 
-    data = CandelSnapshotCsv(path)
-    df = data.load()
+    # Lancer le bot en mode backtest
+    # params = {
+    #     "backtest": {
+    #         "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv"
+    #     },
+    #     "initial_capital": 1000,
+    #     "ema_fast": 7,
+    #     "ema_slow": 21,
+    #     "swing_window": 21,
+    #     "swing_side": 2,
+    #     "tp_pct": 1.6,
+    #     "sl_pct": 1
+    # }
 
-    ema_computer = Ema(df)
-    df = ema_computer.add_ema(21)
-    df = ema_computer.add_ema(7)
+    # bot = TradingBot(params, "backtest")
+    # bot.run()
 
-    swings_detector = SwingDetector(df, window=100, side=2)
-    df = swings_detector.detect()
+    params = {
+        "symbol": "ethusdc",
+        "interval": "1m",
+        "warmup_count": 3,
+        "initial_capital": 1000,
+        "tp_pct": 0.1,
+        "sl_pct": 0.05
+    }
 
-    sweep_detector = SweepDetector(df)
-    df = sweep_detector.detect()
+    bot = TradingBot(params, "realtime")
+    bot.run()
 
-    sweep_strategy = SweepStrategy(df)
-    df = sweep_strategy.generate_signals()
-
-    # ema_trend_filter = EmaTrendFilter(df, ema_col="ema_7")
-    # df = ema_trend_filter.apply_filter()
-
-    # premium_discount_filter = PremiumDiscountFilter(df, window=100)
-    # df = premium_discount_filter.apply_filter()
-
-    # wick_filter = WickFilter(df)
-    # df = wick_filter.apply_filter()
-
-    risk_manager = RiskManager(df, tp_pct=1.0, sl_pct=0.6)
-    df = risk_manager.calculate_risk()
-
-    trader = OnlyOnePositionTrader(df)
-    df = trader.run_trades()
-
-    portefolio = Portfolio(df, initial_capital=1000)
-    df = portefolio.run_portfolio()
-
-    stats = Statistiques(df, initial_capital=1000)
-    print(stats.summary())
-
-
-    # print(list(df.columns)) # affiche une vraie liste Python
-    pd.set_option('display.max_rows', None)
-
-    # sweeps = df[(df['sweep_high'] == True) | (df['sweep_low'] == True)]
-    filtered_df = df[df['signal'].notna()]
-    print(filtered_df[['timestamp_paris', 'open', 'high', 'low', 'close', 'swing_high', 'swing_low', 'sweep_high', 'sweep_low', 'signal']])
-    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct']])
-
-
-    # filtered_df = df[df['position'].isin(["CLOSE_BUY_TP", "CLOSE_SELL_TP", "CLOSE_BUY_SL", "CLOSE_SELL_SL"]) ]
-    # filtered_df = df[df['trade.id'].isin((1,2,3))]
-    # filtered_df = df[df['trade.id'] == 22]
-    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'position', 'capital', 'trade_pnl', 'trade.id']])
-          
-
-    # filtered_df = df[df['original_signal'].notna() & df['signal'].isna()]
-    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'original_signal', 'entry_price', 'zone']])
-    # print(filtered_df[['timestamp_paris', 'close', 'signal', 'entry_price', 'tp', 'sl', 'tp_pct', 'sl_pct', 'position', 'trade.id']])
-
-    print(stats.summary())
+    print("\n=== ✅ Bot terminé ===\n")

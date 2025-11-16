@@ -62,7 +62,7 @@ class CandleSourceBinance(CandleSource):
         logger.info(f"✅ {len(df)} bougies récupérées pour le warmup (sans recouvrement)")
         return df
 
-    async def stream_candles(self, on_new_candle):
+    async def stream(self, on_new_candle):
         """
         Flux temps réel : déclenche `on_new_candle` pour chaque bougie clôturée.
         Gère les erreurs et tente une reconnexion automatique.
@@ -86,10 +86,10 @@ class CandleSourceBinance(CandleSource):
                                 "close": float(k["c"]),
                                 "volume": float(k["v"])
                             }
-                            await on_new_candle(candle)
+                            on_new_candle(candle)
             except websockets.ConnectionClosed as e:
                 logger.warning(f"Websocket fermé : {e}. Reconnexion dans {self._reconnect_delay}s...")
                 await asyncio.sleep(self._reconnect_delay)
-            except Exception as e:
-                logger.error(f"Erreur websocket inattendue : {e}. Reconnexion dans {self._reconnect_delay}s...")
-                await asyncio.sleep(self._reconnect_delay)
+            # except Exception as e:
+            #     logger.error(f"Erreur websocket inattendue : {e}. Reconnexion dans {self._reconnect_delay}s...")
+            #     await asyncio.sleep(self._reconnect_delay)

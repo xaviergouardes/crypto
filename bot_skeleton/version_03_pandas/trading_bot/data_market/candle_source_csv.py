@@ -40,5 +40,5 @@ class CandleSourceCsv(CandleSource):
 
         return df
 
-    async def stream_candles(self, on_new_candle):
+    async def stream(self, on_new_candle):
         raise RuntimeError("stream_candles ne doit pas être utilisé en mode backtest !")

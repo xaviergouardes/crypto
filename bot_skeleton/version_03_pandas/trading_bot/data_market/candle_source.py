@@ -9,6 +9,6 @@ class CandleSource(ABC):
         pass
 
     @abstractmethod
-    async def stream_candles(self, on_new_candle):
+    async def stream(self, on_new_candle):
         """Lance le flux et appelle `on_new_candle(candle_dict)` à chaque bougie clôturée."""
         pass
