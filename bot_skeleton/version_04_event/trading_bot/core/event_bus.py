@@ -23,3 +23,8 @@ class EventBus:
         event_type = type(event)
         if event_type in self._subscribers:
             await asyncio.gather(*[cb(event) for cb in self._subscribers[event_type]])
+
+    def unsubscribe(self, event_type, callback):
+        if event_type in self._subscribers:
+            if callback in self._subscribers[event_type]:
+                self._subscribers[event_type].remove(callback)

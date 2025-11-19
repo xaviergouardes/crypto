@@ -40,7 +40,7 @@ class TraderOnlyOnePosition:
             "open_timestamp": event.price.timestamp,
             "close_timestamp": None
         }
-        self.logger.info(f"✅ Nouvelle position ouverte : {self.active_trade}"
+        self.logger.debug(f"✅ Nouvelle position ouverte : {self.active_trade}"
               f"TradeApproved={event}"
               )
 

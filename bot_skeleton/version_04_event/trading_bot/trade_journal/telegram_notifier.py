@@ -19,6 +19,7 @@ class TelegramNotifier:
 
         self.token = "8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA"
         self.chat_id = "6070936106"
+        self._subscribed = False
 
         # Pour synchroniser les événements
         self.message_data = {
@@ -28,10 +29,6 @@ class TelegramNotifier:
             "side": None,
             "pnl": None
         }
-
-        # On s’abonne aux deux événements
-        self.event_bus.subscribe(TradeClose, self.on_trade_close)
-        self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
 
         self.logger.info(f"Initialisé  - {self.token}")
 
@@ -84,11 +81,29 @@ class TelegramNotifier:
         })
 
     def send_message(self, text: str):
-        """Envoie le message Telegram via curl."""
+        """Envoie le message Telegram via curl sans afficher la sortie."""
         cmd = [
             "curl", "-s", "-X", "POST",
             f"https://api.telegram.org/bot{self.token}/sendMessage",
             "-d", f"chat_id={self.chat_id}",
             "-d", f"text={text}"
         ]
-        subprocess.run(cmd, check=False)
+        # -s (silent) est déjà là mais on peut aussi capturer stdout/stderr
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+        self.logger.debug(f"Telegram response: {result.stdout}")
+
+    def start(self):
+        """Active les écouteurs."""
+        if not self._subscribed:
+            self.event_bus.subscribe(TradeClose, self.on_trade_close)
+            self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
+            self._subscribed = True
+            self.logger.info("TelegramNotifier started")
+
+    def stop(self):
+        """Désactive les écouteurs."""
+        if self._subscribed:
+            self.event_bus.unsubscribe(TradeClose, self.on_trade_close)
+            self.event_bus.unsubscribe(NewSoldes, self.on_new_soldes)
+            self._subscribed = False
+            self.logger.info("TelegramNotifier stopped")

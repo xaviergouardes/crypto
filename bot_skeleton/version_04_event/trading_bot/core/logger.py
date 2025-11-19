@@ -1,16 +1,29 @@
 import logging
 
 class Logger:
-    """
-    Wrapper simple autour de logging pour masquer son utilisation.
-    Si tu veux changer d’implémentation (ex: envoyer vers Elastic, fichiers, stdout, etc.),
-    tu n’as qu’à modifier cette classe.
-    """
     _loggers = {}
+    _default_level = logging.INFO
+    _custom_levels = {}
 
     @classmethod
-    def get(cls, name: str = "App"):
-        """Retourne un logger déjà créé ou en crée un nouveau."""
+    def set_default_level(cls, level):
+        cls._default_level = level
+        # Forcer tous les loggers existants
+        for logger in cls._loggers.values():
+            logger.setLevel(level)
+            logger.propagate = False
+        # Forcer le root logger
+        logging.getLogger().setLevel(level)
+
+    @classmethod
+    def set_level(cls, name: str, level):
+        cls._custom_levels[name] = level
+        if name in cls._loggers:
+            cls._loggers[name].setLevel(level)
+            cls._loggers[name].propagate = False
+
+    @classmethod
+    def get(cls, name="App"):
         if name not in cls._loggers:
             cls._loggers[name] = cls._create_logger(name)
         return cls._loggers[name]
@@ -18,31 +31,24 @@ class Logger:
     @classmethod
     def _create_logger(cls, name):
         logger = logging.getLogger(name)
-
-        if not logger.handlers:  # éviter les doublons en mode multi-import
+        if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
                 '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-            logger.setLevel(logging.INFO)
-
+        # Niveau spécifique ou global
+        level = cls._custom_levels.get(name, cls._default_level)
+        logger.setLevel(level)
+        logger.propagate = False  # n’hérite pas du parent
         return logger
 
-    # --- Méthodes simplifiées ---
     @classmethod
-    def info(cls, msg: str, name="App"):
-        cls.get(name).info(msg)
-
+    def info(cls, msg, name="App"): cls.get(name).info(msg)
     @classmethod
-    def warning(cls, msg: str, name="App"):
-        cls.get(name).warning(msg)
-
+    def warning(cls, msg, name="App"): cls.get(name).warning(msg)
     @classmethod
-    def error(cls, msg: str, name="App"):
-        cls.get(name).error(msg)
-
+    def error(cls, msg, name="App"): cls.get(name).error(msg)
     @classmethod
-    def debug(cls, msg: str, name="App"):
-        cls.get(name).debug(msg)
+    def debug(cls, msg, name="App"): cls.get(name).debug(msg)

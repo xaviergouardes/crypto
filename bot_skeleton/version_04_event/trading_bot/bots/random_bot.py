@@ -3,45 +3,28 @@ import asyncio
 from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
-from trading_bot.market_data.candle_source_csv import CandleSourceCsv
-from trading_bot.market_data.candle_source_binance import CandleSourceBinance
 
+from trading_bot.engine.realtime_engine import RealTimeEngine
+from trading_bot.engine.backtest_engine import BacktestEngine
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 
-class TradingBot:
-    logger = Logger.get("TradingBot")
+class RandomBot:
+    logger = Logger.get("RandomBot")
 
     def __init__(self, params, mode):
 
         self.event_bus = EventBus()
         
         self.params = params
-        self.system_trading = RandomSystemTrading(self.event_bus, params)
+        self.system_trading = RandomSystemTrading(self.event_bus, params)   
 
-        # Priorité au warmup_count fourni dans les params
-        warmup_count = params.get("warmup_count", None)
-
-        if warmup_count is None:
-            # Warmup = max de tous les paramètres numériques (sauf initial_capital)
-            excluded = {"initial_capital", "swing_side", "tp_pct", "sl_pct"}  # si tu veux en exclure d’autres
-            numeric_values = [v for k, v in self.params.items() if k not in excluded and isinstance(v,(int,float))]
-            if numeric_values:
-                warmup_count =  max(numeric_values)
-            else:
-                warmup_count =  0
-            self.params["warmup_count"] = warmup_count
-
-        # Injection du bon CancdleSource
         if mode == "backtest":
-            self.candle_source = CandleSourceCsv(self.event_bus, params)  
-
+            self.engine = BacktestEngine(self.event_bus, self.system_trading, path=params["backtest"]["path"])
         else:
-            self.candle_source = CandleSourceBinance(self.event_bus, params) 
+            self.engine = RealTimeEngine(self.event_bus, self.system_trading, self.params)
 
-    async def run(self):
-        await self.candle_source.warmup()
-        await self.candle_source.stream()
-        print("Bot end !")
+    def run(self):
+        asyncio.run(self.engine.run())
 
 
 if __name__ == "__main__":
@@ -61,7 +44,7 @@ if __name__ == "__main__":
     #     "sl_pct": 1
     # }
 
-    # bot = TradingBot(params, "backtest")
+    # bot = RandomBot(params, "backtest")
     # asyncio.run(bot.run())
 
     # params = {
@@ -83,7 +66,7 @@ if __name__ == "__main__":
         "sl_pct": 0.025
     }
 
-    bot = TradingBot(params, "realtime")
-    asyncio.run(bot.run())
+    bot = RandomBot(params, "realtime")
+    bot.run()
 
     print("\n=== ✅ Bot terminé ===\n")

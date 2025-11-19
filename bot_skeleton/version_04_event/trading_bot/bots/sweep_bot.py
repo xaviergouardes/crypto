@@ -1,53 +1,61 @@
 
 import asyncio
+import logging
+import pandas as pd
+from itertools import product
+
 from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
-from trading_bot.market_data.candle_source_csv import CandleSourceCsv
-from trading_bot.market_data.candle_source_binance import CandleSourceBinance
+
+from trading_bot.engine.realtime_engine import RealTimeEngine
+from trading_bot.engine.backtest_engine import BacktestEngine
 
 from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSystemTrading
 
-import sys
-sys.stdout.reconfigure(line_buffering=True)
-sys.stderr.reconfigure(line_buffering=True)
+from trading_bot.trainer.trainer import BotTrainer
 
-class TradingBot:
+# Niveau global : silence tout sauf WARNING et plus
+Logger.set_default_level(logging.INFO)
 
-    logger = Logger.get("TradingBot")
+# Niveau spécifique pour SweepBot
+# Logger.set_level("PortfolioManager", logging.DEBUG)
+
+class SweepBot:
+
+    logger = Logger.get("SweepBot")
 
     def __init__(self, params, mode):
 
         self.event_bus = EventBus()
         
         self.params = params
-        self.system_trading = SimpleSweepSystemTrading(self.event_bus, params)
+        self.system_trading = SimpleSweepSystemTrading(self.event_bus, params)   
 
-        # Priorité au warmup_count fourni dans les params
-        warmup_count = params.get("warmup_count", None)
-
-        if warmup_count is None:
-            # Warmup = max de tous les paramètres numériques (sauf initial_capital)
-            excluded = {"initial_capital", "swing_side", "tp_pct", "sl_pct"}  # si tu veux en exclure d’autres
-            numeric_values = [v for k, v in self.params.items() if k not in excluded and isinstance(v,(int,float))]
-            if numeric_values:
-                warmup_count =  max(numeric_values)
-            else:
-                warmup_count =  0
-            self.params["warmup_count"] = warmup_count
-
-        # Injection du bon CancdleSource
         if mode == "backtest":
-            self.candle_source = CandleSourceCsv(self.event_bus, params)  
-
+            self.engine = BacktestEngine(self.event_bus, self.system_trading, self.params)
         else:
-            self.candle_source = CandleSourceBinance(self.event_bus, params) 
+            self.engine = RealTimeEngine(self.event_bus, self.system_trading, self.params)
 
     async def run(self):
-        await self.candle_source.warmup()
-        await self.candle_source.stream()
-        print("Bot end !")
+        stats = await self.engine.run()
+        self.logger.info(f"Statistiques : {stats}")
+        return stats
 
+    async def train(self):
+
+        param_grid = {
+            "swing_window": [21, 50],
+            # "tp_pct": [1.0, 1.5],
+            # "sl_pct": [0.5, 1]
+        }
+        self.params["warmup_count"] = max(param_grid["swing_window"])
+
+        bot_to_train = SweepBot(self.params, "backtest")
+        trainer = BotTrainer(bot_to_train, self.params)
+        best_params = await trainer.run(param_grid)
+
+        self.logger.info(f"Best param : {best_params}")
 
 if __name__ == "__main__":
 
@@ -66,8 +74,8 @@ if __name__ == "__main__":
         "sl_pct": 1
     }
 
-    bot = TradingBot(params, "backtest")
-    asyncio.run(bot.run())
+    bot = SweepBot(params, "backtest")
+    asyncio.run(bot.train())
 
     # params = {
     #     "symbol": "ethusdc",

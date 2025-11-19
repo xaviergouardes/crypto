@@ -19,7 +19,6 @@ class PortfolioManager:
 
         # Souscriptions
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
-        self.event_bus.subscribe(StopBot, self.on_stop_bot)
 
         self.logger.info(f"Initialisé | USDC={self.usdc_balance:.2f} "
               f"(max={self.max_balance:.2f}, min={self.min_balance:.2f})")
@@ -51,7 +50,7 @@ class PortfolioManager:
             self.min_balance = self.usdc_balance
 
         # Log clair
-        self.logger.info(f"Solde={self.usdc_balance:.2f} | "
+        self.logger.debug(f"Solde={self.usdc_balance:.2f} | "
               f"Max={self.max_balance:.2f} | Min={self.min_balance:.2f}")
 
         # Publication de l'état du portefeuille
@@ -59,8 +58,4 @@ class PortfolioManager:
             usdc=self.usdc_balance,
             eth=0
         ))
-
-    async def on_stop_bot(self, event: StopBot):
-        self.logger.info(f"Soldes finaux | USDC={self.usdc_balance:.2f} | "
-              f"Max={self.max_balance:.2f} | Min={self.min_balance:.2f}")
 

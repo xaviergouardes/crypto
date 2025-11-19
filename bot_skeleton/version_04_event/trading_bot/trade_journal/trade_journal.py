@@ -18,8 +18,7 @@ class TradeJournal:
         self.frais_par_transaction = 0.01
 
         self.event_bus.subscribe(TradeClose, self.on_trade_close)
-        self.event_bus.subscribe(StopBot, self.on_stop_bot)
-
+        
     async def on_trade_close(self, event: TradeClose):
         """
         Traite la fermeture d'un trade et calcule le PnL en tenant compte de la taille et des frais.
@@ -84,14 +83,8 @@ class TradeJournal:
             f"Qty = {trade_record["size"]} | "
             f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}"
         )
-        self.logger.info(f"Summary {self.summary()} ")
+        self.logger.debug(f"Summary {self.summary()} ")
                         
-    async def on_stop_bot(self, event: StopBot):
-        print(
-            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [TradeJournal]: Summary"
-            f" {self.summary()} "
-        )
-
 
     def summary(self):
         """Retourne un résumé global du journal avec win rate par type de trade."""
