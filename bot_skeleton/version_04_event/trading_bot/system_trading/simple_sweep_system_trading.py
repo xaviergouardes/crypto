@@ -30,6 +30,7 @@ class SimpleSweepSystemTrading(System):
         self.event_bus =  event_bus
         self.params = params
 
+
     @override
     def start_piepline(self):
         p = self.params

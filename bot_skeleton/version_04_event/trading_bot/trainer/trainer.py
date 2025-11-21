@@ -6,8 +6,9 @@ import pandas as pd
 
 class BotTrainer:
 
-    def __init__(self, bot, params):
-        self.bot = bot
+    def __init__(self, bot_class, params):
+        self.bot = bot_class
+        self.params = params
 
     async def run(self, param_grid):
 
@@ -18,15 +19,18 @@ class BotTrainer:
         # Fusionner chaque combinaison avec les paramètres fixes
         full_param_sets = []
         for combo in param_combinations:
-            full_params = self.bot.params.copy()  # on part des paramètres fixes
+            full_params = self.params.copy()  # on part des paramètres fixes
             full_params.update(combo)          # on remplace avec les valeurs variables
             full_param_sets.append(full_params)
 
         results = []
         for params in full_param_sets:
-            await self.bot.run()
 
-            journal = self.bot.system_trading.trader_journal.trades
+            bot = self.bot(params, "backtest")
+            bot.system_trading.compute_warmup_count()
+            await bot.run()
+
+            journal = bot.system_trading.trader_journal.trades
             df_journal = pd.DataFrame(journal)
             
             # Ajouter les paramètres utilisés

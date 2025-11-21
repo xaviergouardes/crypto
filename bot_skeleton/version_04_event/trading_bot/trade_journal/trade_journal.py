@@ -76,7 +76,7 @@ class TradeJournal:
         open_time_paris = trade_record["open_timestamp"].astimezone(paris_tz)
         close_time_paris = trade_record["close_timestamp"].astimezone(paris_tz)
 
-        self.logger.info(
+        self.logger.debug(
             f"[{color}] "
             f"Trade {trade_record['side'].ljust(4)} [{open_time_paris.strftime('%Y-%m-%d %H:%M:%S')} / "
             f"{close_time_paris.strftime('%Y-%m-%d %H:%M:%S')}] : "

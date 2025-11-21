@@ -19,7 +19,8 @@ from trading_bot.trainer.trainer import BotTrainer
 Logger.set_default_level(logging.INFO)
 
 # Niveau spécifique pour SweepBot
-# Logger.set_level("PortfolioManager", logging.DEBUG)
+Logger.set_level("PortfolioManager", logging.DEBUG)
+Logger.set_level("TradeJournal", logging.DEBUG)
 
 class SweepBot:
 
@@ -45,17 +46,16 @@ class SweepBot:
     async def train(self):
 
         param_grid = {
-            "swing_window": [21, 50],
-            # "tp_pct": [1.0, 1.5],
-            # "sl_pct": [0.5, 1]
+            "swing_window": [21, 50, 75, 100, 150 , 200],
+            "tp_pct": [1.0, 1.5, 2, 2.5, 3, 3.5],
+            "sl_pct": [0.5, 1, 1.5, 2, 2.5]
         }
         self.params["warmup_count"] = max(param_grid["swing_window"])
 
-        bot_to_train = SweepBot(self.params, "backtest")
-        trainer = BotTrainer(bot_to_train, self.params)
+        trainer = BotTrainer(SweepBot, self.params)
         best_params = await trainer.run(param_grid)
 
-        self.logger.info(f"Best param : {best_params}")
+        self.logger.info(f"Best param : \n {best_params}")
 
 if __name__ == "__main__":
 
@@ -63,19 +63,20 @@ if __name__ == "__main__":
     params = {
         "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
         "symbol": "ethusdc",
-        "interval": "1m",
-        "warmup_count": 21,
+        "interval": "5m",
+        # "warmup_count": 200,
         "initial_capital": 1000,
         "ema_fast": 7,
         "ema_slow": 21,
-        "swing_window": 21,
+        "swing_window": 50,
         "swing_side": 2,
-        "tp_pct": 1.6,
-        "sl_pct": 1
+        "tp_pct": 1,
+        "sl_pct": 2.5
     }
 
     bot = SweepBot(params, "backtest")
-    asyncio.run(bot.train())
+    # asyncio.run(bot.train())
+    asyncio.run(bot.run())
 
     # params = {
     #     "symbol": "ethusdc",

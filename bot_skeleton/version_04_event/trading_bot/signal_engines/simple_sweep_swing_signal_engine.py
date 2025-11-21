@@ -98,8 +98,8 @@ class SimpleSweepSwingSignalEngine:
         price = Price(
             symbol=self.candle.symbol,
             price=self.candle.close,  # valeur du prix
-            volume=0,            # volume à zéro
-            timestamp=now_ts     # timestamp maintenant
+            volume=self.candle.volume,            # volume à zéro
+            timestamp=self.candle.end_time     # timestamp maintenant
         )
 
         # Publication du signal

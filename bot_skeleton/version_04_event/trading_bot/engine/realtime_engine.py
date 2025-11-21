@@ -20,19 +20,9 @@ class RealTimeEngine(Engine):
         self._running = None
 
         # Priorité au warmup_count fourni dans les params
-        warmup_count = params.get("warmup_count", None)
+        self.params = self.system.compute_warmup_count()
 
-        if warmup_count is None:
-            # Warmup = max de tous les paramètres numériques (sauf initial_capital)
-            excluded = {"initial_capital", "swing_side", "tp_pct", "sl_pct"}  # si tu veux en exclure d’autres
-            numeric_values = [v for k, v in self.params.items() if k not in excluded and isinstance(v,(int,float))]
-            if numeric_values:
-                warmup_count =  max(numeric_values)
-            else:
-                warmup_count =  0
-            self.params["warmup_count"] = warmup_count
-
-        self.candle_source = CandleSourceBinance(self.event_bus, params) 
+        self.candle_source = CandleSourceBinance(self.event_bus, self.params) 
         self.telegram_notifier = TelegramNotifier(self.event_bus)
 
     @override
