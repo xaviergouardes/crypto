@@ -125,12 +125,24 @@ class BotTrainer:
 if __name__ == "__main__":
     from trading_bot.bots.sweep_bot import SweepBot
 
-    Logger.set_default_level(logging.INFO)
+    # Niveau global : silence tout sauf WARNING et plus
+    Logger.set_default_level(logging.ERROR)
+
+    # Niveau spécifique pour
+    Logger.set_level("BotTrainer", logging.INFO)
+    # Logger.set_level("PortfolioManager", logging.DEBUG)
+    # Logger.set_level("TradeJournal", logging.DEBUG)
+
+    # param_grid = {
+    #     "swing_window": [21, 50, 100, 150, 200],
+    #     "tp_pct": [1.0, 1.5, 2, 2.5],
+    #     "sl_pct": [0.5, 1.0, 1.5, 2]
+    # }
 
     param_grid = {
-        "swing_window": [21, 150],
-        "tp_pct": [1.5],
-        "sl_pct": [1.0]
+        "swing_window": [200],
+        "tp_pct": [2, 2.5],
+        "sl_pct": [0.5, 1.0]
     }
 
     params = {

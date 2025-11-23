@@ -1,5 +1,7 @@
 import asyncio
+import logging
 from trading_bot.bots.sweep_bot import SweepBot
+from trading_bot.core.logger import Logger
 
 async def main():
     params = {
@@ -16,5 +18,13 @@ async def main():
     await bot.run()
 
 if __name__ == "__main__":
+    # Niveau global : silence tout sauf WARNING et plus
+    Logger.set_default_level(logging.ERROR)
+
+    # Niveau spécifique pour
+    # Logger.set_level("BotTrainer", logging.INFO)
+    # Logger.set_level("PortfolioManager", logging.DEBUG)
+    # Logger.set_level("TradeJournal", logging.DEBUG)
+
     asyncio.run(main())
 
