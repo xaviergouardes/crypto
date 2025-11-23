@@ -15,7 +15,6 @@ class BacktestEngine(Engine):
 
         self._running = None
 
-        # # Priorité au warmup_count fourni dans les params
         # Priorité au warmup_count fourni dans les params
         self.params = self.system.compute_warmup_count()
 

@@ -32,6 +32,12 @@ class RandomSystemTrading(System):
         self.params = params
         
     @override
+    def compute_warmup_count(self) -> int:
+        warmup_count = 1 
+        self.params["warmup_count"] = warmup_count
+        return self.params
+    
+    @override
     def start_piepline(self):
         p = self.params
 
