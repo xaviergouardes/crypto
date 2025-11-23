@@ -29,9 +29,9 @@ class RandomSignalEngine:
             signal = "SELL"
 
         # Log clair
-        # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RandomSignalEngine] "
-        #       f"Signal {signal} | candle={candle} "
-        # )
+        self.logger.debug(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [RandomSignalEngine] "
+              f"Signal {signal} | candle={candle} "
+        )
 
         now_ts = datetime.now(timezone.utc)
         price = Price(

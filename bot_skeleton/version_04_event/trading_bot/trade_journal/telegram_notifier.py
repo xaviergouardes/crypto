@@ -19,7 +19,7 @@ class TelegramNotifier:
 
         self.token = "8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA"
         self.chat_id = "6070936106"
-        self._subscribed = False
+        self._running = False
 
         # Pour synchroniser les événements
         self.message_data = {
@@ -94,16 +94,16 @@ class TelegramNotifier:
 
     def start(self):
         """Active les écouteurs."""
-        if not self._subscribed:
+        if not self._running:
             self.event_bus.subscribe(TradeClose, self.on_trade_close)
             self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
-            self._subscribed = True
-            self.logger.info("TelegramNotifier started")
+            self._running = True
+            self.logger.info("Started...")
 
     def stop(self):
         """Désactive les écouteurs."""
-        if self._subscribed:
+        if self._running:
             self.event_bus.unsubscribe(TradeClose, self.on_trade_close)
             self.event_bus.unsubscribe(NewSoldes, self.on_new_soldes)
-            self._subscribed = False
-            self.logger.info("TelegramNotifier stopped")
+            self._running = False
+            self.logger.info("Stopped.")

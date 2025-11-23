@@ -1,5 +1,7 @@
 
 import asyncio
+import logging
+
 from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
@@ -7,6 +9,14 @@ from trading_bot.core.logger import Logger
 from trading_bot.engine.realtime_engine import RealTimeEngine
 from trading_bot.engine.backtest_engine import BacktestEngine
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
+
+# Niveau global : silence tout sauf WARNING et plus
+Logger.set_default_level(logging.DEBUG)
+
+# Niveau spécifique pour
+# Logger.set_level("BotTrainer", logging.INFO)
+# Logger.set_level("PortfolioManager", logging.DEBUG)
+# Logger.set_level("TradeJournal", logging.DEBUG)
 
 class RandomBot:
     logger = Logger.get("RandomBot")
@@ -57,8 +67,7 @@ if __name__ == "__main__":
     # }
 
     params = {
-        "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
-        "symbol": "ethusdc",
+       "symbol": "ethusdc",
         "interval": "1m",
         "warmup_count": 21,
         "initial_capital": 1000,

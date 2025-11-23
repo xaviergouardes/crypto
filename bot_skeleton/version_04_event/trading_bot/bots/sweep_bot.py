@@ -1,12 +1,10 @@
 
 import asyncio
 import logging
-import pandas as pd
-from itertools import product
-
-from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
+
+from trading_bot.core.event_bus import EventBus
 
 from trading_bot.engine.realtime_engine import RealTimeEngine
 from trading_bot.engine.backtest_engine import BacktestEngine
@@ -16,10 +14,10 @@ from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSy
 from trading_bot.trainer.trainer import BotTrainer
 
 # Niveau global : silence tout sauf WARNING et plus
-Logger.set_default_level(logging.INFO)
+Logger.set_default_level(logging.ERROR)
 
 # Niveau spécifique pour
-Logger.set_level("BotTrainer", logging.INFO)
+# Logger.set_level("BotTrainer", logging.INFO)
 # Logger.set_level("PortfolioManager", logging.DEBUG)
 # Logger.set_level("TradeJournal", logging.DEBUG)
 
@@ -38,9 +36,15 @@ class SweepBot:
         else:
             self.engine = RealTimeEngine(self.event_bus, self.system_trading, self.params)
 
-        self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
+        self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée mode={mode}")
 
     async def run(self):
+        stats = await self.engine.run()
+        self.logger.info(f"Statistiques : {stats}")
+        return stats
+    
+    async def backtest(self):
+        self.engine = BacktestEngine(self.event_bus, self.system_trading, self.params)
         stats = await self.engine.run()
         self.logger.info(f"Statistiques : {stats}")
         return stats
