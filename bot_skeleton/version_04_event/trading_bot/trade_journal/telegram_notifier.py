@@ -33,11 +33,15 @@ class TelegramNotifier:
         self.logger.info(f"Initialisé  - {self.token}")
 
     async def on_new_soldes(self, event: NewSoldes):
+        if not self._running: return
+
         """Reçoit la mise à jour du solde."""
         self.message_data["solde"] = event.usdc
         await self.try_send_message()
 
     async def on_trade_close(self, event: TradeClose):
+        if not self._running: return
+
         """Reçoit la clôture du trade."""
         # Calcul du PnL (simplifié)
         if event.target == "TP":
@@ -93,17 +97,7 @@ class TelegramNotifier:
         self.logger.debug(f"Telegram response: {result.stdout}")
 
     def start(self):
-        """Active les écouteurs."""
-        if not self._running:
-            self.event_bus.subscribe(TradeClose, self.on_trade_close)
-            self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
-            self._running = True
-            self.logger.info("Started...")
+        self._running = True
 
     def stop(self):
-        """Désactive les écouteurs."""
-        if self._running:
-            self.event_bus.unsubscribe(TradeClose, self.on_trade_close)
-            self.event_bus.unsubscribe(NewSoldes, self.on_new_soldes)
-            self._running = False
-            self.logger.info("Stopped.")
+        self._running = False

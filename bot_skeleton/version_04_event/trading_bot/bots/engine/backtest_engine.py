@@ -1,39 +1,40 @@
 import pandas as pd
 
 from trading_bot.core.event_bus import EventBus
+from trading_bot.core.logger import Logger
 
 from trading_bot.market_data.candle_source_csv import CandleSourceCsv
-from trading_bot.engine.engine import Engine
+from trading_bot.bots.engine.engine import Engine
 from trading_bot.system_trading.system import System
 
 class BacktestEngine(Engine):
+
+    logger = Logger.get("BacktestEngine")
       
     def __init__(self, event_bus:EventBus, system: System, params: dict):
-        self.event_bus =  event_bus
-        self.params = params
-        self.system = system
+        self._event_bus =  event_bus
+        self._params = params
+        self._system = system
 
         self._running = None
 
-        # Priorité au warmup_count fourni dans les params
-        self.params = self.system.compute_warmup_count()
-
-        self.candle_source = CandleSourceCsv(self.event_bus, params) 
+        self._candle_source = CandleSourceCsv(self._event_bus, self._params) 
 
     async def run(self):
         pass
         self._running = True
         
         # Démarrer le pipeline pour que les composants puissent capturer les events
-        self.system.start_piepline()
+        self._system.start_piepline()
 
         # Lancer la récupéreration des bougie de warnup
-        await self.candle_source.warmup()
+        await self._candle_source.warmup()
 
         # Boucle événementielle -> non bloqunte en backtest
-        await self.candle_source.stream() 
+        await self._candle_source.stream() 
 
-        return self.system.trader_journal.summary()
+        self.logger.debug(f" self._system.trader_journal.summary() {self._system.trader_journal.summary()} ")
+        return self._system.trader_journal.summary()
 
     async def stop(self):
         self._running = False
@@ -42,7 +43,7 @@ class BacktestEngine(Engine):
     async def get_stats(self) -> dict:
         pass
         # # Exemple simple : récupérer le journal des trades
-        trades = self.system.trader_journal.trades
+        trades = self._system.trader_journal.trades
         df = pd.DataFrame(trades)
         return {
             "num_trades": len(df),

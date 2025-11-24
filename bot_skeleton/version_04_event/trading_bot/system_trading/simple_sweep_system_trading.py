@@ -31,12 +31,6 @@ class SimpleSweepSystemTrading(System):
         self.params = params
 
     @override
-    def compute_warmup_count(self) -> dict:
-        warmup_count = self.params["swing_window"]
-        self.params["warmup_count"] = warmup_count
-        return self.params
-
-    @override
     def start_piepline(self):
         p = self.params
         self.indicator_swing_detector = IndicatorSimpleSwingDetector(self.event_bus, swing_side=p["swing_side"], swing_window=p["swing_window"])

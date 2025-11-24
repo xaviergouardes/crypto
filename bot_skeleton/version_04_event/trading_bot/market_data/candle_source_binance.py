@@ -19,6 +19,7 @@ class CandleSourceBinance(CandleSource):
     logger = Logger.get("CandleSourceBinance")
 
     def __init__(self, event_bus: EventBus, params: dict):
+
         self.event_bus = event_bus
         self.params = params
 

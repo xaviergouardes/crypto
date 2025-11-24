@@ -6,8 +6,8 @@ from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
 
-from trading_bot.engine.realtime_engine import RealTimeEngine
-from trading_bot.engine.backtest_engine import BacktestEngine
+from trading_bot.bots.engine.realtime_engine import RealTimeEngine
+from trading_bot.bots.engine.backtest_engine import BacktestEngine
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 
 # Niveau global : silence tout sauf WARNING et plus

@@ -11,9 +11,6 @@ class System(abc.ABC):
         self.event_bus =  event_bus
         self.params = params
 
-    @abc.abstractmethod
-    def compute_warmup_count(self) -> int:
-        pass
 
     @abc.abstractmethod
     def start_piepline(self):
@@ -23,3 +20,9 @@ class System(abc.ABC):
         """
         pass
 
+    def stop(self):
+        """
+        Méthode principale qui démarre l'exécution du mopipeline de traitement du système de trading
+        Doit être implémentée par les classes concrètes.
+        """
+        pass
