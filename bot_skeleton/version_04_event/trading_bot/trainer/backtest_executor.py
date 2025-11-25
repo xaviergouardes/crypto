@@ -34,16 +34,11 @@ if __name__ == "__main__":
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
-    
+
     params = {
-        "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
-        "symbol": "ethusdc",
-        "interval": "5m",
-        "initial_capital": 1000,
-        "swing_window": 200,
-        "swing_side": 2,
+        "swing_window": 21,
         "tp_pct": 2.5,
-        "sl_pct": 0.5
+        "sl_pct": 0.5,
     }
 
     bot = SweepBot()

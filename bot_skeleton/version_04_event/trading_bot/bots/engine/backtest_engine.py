@@ -36,11 +36,11 @@ class BacktestEngine(Engine):
         self.logger.debug(f" self._system.trader_journal.summary() {self._system.trader_journal.summary()} ")
         return self._system.trader_journal.summary()
 
-    async def stop(self):
+    def stop(self):
         self._running = False
         # Ajouter code pour arrêter proprement le candle_source si nécessaire
 
-    async def get_stats(self) -> dict:
+    def get_stats(self) -> dict:
         pass
         # # Exemple simple : récupérer le journal des trades
         trades = self._system.trader_journal.trades

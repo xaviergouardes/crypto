@@ -102,6 +102,9 @@ class IndicatorSimpleSwingDetector:
     
 
     async def _update_and_publish(self):
+        
+        candles = list(self.candles)
+
         new_high, new_low = self._find_swings()
 
         # Si on ne trouve rien, on ne publie rien
@@ -122,8 +125,8 @@ class IndicatorSimpleSwingDetector:
         #       )
 
         # compute highest/lowest of history window
-        window_high = max(c.high for c in self.candles)
-        window_low = min(c.low for c in self.candles)
+        window_high = max(c.high for c in candles)
+        window_low = min(c.low for c in candles)
 
         await self.event_bus.publish(
             IndicatorUpdated(

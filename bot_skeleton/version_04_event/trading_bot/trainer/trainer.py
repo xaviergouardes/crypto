@@ -12,10 +12,10 @@ class BotTrainer:
     logger = Logger.get("BotTrainer")
 
     def __init__(self, bot):
-        self.bot_class = bot.__class__      # garder la classe pour ré-instancier
-        self.params = bot.params.copy()     # paramètres de base
+        # self._bot_class = bot.__class__      # garder la classe pour ré-instancier
+        self._bot = bot
 
-    def compute_valid_combinations(self, param_grid):
+    def _all_param_grids(self, param_grid):
         """Génère toutes les combinaisons valides avec les paramètres statiques self.params."""
         rules = [
             lambda p: p["tp_pct"] >= p["sl_pct"],  # Take profit >= Stop loss
@@ -24,14 +24,7 @@ class BotTrainer:
         keys, values = zip(*param_grid.items())
         param_combinations = [dict(zip(keys, v)) for v in product(*values)]
 
-        full_param_sets = []
-        for combo in param_combinations:
-            full_params = self.params.copy()
-            full_params.update(combo)
-            if all(rule(full_params) for rule in rules):
-                full_param_sets.append(full_params)
-
-        return full_param_sets
+        return param_combinations
 
     ###########################################################################
     # 1) Exécution d'un backtest sur un set de paramètres
@@ -43,12 +36,13 @@ class BotTrainer:
             self.logger.debug(f"[{idx}] Running Bot with params: {params}")
 
             # Créer une instance du bot et du BacktestExecutor
-            bot_instance = self.bot_class(params.copy())
-            executor = BacktestExecutor(bot_instance)
-            await executor.execute(params)
+            # bot_instance = self._bot_class()
+            bot_instance = self._bot
+            bt_executor = BacktestExecutor(bot_instance)
+            await bt_executor.execute(params)
 
             # --- Transformation du journal en DataFrame ---
-            trades_list = bot_instance.system_trading.trader_journal.trades
+            trades_list = bot_instance.get_trades_journal()
             df_journal = pd.DataFrame(trades_list) if trades_list else pd.DataFrame()
 
             total_profit = df_journal["pnl"].sum() if not df_journal.empty else 0
@@ -76,8 +70,8 @@ class BotTrainer:
     # 2) Exécution complète (ThreadPool + async)
     ###########################################################################
     async def run(self, param_grid, verbose=True, max_workers=10):
-        full_param_sets = self.compute_valid_combinations(param_grid)
-        total_passages = len(full_param_sets)
+        all_param_grids = self._all_param_grids(param_grid)
+        total_passages = len(all_param_grids)
         results = []
         loop = asyncio.get_event_loop()
 
@@ -85,7 +79,7 @@ class BotTrainer:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             tasks = []
-            for idx, params in enumerate(full_param_sets, start=1):
+            for idx, params in enumerate(all_param_grids, start=1):
                 if verbose:
                     self.logger.debug(f"[{idx}/{total_passages}] Scheduling bot…")
                 task = loop.run_in_executor(
@@ -126,7 +120,7 @@ if __name__ == "__main__":
     from trading_bot.bots.sweep_bot import SweepBot
 
     # Niveau global : silence tout sauf WARNING et plus
-    Logger.set_default_level(logging.ERROR)
+    Logger.set_default_level(logging.WARNING)
 
     # Niveau spécifique pour
     Logger.set_level("BotTrainer", logging.INFO)
@@ -142,21 +136,21 @@ if __name__ == "__main__":
     param_grid = {
         "swing_window": [200],
         "tp_pct": [2, 2.5],
-        "sl_pct": [0.5, 1.0]
+        "sl_pct": [1.0]
     }
 
-    params = {
-        "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
-        "symbol": "ethusdc",
-        "interval": "5m",
-        "initial_capital": 1000,
-        "swing_window": 150,
-        "swing_side": 2,
-        "tp_pct": 2,
-        "sl_pct": 0.5
-    }
+    # params = {
+    #     "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+    #     "symbol": "ethusdc",
+    #     "interval": "5m",
+    #     "initial_capital": 1000,
+    #     "swing_window": 150,
+    #     "swing_side": 2,
+    #     "tp_pct": 2,
+    #     "sl_pct": 0.5
+    # }
 
-    bot = SweepBot(params)
+    bot = SweepBot()
     trainer = BotTrainer(bot)
     summary_df, results = asyncio.run(trainer.run(param_grid))
 

@@ -11,15 +11,15 @@ class TradeJournal:
     logger = Logger.get("TradeJournal")
 
     def __init__(self, event_bus: EventBus):
-        self.event_bus = event_bus
-        self.trades = []  # historique des trades fermés
-        self.total_pnl = 0.0
-        self.pnl_total_avec_frais = 0.0
-        self.frais_par_transaction = 0.01
+        self._event_bus = event_bus
+        self._trades = []  # historique des trades fermés
+        self._total_pnl = 0.0
+        self._pnl_total_avec_frais = 0.0
+        self._frais_par_transaction = 0.01
 
-        self.event_bus.subscribe(TradeClose, self.on_trade_close)
+        self._event_bus.subscribe(TradeClose, self._on_trade_close)
         
-    async def on_trade_close(self, event: TradeClose):
+    async def _on_trade_close(self, event: TradeClose):
         """
         Traite la fermeture d'un trade et calcule le PnL en tenant compte de la taille et des frais.
         event doit contenir :
@@ -59,16 +59,16 @@ class TradeJournal:
             "close_timestamp": event.close_timestamp,
             "pnl": pnl
         }
-        self.trades.append(trade_record)
+        self._trades.append(trade_record)
 
         # Mettre à jour le PnL total et le PnL après frais
-        self.total_pnl += pnl
-        self.pnl_total_avec_frais = self.total_pnl - (self.frais_par_transaction * len(self.trades) * event.size)
+        self._total_pnl += pnl
+        self._pnl_total_avec_frais = self._total_pnl - (self._frais_par_transaction * len(self._trades) * event.size)
 
         # Journaliser avec couleur selon PnL
         color = "🟢" if pnl >= 0 else "🔴"
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [{color} Journal] Trade fermé - : {trade_record} | "
-        #     f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}")
+        #     f"P&L = {pnl:.2f} | Total = {self._total_pnl:.2f} | Total - Frais = {self._pnl_total_avec_frais:.2f}")
 
         paris_tz = ZoneInfo("Europe/Paris")
 
@@ -81,20 +81,23 @@ class TradeJournal:
             f"Trade {trade_record['side'].ljust(4)} [{open_time_paris.strftime('%Y-%m-%d %H:%M:%S')} / "
             f"{close_time_paris.strftime('%Y-%m-%d %H:%M:%S')}] : "
             f"Qty = {trade_record["size"]} | "
-            f"P&L = {pnl:.2f} | Total = {self.total_pnl:.2f} | Total - Frais = {self.pnl_total_avec_frais:.2f}"
+            f"P&L = {pnl:.2f} | Total = {self._total_pnl:.2f} | Total - Frais = {self._pnl_total_avec_frais:.2f}"
         )
         self.logger.debug(f"Summary {self.summary()} ")
                         
-
+    def get_trades_journal(self):
+        trades =  self._trades.copy()
+        return trades
+    
     def summary(self):
         """Retourne un résumé global du journal avec win rate par type de trade."""
-        total_trades = len(self.trades)
-        wins = len([t for t in self.trades if t["pnl"] > 0])
+        total_trades = len(self._trades)
+        wins = len([t for t in self._trades if t["pnl"] > 0])
         losses = total_trades - wins
 
         # Séparer BUY et SELL
-        buy_trades = [t for t in self.trades if t["side"] == "BUY"]
-        sell_trades = [t for t in self.trades if t["side"] == "SELL"]
+        buy_trades = [t for t in self._trades if t["side"] == "BUY"]
+        sell_trades = [t for t in self._trades if t["side"] == "SELL"]
 
         wins_buy = len([t for t in buy_trades if t["pnl"] > 0])
         wins_sell = len([t for t in sell_trades if t["pnl"] > 0])
@@ -105,7 +108,7 @@ class TradeJournal:
         # Calcul du PnL cumulé
         cumulative_pnls = []
         running_total = 0
-        for t in self.trades:
+        for t in self._trades:
             running_total += t["pnl"]
             cumulative_pnls.append(running_total)
 
@@ -116,7 +119,7 @@ class TradeJournal:
             "total_trades": total_trades,
             "wins": wins,
             "losses": losses,
-            "total_pnl": self.total_pnl,
+            "total_pnl": self._total_pnl,
             "pnl_min": pnl_min,
             "pnl_max": pnl_max,
             "win_rate": (wins / total_trades) * 100 if total_trades > 0 else 0,

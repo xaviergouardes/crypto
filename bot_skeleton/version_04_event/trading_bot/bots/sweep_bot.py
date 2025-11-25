@@ -36,10 +36,6 @@ class SweepBot(Startable):
 
         self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
 
-    # async def run(self):
-    #     self.engine = RealTimeEngine(self._event_bus, self._system_trading, self.__params)
-    #     await self.engine.run()
-    #     # pas de code après car boucle infinie
 
     def set_backtest_mode(self):
         if self.is_running():
@@ -47,27 +43,61 @@ class SweepBot(Startable):
         self._mode = "backtest"
         self._engine = BacktestEngine(self._event_bus, self._system_trading, self._params)
 
+
     def set_realtime_mode(self):
         if self.is_running():
             raise Exception("Pas possible de changer le mode en cours d'execution !")
         self._mode = "realtime"
         self._engine = RealTimeEngine(self._event_bus, self._system_trading, self._params)
 
-    def sync(self, params:dict):
+
+    def sync(self, params: dict):
         if self.is_running():
-            raise Exception("Pas possible de changer les paramétres en cours d'execution !")
-        self._params  = self._compute_warmup_count(params.copy())
+            raise Exception("Impossible de changer les paramètres en cours d'exécution !")
 
-        # Recrée le system de trading por prise en compte des nouveaux paramétres 
-        self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params) 
+        # -------------------------
+        # 1. Filtrer les paramètres inconnus
+        # -------------------------
+        default_keys = set(self._params.keys())
+        incoming_keys = set(params.keys())
 
-        # Recrée l'engine pour refléter les nouveaux params
+        # Paramètres inconnus = non présents dans les defaults
+        unknown_keys = incoming_keys - default_keys
+        if unknown_keys:
+            # Construire un dict avec clé et valeur pour le log
+            unknown_params = {k: params[k] for k in unknown_keys}
+            self.logger.warning(f"Paramètres inconnus ignorés : {unknown_params}")
+
+        # On ne garde que les paramètres valides
+        valid_params = {k: v for k, v in params.items() if k in default_keys}
+
+        # -------------------------
+        # 2. Merge propre (les valid_params écrasent self._params)
+        # -------------------------
+        merged = {**self._params, **valid_params}
+
+        # -------------------------
+        # 3. Recalcule warmup
+        # -------------------------
+        self._params = self._compute_warmup_count(merged.copy())
+
+        # -------------------------
+        # 4. Recrée les sous-systèmes
+        # -------------------------
+        self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)
+
         if self._mode == "realtime":
             self.set_realtime_mode()
         elif self._mode == "backtest":
             self.set_backtest_mode()
 
+        # -------------------------
+        # 5. Log final
+        # -------------------------
         self.logger.info(f"Paramètres synchronisés : {self._params}")
+
+    def get_trades_journal(self):
+        trades = self._system_trading.get_trades_journal()    
 
     @override
     async def on_start(self):
