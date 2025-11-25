@@ -5,16 +5,15 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from trading_bot.core.logger import Logger
-from trading_bot.trainer.backtest_executor import BacktestExecutor
+from trading_bot.trainer.backtest import Backtest
 
 
 class BotTrainer:
     logger = Logger.get("BotTrainer")
 
     def __init__(self, bot):
-        # self._bot_class = bot.__class__      # garder la classe pour ré-instancier
-        self._bot = bot
-
+        self._bot_class = bot.__class__      # garder la classe pour ré-instancier
+ 
     def _all_param_grids(self, param_grid):
         """Génère toutes les combinaisons valides avec les paramètres statiques self.params."""
         rules = [
@@ -35,10 +34,9 @@ class BotTrainer:
             bot_name = f"Bot_{idx}"
             self.logger.debug(f"[{idx}] Running Bot with params: {params}")
 
-            # Créer une instance du bot et du BacktestExecutor
-            # bot_instance = self._bot_class()
-            bot_instance = self._bot
-            bt_executor = BacktestExecutor(bot_instance)
+            # Créer une instance du bot et du Backtest
+            bot_instance = self._bot_class()
+            bt_executor = Backtest(bot_instance)
             await bt_executor.execute(params)
 
             # --- Transformation du journal en DataFrame ---
@@ -124,6 +122,7 @@ if __name__ == "__main__":
 
     # Niveau spécifique pour
     Logger.set_level("BotTrainer", logging.INFO)
+    Logger.set_level("Backtest", logging.DEBUG)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
 
@@ -135,7 +134,7 @@ if __name__ == "__main__":
 
     param_grid = {
         "swing_window": [200],
-        "tp_pct": [2, 2.5],
+        "tp_pct": [2.0, 2.5],
         "sl_pct": [1.0]
     }
 

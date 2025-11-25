@@ -40,13 +40,4 @@ class BacktestEngine(Engine):
         self._running = False
         # Ajouter code pour arrêter proprement le candle_source si nécessaire
 
-    def get_stats(self) -> dict:
-        pass
-        # # Exemple simple : récupérer le journal des trades
-        trades = self._system.trader_journal.trades
-        df = pd.DataFrame(trades)
-        return {
-            "num_trades": len(df),
-            "total_profit": df['pnl'].sum() if not df.empty else 0,
-            "win_rate": len(df[df['pnl'] > 0]) / len(df) if len(df) > 0 else 0
-        }
+

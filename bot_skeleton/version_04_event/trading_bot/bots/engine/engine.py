@@ -34,11 +34,3 @@ class Engine(abc.ABC):
         Méthode pour arrêter proprement l'exécution.
         """
         pass
-
-    @abc.abstractmethod
-    async def get_stats(self) -> Dict:
-        """
-        Retourne les statistiques du moteur en cours d'exécution
-        (ex: PnL, nombre de trades, win rate, etc.)
-        """
-        pass

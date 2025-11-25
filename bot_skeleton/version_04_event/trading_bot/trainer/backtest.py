@@ -3,9 +3,9 @@ import asyncio
 
 from trading_bot.core.logger import Logger
 
-class BacktestExecutor:
+class Backtest:
 
-    logger = Logger.get("BacktestExecutor")
+    logger = Logger.get("Backtest")
 
     def __init__(self, bot):
         self._bot = bot
@@ -19,6 +19,7 @@ class BacktestExecutor:
         self._bot.sync(params)
 
         stats = await self._bot.start()
+        self.logger.debug(f"Statistique : {stats}")
         return stats
 
 
@@ -36,17 +37,17 @@ if __name__ == "__main__":
     # Logger.set_level("TradeJournal", logging.DEBUG)
 
     params = {
-        "swing_window": 21,
+        "swing_window": 200,
         "tp_pct": 2.5,
-        "sl_pct": 0.5,
+        "sl_pct": 1.0,
     }
 
     bot = SweepBot()
-    backtest_executor = BacktestExecutor(bot)
+    backtest_executor = Backtest(bot)
     stats = asyncio.run(backtest_executor.execute(params)) 
 
     # self.engine = BacktestEngine(self.event_bus, self.system_trading, self.params)
     # stats = await self.engine.run()
-    BacktestExecutor.logger.info(f"Statistiques : {stats}")
+    Backtest.logger.info(f"Statistiques : {stats}")
 
  

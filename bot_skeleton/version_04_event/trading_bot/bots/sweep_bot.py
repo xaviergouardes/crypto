@@ -97,7 +97,8 @@ class SweepBot(Startable):
         self.logger.info(f"Paramètres synchronisés : {self._params}")
 
     def get_trades_journal(self):
-        trades = self._system_trading.get_trades_journal()    
+        trades = self._system_trading.get_trades_journal()   
+        return trades 
 
     @override
     async def on_start(self):
