@@ -13,9 +13,6 @@ from trading_bot.bots.engine.backtest_engine import BacktestEngine
 
 from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSystemTrading
 
-from trading_bot.trainer.trainer import BotTrainer
-
-
 class SweepBot(Startable):
 
     logger = Logger.get("SweepBot")
@@ -101,10 +98,10 @@ class SweepBot(Startable):
         return trades 
 
     @override
-    async def on_start(self):
+    async def on_start(self) -> list:
         self.logger.info("SweepBot démarré.")
-        stats = await self._engine.run()
-        return stats
+        trades_list = await self._engine.run()
+        return trades_list
 
     @override
     def on_stop(self):

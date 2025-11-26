@@ -43,6 +43,6 @@ class SimpleSweepSystemTrading(System):
         self.trader_journal = TradeJournal(self.event_bus)
         self.portefolio_manager = PortfolioManager(self.event_bus, starting_usdc=p["initial_capital"])
 
-    def get_trades_journal(self):
+    def get_trades_journal(self) -> list:
         trades =  self.trader_journal.get_trades_journal()
         return trades

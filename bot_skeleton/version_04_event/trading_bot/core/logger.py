@@ -26,7 +26,7 @@ class Logger:
     def get(cls, name="App"):
         if name not in cls._loggers:
             cls._loggers[name] = cls._create_logger(name)
-        return cls._loggers[name]
+        return cls._wrap(cls._loggers[name])
 
     @classmethod
     def _create_logger(cls, name):
@@ -41,9 +41,39 @@ class Logger:
         # Niveau spécifique ou global
         level = cls._custom_levels.get(name, cls._default_level)
         logger.setLevel(level)
-        logger.propagate = False  # n’hérite pas du parent
+        logger.propagate = False
         return logger
 
+    @staticmethod
+    def _wrap(logger):
+        """Wrapper pour n’évaluer le message que si le niveau est actif"""
+        class LoggerWrapper:
+            def __init__(self, logger):
+                self._logger = logger
+
+            def debug(self, msg, *args, **kwargs):
+                if self._logger.isEnabledFor(logging.DEBUG):
+                    self._logger.debug(msg() if callable(msg) else msg, *args, **kwargs)
+
+            def info(self, msg, *args, **kwargs):
+                if self._logger.isEnabledFor(logging.INFO):
+                    self._logger.info(msg() if callable(msg) else msg, *args, **kwargs)
+
+            def warning(self, msg, *args, **kwargs):
+                if self._logger.isEnabledFor(logging.WARNING):
+                    self._logger.warning(msg() if callable(msg) else msg, *args, **kwargs)
+
+            def error(self, msg, *args, **kwargs):
+                if self._logger.isEnabledFor(logging.ERROR):
+                    self._logger.error(msg() if callable(msg) else msg, *args, **kwargs)
+
+            def critical(self, msg, *args, **kwargs):
+                if self._logger.isEnabledFor(logging.CRITICAL):
+                    self._logger.critical(msg() if callable(msg) else msg, *args, **kwargs)
+
+        return LoggerWrapper(logger)
+
+    # Accès rapide via classe pour conserver compatibilité
     @classmethod
     def info(cls, msg, name="App"): cls.get(name).info(msg)
     @classmethod

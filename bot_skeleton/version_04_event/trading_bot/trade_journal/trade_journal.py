@@ -85,7 +85,7 @@ class TradeJournal:
         )
         self.logger.debug(f"Summary {self.summary()} ")
                         
-    def get_trades_journal(self):
+    def get_trades_journal(self) -> list:
         trades =  self._trades.copy()
         return trades
     

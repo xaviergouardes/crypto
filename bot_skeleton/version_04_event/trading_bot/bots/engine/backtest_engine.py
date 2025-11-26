@@ -20,7 +20,8 @@ class BacktestEngine(Engine):
 
         self._candle_source = CandleSourceCsv(self._event_bus, self._params) 
 
-    async def run(self):
+
+    async def run(self) -> list:
         pass
         self._running = True
         
@@ -33,8 +34,9 @@ class BacktestEngine(Engine):
         # Boucle événementielle -> non bloqunte en backtest
         await self._candle_source.stream() 
 
-        self.logger.debug(f" self._system.trader_journal.summary() {self._system.trader_journal.summary()} ")
-        return self._system.trader_journal.summary()
+        self.logger.debug(f" self._system.trader_journal : {self._system.get_trades_journal()} ")
+        return self._system.get_trades_journal()
+
 
     def stop(self):
         self._running = False
