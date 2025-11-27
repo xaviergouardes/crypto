@@ -17,7 +17,7 @@ class BotTrainer:
         self._bot_class = bot_class      # garder la classe pour ré-instancier
  
     def _all_param_grids(self, param_grid):
-        """Génère toutes les combinaisons valides avec les paramètres statiques self.params."""
+        """Génère toutes les combinaisons valides avec les règles appliquées."""
         rules = [
             lambda p: p["tp_pct"] >= p["sl_pct"],  # Take profit >= Stop loss
         ]
@@ -25,7 +25,13 @@ class BotTrainer:
         keys, values = zip(*param_grid.items())
         param_combinations = [dict(zip(keys, v)) for v in product(*values)]
 
-        return param_combinations
+        # Appliquer les règles de filtrage
+        valid_combinations = [
+            p for p in param_combinations
+            if all(rule(p) for rule in rules)
+        ]
+
+        return valid_combinations
 
     ###########################################################################
     # 1) Exécution d'un backtest sur un set de paramètres
@@ -100,6 +106,7 @@ class BotTrainer:
         # Tri par total_score décroissant
         summary_df = summary_df.sort_values("total_score", ascending=False).reset_index(drop=True)
 
+        # Todo : attention la liste des paramétre est dépendante du bot / signal engine
         cols_to_show = ["name", "total_profit", "win_rate", "num_trades", "total_score", "swing_window", "tp_pct", "sl_pct"]
         self.log_summary_df_one_line(self.logger, summary_df, cols=cols_to_show)
 
@@ -153,17 +160,18 @@ if __name__ == "__main__":
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
 
-    # param_grid = {
-    #     "swing_window": [21, 50, 100, 150, 200],
-    #     "tp_pct": [1.0, 1.5, 2, 2.5],
-    #     "sl_pct": [0.5, 1.0, 1.5, 2]
-    # }
-
     param_grid = {
-        "swing_window": [200],
-        "tp_pct": [2.0, 2.5],
-        "sl_pct": [1.0]
+        "swing_window": [21, 50, 100, 150, 200],
+        "tp_pct": [1.0, 1.5, 2, 2.5],
+        "sl_pct": [0.5, 1.0, 1.5, 2],
+        "swing_side": [2, 3]
     }
+
+    # param_grid = {
+    #     "swing_window": [200],
+    #     "tp_pct": [2.0, 2.5],
+    #     "sl_pct": [1.0]
+    # }
 
     trainer = BotTrainer(BOT_CLASSES["sweep_bot"])
     summary_df, results = asyncio.run(trainer.run(param_grid))
