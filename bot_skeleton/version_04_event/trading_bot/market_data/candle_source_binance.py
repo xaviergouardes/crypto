@@ -25,7 +25,7 @@ class CandleSourceBinance(CandleSource):
 
         self.symbol = params["symbol"]
         self.interval = params["interval"]
-        self.warmup_count = params["warmup_count"]
+        self.warmup_count = params["trading_system"]["warmup_count"]
 
         self._ws_url = f"wss://stream.binance.com:9443/ws/{self.symbol}@kline_{self.interval}"
         self._rest_url = f"https://api.binance.com/api/v3/klines?symbol={self.symbol.upper()}&interval={self.interval}&limit={self.warmup_count + 1}"

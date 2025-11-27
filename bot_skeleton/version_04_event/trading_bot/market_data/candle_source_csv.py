@@ -50,7 +50,7 @@ class CandleSourceCsv(CandleSource):
         df = self._read_csv()
 
         # Limite du nombre de bougies
-        warmup_count = p["warmup_count"]
+        warmup_count = p["trading_system"]["warmup_count"]
         if warmup_count and len(df) > warmup_count:
             df = df.head(warmup_count)
 
@@ -73,7 +73,7 @@ class CandleSourceCsv(CandleSource):
         p = self.params
         df = self._read_csv()
 
-        warmup_count = p["warmup_count"]
+        warmup_count = p["trading_system"]["warmup_count"]
         if len(df) > warmup_count:
             df = df.iloc[warmup_count:]
         else:

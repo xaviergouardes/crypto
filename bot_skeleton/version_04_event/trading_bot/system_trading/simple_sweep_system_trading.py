@@ -33,11 +33,12 @@ class SimpleSweepSystemTrading(System):
     @override
     def start_piepline(self):
         p = self.params
-        self.indicator_swing_detector = IndicatorSimpleSwingDetector(self.event_bus, swing_side=p["swing_side"], swing_window=p["swing_window"])
+    
+        self.indicator_swing_detector = IndicatorSimpleSwingDetector(self.event_bus, swing_side=p["trading_system"]["swing_side"], swing_window=p["trading_system"]["swing_window"])
 
         self.signal_engine = SimpleSweepSwingSignalEngine(self.event_bus)      
         
-        self.risk_manager = RiskManager(self.event_bus, tp_percent=p["tp_pct"], sl_percent=p["sl_pct"], solde_disponible=p["initial_capital"])     
+        self.risk_manager = RiskManager(self.event_bus, tp_percent=p["trading_system"]["tp_pct"], sl_percent=p["trading_system"]["sl_pct"], solde_disponible=p["initial_capital"])     
         self.trader = TraderOnlyOnePosition(self.event_bus)
         
         self.trader_journal = TradeJournal(self.event_bus)

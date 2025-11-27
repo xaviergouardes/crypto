@@ -23,7 +23,7 @@ class Backtest:
         bot.sync(params)
 
         trades_list = await bot.start()
- 
+
         performance_analyser = PerformanceAnalyzer()
         stats, trades_list = performance_analyser.analyze(
             trades_list=trades_list,
@@ -51,9 +51,12 @@ if __name__ == "__main__":
     # Logger.set_level("TradeJournal", logging.DEBUG)
 
     params = {
-        "swing_window": 200,
-        "tp_pct": 2.5,
-        "sl_pct": 1.0,
+        "trading_system": {
+            "swing_window": 21,
+            "tp_pct": 2.0,
+            "sl_pct": 2.0,
+            "swing_side": 3,
+        }
     }
 
     backtest_executor = Backtest(BOT_CLASSES["sweep_bot"])

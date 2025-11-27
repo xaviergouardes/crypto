@@ -53,6 +53,16 @@ class SweepBot(Startable):
             raise Exception("Impossible de changer les paramètres en cours d'exécution !")
 
         # -------------------------
+        # 0. Helpers
+        # -------------------------
+        def deep_merge_trading_system(default_ts, incoming_ts):
+            """Fusionne proprement les sous-clés trading_system sans écraser les defaults."""
+            merged = default_ts.copy()
+            for k, v in incoming_ts.items():
+                merged[k] = v
+            return merged
+
+        # -------------------------
         # 1. Filtrer les paramètres inconnus
         # -------------------------
         default_keys = set(self._params.keys())
@@ -61,7 +71,6 @@ class SweepBot(Startable):
         # Paramètres inconnus = non présents dans les defaults
         unknown_keys = incoming_keys - default_keys
         if unknown_keys:
-            # Construire un dict avec clé et valeur pour le log
             unknown_params = {k: params[k] for k in unknown_keys}
             self.logger.warning(f"Paramètres inconnus ignorés : {unknown_params}")
 
@@ -69,9 +78,18 @@ class SweepBot(Startable):
         valid_params = {k: v for k, v in params.items() if k in default_keys}
 
         # -------------------------
-        # 2. Merge propre (les valid_params écrasent self._params)
+        # 2. Merge profond et propre
         # -------------------------
-        merged = {**self._params, **valid_params}
+        merged = self._params.copy()
+
+        for key, value in valid_params.items():
+            if key == "trading_system":
+                merged["trading_system"] = deep_merge_trading_system(
+                    self._params["trading_system"],
+                    value
+                )
+            else:
+                merged[key] = value
 
         # -------------------------
         # 3. Recalcule warmup
@@ -79,7 +97,7 @@ class SweepBot(Startable):
         self._params = self._compute_warmup_count(merged.copy())
 
         # -------------------------
-        # 4. Recrée les sous-systèmes
+        # 4. Re-crée les sous-systèmes
         # -------------------------
         self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)
 
@@ -92,6 +110,8 @@ class SweepBot(Startable):
         # 5. Log final
         # -------------------------
         self.logger.info(f"Paramètres synchronisés : {self._params}")
+
+
 
     def get_trades_journal(self):
         trades = self._system_trading.get_trades_journal()   
@@ -115,14 +135,16 @@ class SweepBot(Startable):
             "symbol": "ethusdc",
             "interval": "5m",
             "initial_capital": 1000,
-            "swing_window": 200,
-            "swing_side": 2,
-            "tp_pct": 2.5,
-            "sl_pct": 0.5
+            "trading_system": {
+                "swing_window": 200,
+                "swing_side": 2,
+                "tp_pct": 2.5,
+                "sl_pct": 0.5,
+            }
         }
 
     def _compute_warmup_count(self, params:dict) -> dict:
         return_params = params.copy()
-        warmup_count = return_params["swing_window"]
-        return_params["warmup_count"] = warmup_count
+        warmup_count = return_params["trading_system"]["swing_window"]
+        return_params["trading_system"]["warmup_count"] = warmup_count
         return return_params
