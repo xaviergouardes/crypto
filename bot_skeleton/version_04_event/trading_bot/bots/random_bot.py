@@ -21,7 +21,7 @@ Logger.set_default_level(logging.DEBUG)
 class RandomBot:
     logger = Logger.get("RandomBot")
 
-    def __init__(self, params, mode):
+    def __init__(self, params):
 
         self.event_bus = EventBus()
         

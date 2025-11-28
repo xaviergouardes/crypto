@@ -46,6 +46,7 @@ class Backtest:
         )
 
         self.logger.debug(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
+        self.logger.info("Backtest Terminé !")
 
         return stats, trades_list
 

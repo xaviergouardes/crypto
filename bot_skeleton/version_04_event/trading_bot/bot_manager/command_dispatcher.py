@@ -1,7 +1,9 @@
 from trading_bot.bot_manager.bot_manager import BotManager
+from trading_bot.core.logger import Logger
 
 class CommandDispatcher:
     """Mappe un message JSON à une méthode du BotManager."""
+    _logger = Logger.get("CommandDispatcher")
 
     def __init__(self, manager: BotManager):
         self.manager = manager
@@ -36,7 +38,11 @@ class CommandDispatcher:
         return await self.manager.train_bot(msg["bot_name"])
 
     async def _backtest(self, msg):
-        return await self.manager.backtest_bot(msg["bot_name"])
+        self._logger.debug(f"Commande à dispatcher {msg}")
+        return await self.manager.backtest_bot(
+            msg.get("bot_type", None),
+            msg.get("params", None)
+        )
 
     async def _list(self, msg):
         return self.manager.list_bots()

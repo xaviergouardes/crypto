@@ -1,6 +1,7 @@
 import json
 import asyncio
 import typer
+import json as js
 
 app = typer.Typer()
 
@@ -22,8 +23,9 @@ def start(
     bot_type: str = typer.Option("sweep", help="Type de bot à lancer"),
     params_file: str = typer.Option(None, help="Fichier JSON avec paramètres du bot")
 ):
-    """Démarre un bot."""
-    import json as js
+    """Démarre un bot.
+    (venv) xavier@fedora-1:~/Documents/gogs-repository/crypto/bot_skeleton/version_04_event$ /home/xavier/Documents/gogs-repository/crypto/venv/bin/python -m trading_bot.bot_manager.bot_manager_cli start sweep_bot_01 --bot-type sweep_bot --params-file /home/xavier/Documents/gogs-repository/crypto/bot_skeleton/version_04_event/trading_bot/bot_manager/sweep_bot_01.json
+    """
     params = {}
     if params_file:
         with open(params_file, "r") as f:
@@ -54,20 +56,24 @@ def list_bots():
     typer.echo(result)
 
 @app.command()
-def backtest(bot_name: str):
+def backtest(
+    bot_type: str = typer.Argument(..., help="Type de bot à lancer à Backtester"),
+    params_file: str = typer.Option(None, help="Fichier JSON avec paramètres du bot")
+):
+    params = {}
+    if params_file:
+        with open(params_file, "r") as f:
+            params = js.load(f)
 
-    command = {"command": "backtest_bot", "bot_name": bot_name}
+    command = {"command": "backtest_bot", "bot_type": bot_type, "params": params}
     result = asyncio.run(send_command(command))
 
     # Affichage des stats
     if result:
         stats = result.get("stats", {})
-        typer.echo(f"\nBacktest de {bot_name} terminé :")
-        typer.echo(f"  → Win Rate    : {stats.get('win_rate', 0):.2f}%")
-        typer.echo(f"  → Nb Trades   : {stats.get('total_trades', 0)}")
-        typer.echo(f"  → Total Pnl   : {stats.get('total_pnl', 0):.2f}")
-        typer.echo(f"  → Min Pnl     : {stats.get('pnl_min', 0):.3f}")
-        typer.echo(f"  → Max Pnl     : {stats.get('pnl_max', 0):.3f}")
+        typer.echo(result)
+        typer.echo("Statistiques : ")
+        typer.echo(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
     else:
         typer.echo("Erreur : aucun résultat reçu du serveur.")
 

@@ -39,6 +39,7 @@ class SweepBot(Startable):
             raise Exception("Pas possible de changer le mode en cours d'execution !")
         self._mode = "backtest"
         self._engine = BacktestEngine(self._event_bus, self._system_trading, self._params)
+        self.logger.info(f"Mode backtest positioné")
 
 
     def set_realtime_mode(self):
@@ -46,7 +47,7 @@ class SweepBot(Startable):
             raise Exception("Pas possible de changer le mode en cours d'execution !")
         self._mode = "realtime"
         self._engine = RealTimeEngine(self._event_bus, self._system_trading, self._params)
-
+        self.logger.info(f"Mode realtime positioné")
 
     def sync(self, params: dict):
         if self.is_running():

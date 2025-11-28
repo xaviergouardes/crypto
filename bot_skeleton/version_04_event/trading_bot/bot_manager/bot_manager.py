@@ -1,10 +1,16 @@
 import asyncio
 from typing import Dict
+
+from trading_bot.core.logger import Logger
+
 from trading_bot.bots import BOT_CLASSES
+from trading_bot.trainer.backtest import Backtest
+
 
 class BotManager:
     """Gestion interne des bots, indépendante du serveur."""
-    
+    logger = Logger.get("BotManager")
+
     def __init__(self):
         self.bots: Dict[str, object] = {}
 
@@ -16,16 +22,33 @@ class BotManager:
             return {"status": "error", "msg": f"Unknown bot_type {bot_type}"}
 
         bot_class = BOT_CLASSES[bot_type]
-        bot = bot_class(params, "backtest")
+        bot = bot_class()
+        bot.set_realtime_mode()
+        bot.sync(params)
 
-        self.bots[name] = bot
-        asyncio.create_task(bot.run())
+        # start async
+        task = asyncio.create_task(bot.start())
 
+        self.bots[name] = {"bot": bot, "task": task}
         return {"status": "ok", "msg": f"{name} started"}
+
 
     async def stop_bot(self, name: str):
         if name not in self.bots:
             return {"status": "error", "msg": f"{name} not found"}
+        
+        bot_entry = self.bots[name]
+        bot = bot_entry["bot"]
+        task = bot_entry["task"]
+
+        bot.stop()
+
+        # Wait for the task to finish or cancel
+        try:
+            await asyncio.wait_for(task, timeout=5)
+        except asyncio.TimeoutError:
+            task.cancel()
+            self._logger.warning(f"{name} did not stop in time → canceled")
 
         del self.bots[name]
         return {"status": "ok", "msg": f"{name} stopped"}
@@ -37,11 +60,14 @@ class BotManager:
         summary, results = await self.bots[name].train()
         return {"status": "ok", "summary": summary.to_dict(), "results": results}
 
-    async def backtest_bot(self, name: str):
-        if name not in self.bots:
-            return {"status": "error", "msg": f"{name} not found"}
+    async def backtest_bot(self, bot_type: str, params: dict):
+        self.logger.info(f"Backtest sur {bot_type} demandé avec params = {params}")
+        if bot_type not in BOT_CLASSES:
+            return {"status": "error", "msg": f"Unknown bot_type {bot_type}"}
 
-        stats = await self.bots[name].backtest()
+        backtest_executor = Backtest(BOT_CLASSES["sweep_bot"])
+        stats, trades_list = await backtest_executor.execute(params)
+
         return {"status": "ok", "stats": stats}
 
     def list_bots(self):
