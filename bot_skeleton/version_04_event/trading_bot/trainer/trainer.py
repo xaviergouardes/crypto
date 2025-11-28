@@ -7,7 +7,6 @@ from concurrent.futures import ThreadPoolExecutor
 from trading_bot.bots import BOT_CLASSES
 from trading_bot.core.logger import Logger
 from trading_bot.trainer.backtest import Backtest
-from trading_bot.trainer.performance_analyser import PerformanceAnalyzer
 
 
 class BotTrainer:
@@ -54,15 +53,11 @@ class BotTrainer:
             # Créer une instance du bot et du Backtest
             bt_executor = Backtest(self._bot_class)
             stats, trades_list = await bt_executor.execute(params)
+            
+            # Ajouter le nom du bot dans les stats
+            stats["name"] = bot_name
 
-            performance_analyser = PerformanceAnalyzer()
-            stats, trades_list = performance_analyser.analyze(
-                trades_list=trades_list,
-                params=params,
-                name=bot_name,
-                bot_id=idx
-            )
-            self.logger.debug( performance_analyser.stats_one_line(stats))
+            self.logger.debug(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
 
             return stats
 
@@ -103,51 +98,67 @@ class BotTrainer:
                     self.logger.info(f"✔ Progression : {done_count}/{total_passages} terminés")
                 results.append(result)
 
-        summary_df = pd.DataFrame(results)
+        all_stats = pd.DataFrame(results)
 
-        performance_analyser = PerformanceAnalyzer()
-        summary_df = performance_analyser.compute_total_score(summary_df)
+        self.log_summary_df_one_line(all_stats)
 
-        self.log_summary_df_one_line(summary_df)
-
-        return summary_df, results
-
+        return all_stats, results
 
 
     def log_summary_df_one_line(self, df, col_width=12, float_precision=2):
         """
-        Affiche le DataFrame df sur une seule ligne par entrée avec colonnes de largeur fixe.
-        Tout l’aplatissement des colonnes trading_system -> systrad_xxx est fait ici.
+        Log toutes les statistiques et paramètres d'un DataFrame en forme de tableau.
+        Colonnes statistiques : préfixées par 's_'
+        Colonnes paramètres : préfixées par 'p_'
+        La colonne 'name' et 's_normalized_score' sont toujours affichées en premier si présentes.
+        Les lignes sont triées par 's_normalized_score' décroissant.
         """
+        if df.empty:
+            self.logger.info("Aucun backtest à afficher.")
+            return
+
         display_df = df.copy()
 
-        # 1. Aplatir trading_system si présent
-        systrad_cols = []
-        if "trading_system" in display_df.columns:
-            for k in display_df["trading_system"].iloc[0].keys():
-                col_name = f"p_{k}"
-                display_df[col_name] = display_df["trading_system"].apply(lambda r: r.get(k, ""))
-                systrad_cols.append(col_name)
-            display_df = display_df.drop(columns=["trading_system"])
+        # Trier par s_normalized_score si elle existe
+        if "s_normalized_score" in display_df.columns:
+            display_df = display_df.sort_values(by="s_normalized_score", ascending=False)
 
-        # 2. Colonnes à afficher : base + systrad_xxx dynamiques
-        base_cols = ["name", "total_profit", "win_rate", "num_trades", "total_score",
-                    "max_drawdown_pct", "max_winning_streak"] 
-        cols_to_show = base_cols + systrad_cols
+        # Colonnes statistiques et paramètres
+        stat_cols = [c for c in display_df.columns if c.startswith("s_") and c != "s_normalized_score"]
+        param_cols = [c for c in display_df.columns if c.startswith("p_")]
+        other_cols = [c for c in display_df.columns if c not in stat_cols + param_cols + ["s_normalized_score"]]
 
-        # 3. Préparer l'en-tête
+        # Ordre final : name + s_normalized_score + autres stats + paramètres + reste
+        cols_to_show = []
+        if "name" in display_df.columns:
+            cols_to_show.append("name")
+        if "s_normalized_score" in display_df.columns:
+            cols_to_show.append("s_normalized_score")
+        cols_to_show += stat_cols + param_cols + [c for c in other_cols if c not in cols_to_show]
+
+        # Préparer l'en-tête
         header = " | ".join(f"{col[:col_width]:<{col_width}}" for col in cols_to_show)
         self.logger.info(header)
         self.logger.info("-" * len(header))
 
-        # 4. Affichage ligne par ligne
+        # Affichage ligne par ligne
         for _, row in display_df.iterrows():
             line_items = []
             for col in cols_to_show:
                 val = row[col]
-                val_str = f"{val:.{float_precision}f}" if isinstance(val, float) else str(val)
+                # Formatage float ou np.float64
+                if isinstance(val, (float, int)) or hasattr(val, "item"):
+                    try:
+                        val_str = f"{float(val):.{float_precision}f}"
+                    except:
+                        val_str = str(val)
+                else:
+                    val_str = str(val)
                 line_items.append(f"{val_str[:col_width]:<{col_width}}")
             self.logger.info(" | ".join(line_items))
+
+
+
 
 
 if __name__ == "__main__":
