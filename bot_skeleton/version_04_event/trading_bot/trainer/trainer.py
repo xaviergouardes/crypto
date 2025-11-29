@@ -101,7 +101,7 @@ class BotTrainer:
         all_stats = pd.DataFrame(results)
 
         self.log_summary_df_one_line(all_stats)
-
+        self.logger.info("Terminé !")
         return all_stats, results
 
 

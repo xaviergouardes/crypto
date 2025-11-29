@@ -1,5 +1,6 @@
 import json
 import asyncio
+import pandas as pd
 import typer
 import json as js
 
@@ -42,11 +43,30 @@ def stop(bot_name: str = typer.Argument(..., help="Nom du bot à arrêter")):
     typer.echo(result)
 
 @app.command()
-def train(bot_name: str = typer.Argument(..., help="Nom du bot à entraîner")):
-    """Entraîne un bot déjà lancé."""
-    command = {"command": "train_bot", "bot_name": bot_name}
+def train(
+    bot_type: str = typer.Argument(..., help="Type de bot à lancer à Optimiser"),
+    params_file: str = typer.Option(None, help="Fichier JSON avec le grid à optimiser")
+):
+    param_grid = {}
+    if params_file:
+        with open(params_file, "r") as f:
+            param_grid = js.load(f)
+
+    command = {"command": "train_bot", "bot_type": bot_type, "param_grid": param_grid}
     result = asyncio.run(send_command(command))
-    typer.echo(result)
+
+    # Affichage des stats
+    if result:
+        results = result.pop("results", None)
+        typer.echo(result)
+
+        df = pd.DataFrame(results)
+        df = df.sort_values(by="s_normalized_score", ascending=False)
+        typer.echo(df)
+        # typer.echo("Statistiques : ")
+        # typer.echo(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
+    else:
+        typer.echo("Erreur : aucun résultat reçu du serveur.")
 
 @app.command()
 def list_bots():
@@ -70,10 +90,13 @@ def backtest(
 
     # Affichage des stats
     if result:
-        stats = result.get("stats", {})
+        stats = result.pop("stats", {})
         typer.echo(result)
-        typer.echo("Statistiques : ")
-        typer.echo(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
+        
+        df = pd.DataFrame([stats])
+        typer.echo(df)
+        # typer.echo("Statistiques : ")
+        # typer.echo(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
     else:
         typer.echo("Erreur : aucun résultat reçu du serveur.")
 

@@ -40,4 +40,10 @@ if __name__ == "__main__":
 
     Logger.set_default_level(logging.INFO)
 
+    # Logger.set_level("BotManagerServer", logging.DEBUG)
+    # Logger.set_level("CommandDispatcher", logging.DEBUG)
+    # Logger.set_level("BotManager", logging.DEBUG)
+    # Logger.set_level("BotTrainer", logging.INFO)
+    # Logger.set_level("Backtest", logging.INFO)
+
     asyncio.run(BotManagerServer().run_server())

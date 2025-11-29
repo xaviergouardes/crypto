@@ -35,7 +35,11 @@ class CommandDispatcher:
         return await self.manager.stop_bot(msg["bot_name"])
 
     async def _train(self, msg):
-        return await self.manager.train_bot(msg["bot_name"])
+        self._logger.debug(f"Commande à dispatcher {msg}")
+        return await self.manager.train_bot(
+            msg.get("bot_type", None),
+            msg.get("param_grid", None)
+        )
 
     async def _backtest(self, msg):
         self._logger.debug(f"Commande à dispatcher {msg}")
