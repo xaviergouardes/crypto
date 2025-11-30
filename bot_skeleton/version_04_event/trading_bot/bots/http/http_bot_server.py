@@ -3,6 +3,7 @@ import aiohttp
 from aiohttp import web
 
 from trading_bot.core.logger import Logger
+from trading_bot.trainer.backtest import Backtest
 
 class HttpBotServer:
     """
@@ -24,6 +25,7 @@ class HttpBotServer:
             web.post("/stop", self._handle_stop),
             web.get("/status", self._handle_status),
             web.post('/shutdown', self._handle_shutdown),
+            web.post('/backtest', self._handle_backtest),
         ])
 
         self._runner = None
@@ -42,6 +44,32 @@ class HttpBotServer:
         # await self.bot.stop()
         return web.json_response({"status": "stopped", "bot_id": self.bot.bot_id})
 
+    async def _handle_backtest(self, request):
+        try:
+            data = await request.json()   # <--- Le body JSON
+
+            # Exemple d'accès aux champs
+            params = data
+
+            # Log pour debug
+            self._logger.info(f"[HTTP] Backtest demandé : bot={self.bot.bot_type}, params={params}")
+
+            bot_class = self.bot.__class__
+            backtest_executor = Backtest(bot_class)
+            stats, trades_list = await backtest_executor.execute(params)
+
+            return web.json_response({
+                "status": "ok",
+                "bot_id": self.bot.bot_id,
+                "bot_type": self.bot.bot_type,
+                "stats": stats
+            })
+
+        except Exception as e:
+            self._logger.exception("Erreur dans _handle_backtest")
+            return web.json_response({"status": "error", "message": str(e)}, status=400)
+
+    
     async def _handle_status(self, request):
         return web.json_response({
             "bot_id": self.bot.bot_id,

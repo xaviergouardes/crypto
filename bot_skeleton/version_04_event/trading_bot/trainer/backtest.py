@@ -3,7 +3,6 @@ import asyncio
 
 import pandas as pd
 
-from trading_bot.bots import BOT_CLASSES
 from trading_bot.core.logger import Logger
 from trading_bot.trainer.statistiques_engine import *
 
@@ -74,8 +73,8 @@ if __name__ == "__main__":
         }
     }
 
-    backtest_executor = Backtest(BOT_CLASSES["sweep_bot"])
-    stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
+    # backtest_executor = Backtest(BOT_CLASSES["sweep_bot"])
+    # stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
 
     # Backtest.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
     # Backtest.logger.info(f"trades_list : {trades_list}")

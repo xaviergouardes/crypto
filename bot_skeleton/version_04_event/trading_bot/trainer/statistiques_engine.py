@@ -2,8 +2,6 @@ import pandas as pd
 from itertools import product
 from trading_bot.core.logger import Logger
 
-from trading_bot.bots import BOT_CLASSES
-
 # --------------------------
 # 1) Indicateurs
 # il sont préfixés par s_ pour Statistique
@@ -130,6 +128,7 @@ class StatsEngine:
 
         # Aplatir trading_system dans les stats
         ts_params = params.get("trading_system", {})
+        print(ts_params)
         for k, v in ts_params.items():
             stats[f"p_{k}"] = v
 
