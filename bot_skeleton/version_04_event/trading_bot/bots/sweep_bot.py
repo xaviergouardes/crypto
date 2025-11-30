@@ -2,7 +2,9 @@
 import asyncio
 import logging
 from typing import override
+import argparse
 
+from trading_bot.bots.http.http_bot_server import HttpBotServer
 from trading_bot.core.logger import Logger
 
 from trading_bot.core.event_bus import EventBus
@@ -18,10 +20,14 @@ class SweepBot(Startable):
     logger = Logger.get("SweepBot")
 
     # def __init__(self, params, mode):
-    def __init__(self):
+    def __init__(self, bot_id="sweep_bot_01"):
         super().__init__()
 
         self._event_bus = EventBus()
+
+        self.bot_id = bot_id
+        self.bot_type = "sweep_bot"
+        
         self._engine = None
         self._mode = None
 
@@ -149,3 +155,33 @@ class SweepBot(Startable):
         warmup_count = return_params["trading_system"]["swing_window"]
         return_params["trading_system"]["warmup_count"] = warmup_count
         return return_params
+    
+
+
+# ----------------------------------------
+# Lancement direct
+# ----------------------------------------
+if __name__ == "__main__":
+    Logger.set_default_level(logging.DEBUG)
+
+    # Logger.set_level("BotManagerServer", logging.DEBUG)
+    # Logger.set_level("CommandDispatcher", logging.DEBUG)
+    # Logger.set_level("BotManager", logging.DEBUG)
+    # Logger.set_level("BotTrainer", logging.INFO)
+    # Logger.set_level("Backtest", logging.INFO)
+        
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--bot_id", default="sweep_bot_01")
+    parser.add_argument("--port", type=int, default=9101)
+    args = parser.parse_args()
+
+    # Création du bot avec paramètres dynamiques
+    bot = SweepBot(bot_id=args.bot_id)
+    http_server = HttpBotServer(bot, port=args.port)
+
+    async def main():
+        await http_server.start()
+        await http_server.register()
+        await http_server.wait_closed()
+
+    asyncio.run(main())
