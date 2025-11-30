@@ -128,7 +128,6 @@ class StatsEngine:
 
         # Aplatir trading_system dans les stats
         ts_params = params.get("trading_system", {})
-        print(ts_params)
         for k, v in ts_params.items():
             stats[f"p_{k}"] = v
 

@@ -53,12 +53,13 @@ class Backtest:
 if __name__ == "__main__":
 
     import logging
+    from trading_bot.bots import BOT_CLASSES
     from trading_bot.bots.sweep_bot import SweepBot
 
     Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
-    Logger.set_level("Backtest", logging.DEBUG)
+    # Logger.set_level("Backtest", logging.DEBUG)
     # Logger.set_level("BacktestEngine", logging.INFO)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
@@ -73,8 +74,8 @@ if __name__ == "__main__":
         }
     }
 
-    # backtest_executor = Backtest(BOT_CLASSES["sweep_bot"])
-    # stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
+    backtest_executor = Backtest(BOT_CLASSES["sweep_bot"])
+    stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
 
     # Backtest.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
     # Backtest.logger.info(f"trades_list : {trades_list}")

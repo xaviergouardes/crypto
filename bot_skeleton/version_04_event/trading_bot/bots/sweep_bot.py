@@ -125,13 +125,13 @@ class SweepBot(Startable):
         return trades 
 
     @override
-    async def on_start(self) -> list:
+    async def _on_start(self) -> list:
         self.logger.info("SweepBot démarré.")
         trades_list = await self._engine.run()
         return trades_list
 
     @override
-    def on_stop(self):
+    def _on_stop(self):
         self._engine.stop()
         self._system_trading.stop()
         self.logger.info("SweepBot arrêté.")

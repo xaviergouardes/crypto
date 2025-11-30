@@ -32,7 +32,7 @@ class BotManagerServer:
 
     async def run_server(self):
         server = await asyncio.start_server(self.handle_client, self.host, self.port)
-        print(f"BotManagerServer listening on {self.host}:{self.port}")
+        self._logger.info(f"BotManagerServer listening on {self.host}:{self.port}")
         async with server:
             await server.serve_forever()
 

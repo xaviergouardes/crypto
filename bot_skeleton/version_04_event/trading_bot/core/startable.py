@@ -12,20 +12,20 @@ class Startable(ABC):
     async def start(self):
         """Démarre le composant."""
         self._running = True
-        return await self.on_start()
+        return await self._on_start()
 
     def stop(self):
         """Arrête le composant."""
-        self.on_stop()
+        self._on_stop()
         self._running = False
 
     @abstractmethod
-    async def on_start(self):
+    async def _on_start(self):
         """Méthode à implémenter : logique lors du démarrage."""
         pass
 
     @abstractmethod
-    def on_stop(self):
+    def _on_stop(self):
         """Méthode à implémenter : logique lors de l'arrêt."""
         pass
 

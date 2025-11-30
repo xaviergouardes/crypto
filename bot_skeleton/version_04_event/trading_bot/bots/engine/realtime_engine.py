@@ -33,11 +33,9 @@ class RealTimeEngine():
         # Démarre le notifier Telegram
         self._telegram_notifier.start()
 
-        # Récup warmup
-        await self._candle_source.warmup()
+        # Lancement du flux de candle
+        await self._candle_source.start()
 
-        # Lancer le stream dans une tâche concurrente
-        await self._candle_source.stream()
 
     @override
     def stop(self):

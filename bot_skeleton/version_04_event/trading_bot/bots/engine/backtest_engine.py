@@ -28,11 +28,10 @@ class BacktestEngine(Engine):
         # Démarrer le pipeline pour que les composants puissent capturer les events
         self._system.start_piepline()
 
-        # Lancer la récupéreration des bougie de warnup
-        await self._candle_source.warmup()
+        await self._candle_source.start()
 
-        # Boucle événementielle -> non bloqunte en backtest
-        await self._candle_source.stream() 
+        # Attendre la fin de la lecture du fichier csv
+        await self._candle_source.join()
 
         self.logger.debug(f" self._system.trader_journal : {self._system.get_trades_journal()} ")
         return self._system.get_trades_journal()

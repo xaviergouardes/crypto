@@ -19,8 +19,7 @@ class CandleSourceBinance(CandleSource):
     logger = Logger.get("CandleSourceBinance")
 
     def __init__(self, event_bus: EventBus, params: dict):
-
-        self.event_bus = event_bus
+        super().__init__(event_bus)
         self.params = params
 
         self.symbol = params["symbol"]
@@ -34,7 +33,7 @@ class CandleSourceBinance(CandleSource):
         self._seconds = int(self.interval[:-1]) * 60  # intervalle en secondes
 
     @override
-    async def warmup(self):
+    async def _warmup(self):
         """
         Récupère les dernières bougies via l'API REST
         et publie un CandleHistoryReady.
@@ -65,11 +64,11 @@ class CandleSourceBinance(CandleSource):
         )
 
     @override
-    async def stream(self):
+    async def _stream(self):
         """
         Flux temps réel : publie un CandleClose pour chaque bougie clôturée.
         """
-        while True:
+        while not self.should_stop():
             try:
                 self.logger.info(f"Connexion au websocket Binance ({self.symbol}, {self.interval})...")
                 async with websockets.connect(self._ws_url) as ws:

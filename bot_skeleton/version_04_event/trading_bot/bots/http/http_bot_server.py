@@ -23,9 +23,9 @@ class HttpBotServer:
         self.app.add_routes([
             web.post("/start", self._handle_start),
             web.post("/stop", self._handle_stop),
-            web.get("/status", self._handle_status),
             web.post('/shutdown', self._handle_shutdown),
             web.post('/backtest', self._handle_backtest),
+            web.get("/status", self._handle_status),
         ])
 
         self._runner = None
@@ -47,11 +47,8 @@ class HttpBotServer:
     async def _handle_backtest(self, request):
         try:
             data = await request.json()   # <--- Le body JSON
-
-            # Exemple d'accès aux champs
             params = data
 
-            # Log pour debug
             self._logger.info(f"[HTTP] Backtest demandé : bot={self.bot.bot_type}, params={params}")
 
             bot_class = self.bot.__class__

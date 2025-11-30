@@ -3,7 +3,7 @@ import logging
 from trading_bot.bots.sweep_bot import SweepBot
 from trading_bot.core.logger import Logger
 
-def main():
+async def main():
     params = {
         "symbol": "ethusdc",
         "interval": "1m",
@@ -18,7 +18,8 @@ def main():
 
     bot = SweepBot()
     bot.sync(params)
-    asyncio.run( bot.start() )
+    await bot.start()
+    await asyncio.sleep(3600) 
     print(" ============== Terminé ======================")
 
 if __name__ == "__main__":
@@ -30,5 +31,5 @@ if __name__ == "__main__":
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
 
-    main()
+    asyncio.run(main())
 

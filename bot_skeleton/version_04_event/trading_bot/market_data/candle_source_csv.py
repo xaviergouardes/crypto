@@ -19,7 +19,7 @@ class CandleSourceCsv(CandleSource):
     REQUIRED_COLS = {"timestamp", "open", "high", "low", "close", "volume"}
 
     def __init__(self, event_bus: EventBus, params: dict):
-        self.event_bus = event_bus
+        super().__init__(event_bus)
         self.params = params
 
     def _read_csv(self) -> pd.DataFrame:
@@ -45,7 +45,7 @@ class CandleSourceCsv(CandleSource):
         )
     
     @override
-    async def warmup(self):
+    async def _warmup(self):
         p = self.params
         df = self._read_csv()
 
@@ -68,8 +68,12 @@ class CandleSourceCsv(CandleSource):
             )
         )
 
+    async def join(self):
+        if self._stream_task:
+            await self._stream_task
+
     @override
-    async def stream(self):
+    async def _stream(self):
         p = self.params
         df = self._read_csv()
 
@@ -82,17 +86,22 @@ class CandleSourceCsv(CandleSource):
         seconds = int(p["interval"][:-1]) * 60
 
         for _, row in df.iterrows():
+            if self.should_stop(): 
+                self.logger.info("Arrêt demandé — fin du flux CSV.")
+                return
+        
             candle = self._create_candle(row, seconds)
             await self.event_bus.publish(CandleClose(symbol=p["symbol"], candle=candle))
 
-    def _dump_candles(self, candles):
-        """Affiche les bougies pour debug."""
-        for i, c in enumerate(candles, start=1):
-            start = c.start_time.replace(tzinfo=ZoneInfo("UTC"))
-            end = c.end_time.replace(tzinfo=ZoneInfo("UTC"))
-            print(
-                f"CandleSourceCsv - "
-                f"{i:02d}. "
-                f"[{start.strftime('%Y-%m-%d %H:%M:%S')} ➝ {end.strftime('%Y-%m-%d %H:%M:%S')}] "
-                f"{c.symbol} | O:{c.open:.2f} H:{c.high:.2f} L:{c.low:.2f} C:{c.close:.2f} V:{c.volume:.2f}"
-            )
+
+    # def _dump_candles(self, candles):
+    #     """Affiche les bougies pour debug."""
+    #     for i, c in enumerate(candles, start=1):
+    #         start = c.start_time.replace(tzinfo=ZoneInfo("UTC"))
+    #         end = c.end_time.replace(tzinfo=ZoneInfo("UTC"))
+    #         print(
+    #             f"CandleSourceCsv - "
+    #             f"{i:02d}. "
+    #             f"[{start.strftime('%Y-%m-%d %H:%M:%S')} ➝ {end.strftime('%Y-%m-%d %H:%M:%S')}] "
+    #             f"{c.symbol} | O:{c.open:.2f} H:{c.high:.2f} L:{c.low:.2f} C:{c.close:.2f} V:{c.volume:.2f}"
+    #         )
