@@ -9,7 +9,7 @@
 
 from typing import override
 
-from trading_bot.system_trading.system import System
+from trading_bot.core.logger import Logger
 
 from trading_bot.core.event_bus import EventBus
 
@@ -24,17 +24,24 @@ from trading_bot.trade_journal.trade_journal import TradeJournal
 from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 
 
-class SimpleSweepSystemTrading(System):
+class SimpleSweepSystemTrading():
+    """
+    Implémente le système de trading, la stratégie.
+    N'a pas besoin d'etre startable car tous ces composants sont ré-instancier systématiquement au démarrage du bot
+    afin de garantir la prise en compte des bon paramétrage t du bon warmup
+    """
+
+    _logger = Logger.get("SimpleSweepSystemTrading")
 
     def __init__(self, event_bus: EventBus, params:dict):
         self.event_bus =  event_bus
         self.params = params
 
-    @override
-    def start_piepline(self):
+        self._logger.info(f"Demmarage demandé")
+
         p = self.params
     
-        self.indicator_swing_detector = IndicatorSimpleSwingDetector(self.event_bus, swing_side=p["trading_system"]["swing_side"], swing_window=p["trading_system"]["swing_window"])
+        self._indicator_swing_detector = IndicatorSimpleSwingDetector(self.event_bus, swing_side=p["trading_system"]["swing_side"], swing_window=p["trading_system"]["swing_window"])
 
         self.signal_engine = SimpleSweepSwingSignalEngine(self.event_bus)      
         
@@ -43,6 +50,9 @@ class SimpleSweepSystemTrading(System):
         
         self.trader_journal = TradeJournal(self.event_bus)
         self.portefolio_manager = PortfolioManager(self.event_bus, starting_usdc=p["initial_capital"])
+
+        self._logger.info(f"Demmarage Terminé")
+
 
     def get_trades_journal(self) -> list:
         trades =  self.trader_journal.get_trades_journal()

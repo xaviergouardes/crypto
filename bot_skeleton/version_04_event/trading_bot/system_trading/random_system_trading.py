@@ -12,8 +12,6 @@ from trading_bot.system_trading.system import System
 
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.indicator_simple_swing_detector import IndicatorSimpleSwingDetector
-
 from trading_bot.signal_engines.random_signal_engine import RandomSignalEngine
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
@@ -38,7 +36,7 @@ class RandomSystemTrading(System):
         return self.params
     
     @override
-    def start_piepline(self):
+    def start(self):
         p = self.params
 
         self.signal_engine = RandomSignalEngine(self.event_bus)      

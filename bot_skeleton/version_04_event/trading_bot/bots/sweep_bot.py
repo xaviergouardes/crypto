@@ -20,7 +20,7 @@ class SweepBot(Startable):
     logger = Logger.get("SweepBot")
 
     # def __init__(self, params, mode):
-    def __init__(self, bot_id="sweep_bot_01"):
+    def __init__(self, bot_id="sweep_bot_01", params:dict = None):
         super().__init__()
 
         self._event_bus = EventBus()
@@ -31,11 +31,13 @@ class SweepBot(Startable):
         self._engine = None
         self._mode = None
 
-        self._params = self._default_params()
+        if params is None : 
+            self._params = self._default_params()
+        else:
+            self._params = params
         self._params = self._compute_warmup_count(self._params)
 
-        self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)  
-        self.set_realtime_mode()
+        self._system_trading = None
 
         self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
 
@@ -44,7 +46,6 @@ class SweepBot(Startable):
         if self.is_running():
             raise Exception("Pas possible de changer le mode en cours d'execution !")
         self._mode = "backtest"
-        self._engine = BacktestEngine(self._event_bus, self._system_trading, self._params)
         self.logger.info(f"Mode backtest positioné")
 
 
@@ -52,72 +53,39 @@ class SweepBot(Startable):
         if self.is_running():
             raise Exception("Pas possible de changer le mode en cours d'execution !")
         self._mode = "realtime"
-        self._engine = RealTimeEngine(self._event_bus, self._system_trading, self._params)
         self.logger.info(f"Mode realtime positioné")
+
 
     def sync(self, params: dict):
         if self.is_running():
             raise Exception("Impossible de changer les paramètres en cours d'exécution !")
 
-        # -------------------------
-        # 0. Helpers
-        # -------------------------
-        def deep_merge_trading_system(default_ts, incoming_ts):
-            """Fusionne proprement les sous-clés trading_system sans écraser les defaults."""
-            merged = default_ts.copy()
-            for k, v in incoming_ts.items():
-                merged[k] = v
-            return merged
+        def merge_dicts(default: dict, update: dict) -> dict:
+            """Merge profond limité au 1er niveau pour les sous-dicts."""
+            result = default.copy()
+            for k, v in update.items():
+                if isinstance(v, dict) and isinstance(result.get(k), dict):
+                    result[k] = {**result[k], **v}
+                else:
+                    result[k] = v
+            return result
 
-        # -------------------------
-        # 1. Filtrer les paramètres inconnus
-        # -------------------------
+        # --- 1. Filtrer les paramètres inconnus ---
         default_keys = set(self._params.keys())
-        incoming_keys = set(params.keys())
-
-        # Paramètres inconnus = non présents dans les defaults
-        unknown_keys = incoming_keys - default_keys
-        if unknown_keys:
-            unknown_params = {k: params[k] for k in unknown_keys}
-            self.logger.warning(f"Paramètres inconnus ignorés : {unknown_params}")
-
-        # On ne garde que les paramètres valides
         valid_params = {k: v for k, v in params.items() if k in default_keys}
 
-        # -------------------------
-        # 2. Merge profond et propre
-        # -------------------------
-        merged = self._params.copy()
+        unknown_keys = set(params) - default_keys
+        if unknown_keys:
+            self.logger.warning(f"Paramètres inconnus ignorés : "
+                                f"{ {k: params[k] for k in unknown_keys} }")
 
-        for key, value in valid_params.items():
-            if key == "trading_system":
-                merged["trading_system"] = deep_merge_trading_system(
-                    self._params["trading_system"],
-                    value
-                )
-            else:
-                merged[key] = value
+        # --- 2. Merge propre et automatique ---
+        merged = merge_dicts(self._params, valid_params)
 
-        # -------------------------
-        # 3. Recalcule warmup
-        # -------------------------
-        self._params = self._compute_warmup_count(merged.copy())
+        # --- 3. Warmup ---
+        self._params = self._compute_warmup_count(merged)
 
-        # -------------------------
-        # 4. Re-crée les sous-systèmes
-        # -------------------------
-        self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)
-
-        if self._mode == "realtime":
-            self.set_realtime_mode()
-        elif self._mode == "backtest":
-            self.set_backtest_mode()
-
-        # -------------------------
-        # 5. Log final
-        # -------------------------
         self.logger.info(f"Paramètres synchronisés : {self._params}")
-
 
 
     def get_trades_journal(self):
@@ -127,14 +95,28 @@ class SweepBot(Startable):
     @override
     async def _on_start(self) -> list:
         self.logger.info("SweepBot démarré.")
-        trades_list = await self._engine.run()
+
+        self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)
+
+        if self._mode == "realtime":
+            self._engine = RealTimeEngine(self._event_bus, self._system_trading, self._params)
+        elif self._mode == "backtest":
+            self._engine = BacktestEngine(self._event_bus, self._system_trading, self._params)
+        else:
+            raise ValueError(f"Mode inconnu : {self._mode}. Valeurs acceptées : realtime, backtest.")
+        
+        trades_list = await self._engine.start()
         return trades_list
 
     @override
     def _on_stop(self):
-        self._engine.stop()
-        self._system_trading.stop()
-        self.logger.info("SweepBot arrêté.")
+        if self.is_running():
+            self._engine.stop()
+            # Pour libérer les objets qui sont abonée sur le bus
+            self._event_bus.unsubscribe_all()
+            # Pour etre sur que l'aobjet soit bien rétinstancier
+            self._system_trading = None
+            self.logger.info("SweepBot arrêté.")
 
     def _default_params(self) -> dict:
         return {

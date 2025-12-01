@@ -168,7 +168,7 @@ if __name__ == "__main__":
     Logger.set_default_level(logging.WARNING)
 
     # Niveau spécifique pour
-    Logger.set_level("BotTrainer", logging.INFO)
+    # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("Backtest", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)

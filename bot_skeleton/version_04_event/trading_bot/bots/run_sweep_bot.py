@@ -18,8 +18,29 @@ async def main():
 
     bot = SweepBot()
     bot.sync(params)
-    await bot.start()
-    await asyncio.sleep(3600) 
+    bot.set_realtime_mode()
+
+    try:
+        print("====> 1 Bot lancé, attente 3 minutes...")
+        await bot.start()
+        await asyncio.sleep(70)  # 3 minutes
+        bot.stop()
+
+        await asyncio.sleep(120)  # 3 minutes
+
+        print("====> 2 Bot lancé, attente 3 minutes...")
+        await bot.start()
+        await asyncio.sleep(70)  # 3 minutes
+        bot.stop()
+
+    except Exception as e:
+        print(f"Erreur pendant l'exécution : {e}")
+
+    finally:
+        print("Arrêt du bot...")
+        bot.stop()
+        print("Bot arrêté proprement.")
+        
     print(" ============== Terminé ======================")
 
 if __name__ == "__main__":

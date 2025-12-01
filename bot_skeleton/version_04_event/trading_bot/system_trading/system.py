@@ -13,7 +13,7 @@ class System(abc.ABC):
 
 
     @abc.abstractmethod
-    def start_piepline(self):
+    def start(self):
         """
         Méthode principale qui démarre l'exécution du mopipeline de traitement du système de trading
         Doit être implémentée par les classes concrètes.

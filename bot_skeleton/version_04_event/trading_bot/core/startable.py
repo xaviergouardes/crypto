@@ -11,13 +11,15 @@ class Startable(ABC):
 
     async def start(self):
         """Démarre le composant."""
-        self._running = True
-        return await self._on_start()
+        if not self._running:
+            self._running = True
+            return await self._on_start()
 
     def stop(self):
         """Arrête le composant."""
-        self._on_stop()
-        self._running = False
+        if self._running:
+            self._on_stop()
+            self._running = False
 
     @abstractmethod
     async def _on_start(self):

@@ -1,33 +1,31 @@
+from typing import override
 import pandas as pd
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.logger import Logger
 
+from trading_bot.core.startable import Startable
 from trading_bot.market_data.candle_source_csv import CandleSourceCsv
-from trading_bot.bots.engine.engine import Engine
 from trading_bot.system_trading.system import System
 
-class BacktestEngine(Engine):
+class BacktestEngine(Startable):
 
     logger = Logger.get("BacktestEngine")
       
     def __init__(self, event_bus:EventBus, system: System, params: dict):
+        super().__init__() 
         self._event_bus =  event_bus
         self._params = params
         self._system = system
 
-        self._running = None
-
         self._candle_source = CandleSourceCsv(self._event_bus, self._params) 
 
+    @override
+    async def _on_start(self):
+        """Démarre le pipeline de traitement"""
+        self.logger.info("Démarrage demandé")
 
-    async def run(self) -> list:
-        pass
-        self._running = True
-        
-        # Démarrer le pipeline pour que les composants puissent capturer les events
-        self._system.start_piepline()
-
+         # Démarrer la lecture du fichier csv
         await self._candle_source.start()
 
         # Attendre la fin de la lecture du fichier csv
@@ -36,9 +34,9 @@ class BacktestEngine(Engine):
         self.logger.debug(f" self._system.trader_journal : {self._system.get_trades_journal()} ")
         return self._system.get_trades_journal()
 
-
-    def stop(self):
-        self._running = False
-        # Ajouter code pour arrêter proprement le candle_source si nécessaire
+    @override
+    def _on_stop(self):
+         self.logger.info("Arret demandé")
+         self._candle_source.stop()
 
 

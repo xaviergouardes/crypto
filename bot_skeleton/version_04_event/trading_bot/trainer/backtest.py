@@ -59,7 +59,7 @@ if __name__ == "__main__":
     Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
-    # Logger.set_level("Backtest", logging.DEBUG)
+    Logger.set_level("Backtest", logging.DEBUG)
     # Logger.set_level("BacktestEngine", logging.INFO)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)

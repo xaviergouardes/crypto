@@ -7,8 +7,9 @@ from zoneinfo import ZoneInfo
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose, NewSoldes
+from trading_bot.core.startable import Startable
 
-class TelegramNotifier:
+class TelegramNotifier():
     """
     Envoie une notification Telegram quand un trade se ferme et que le solde a été mis à jour.
     """
@@ -19,7 +20,6 @@ class TelegramNotifier:
 
         self.token = "8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA"
         self.chat_id = "6070936106"
-        self._running = False
 
         # Pour synchroniser les événements
         self.message_data = {
@@ -33,15 +33,11 @@ class TelegramNotifier:
         self.logger.info(f"Initialisé  - {self.token}")
 
     async def on_new_soldes(self, event: NewSoldes):
-        if not self._running: return
-
         """Reçoit la mise à jour du solde."""
         self.message_data["solde"] = event.usdc
         await self.try_send_message()
 
     async def on_trade_close(self, event: TradeClose):
-        if not self._running: return
-
         """Reçoit la clôture du trade."""
         # Calcul du PnL (simplifié)
         if event.target == "TP":
@@ -96,8 +92,3 @@ class TelegramNotifier:
         result = subprocess.run(cmd, check=False, capture_output=True, text=True)
         self.logger.debug(f"Telegram response: {result.stdout}")
 
-    def start(self):
-        self._running = True
-
-    def stop(self):
-        self._running = False

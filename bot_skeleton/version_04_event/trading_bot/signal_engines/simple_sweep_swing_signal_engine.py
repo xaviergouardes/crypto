@@ -25,7 +25,7 @@ class SimpleSweepSwingSignalEngine:
         # Abonnements
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
-        self.logger.info("[StrategySweepSwingEngine] Initisé") 
+        self.logger.info("Initisé") 
 
     async def on_indicator_update(self, event: IndicatorUpdated):
         """Récupère les swings forts émis par l'indicateur. IndicatorSimpleSwingDetector"""

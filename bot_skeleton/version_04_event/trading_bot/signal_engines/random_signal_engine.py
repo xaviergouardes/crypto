@@ -6,9 +6,7 @@ from trading_bot.core.events import TradeSignalGenerated, CandleClose, Price
 
 
 class RandomSignalEngine:
-    """
-    Stratégie Sweep Swing compatible avec IndicatorSimpleSwingDetector :
-    """
+
     logger = Logger.get("RandomSignalEngine")
 
     def __init__(self, event_bus: EventBus):

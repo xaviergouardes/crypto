@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Deque, Optional, List
+from typing import Deque, Optional, List, override
 from datetime import datetime
 import numpy as np
 import json
@@ -7,16 +7,18 @@ import json
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
+from trading_bot.system_trading.pipeline_component import PipelineComponent
 
 
-class IndicatorSimpleSwingDetector:
+class IndicatorSimpleSwingDetector(PipelineComponent):
     """
     Détecte les swings highs/lows sur une fenêtre historique de N bougies.
     Conserve le max swing high et le min swing low dans cette fenêtre.
     """
-    logger = Logger.get("IndicatorSimpleSwingDetector")
+    _logger = Logger.get("IndicatorSimpleSwingDetector")
 
     def __init__(self, event_bus: EventBus, swing_side: int = 2, swing_window: int = 21):
+        super().__init__()
         self.event_bus = event_bus
         self.swing_side = swing_side
         self.swing_window = swing_window
@@ -28,18 +30,17 @@ class IndicatorSimpleSwingDetector:
         self.prev_max = None
         self.prev_min = None
 
-        event_bus.subscribe(CandleHistoryReady, self.on_history_ready)
-        event_bus.subscribe(CandleClose, self.on_candle_close)
+        event_bus.subscribe(CandleHistoryReady, self._on_history_ready)
+        event_bus.subscribe(CandleClose, self._on_candle_close)
 
-        self.logger.info(f"init swing_side={self.swing_side} swing_window={self.swing_window}")
+        self._logger.info(f"Démarré avec swing_side={self.swing_side} swing_window={self.swing_window}")
 
 
     # =====================================================
     # Initialisation avec l'historique
     # =====================================================
-    async def on_history_ready(self, event: CandleHistoryReady):
-        self.logger.info("Initialisation ...")
-        
+    async def _on_history_ready(self, event: CandleHistoryReady):
+        self._logger.info(f"Initialisation ...")
         if not event.candles:
             return
         if len(event.candles) < self.candles.maxlen:
@@ -50,21 +51,21 @@ class IndicatorSimpleSwingDetector:
         for c in event.candles[-self.candles.maxlen:]:
             self.candles.append(c)
         
-        await self._update_and_publish()
-
-        self.logger.info(f"Initialisation terminée ({self.swing_window})")
+        self._logger.info(f"Initialisation terminée ({self.swing_window})")
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] Première bougie: {self.candles[0]} ")
         # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorSimpleSwingDetector] Dernière bougie: {self.candles[-1]}")
+
+        await self.execute()
 
     # =====================================================
     # Temps réel
     # =====================================================
-    async def on_candle_close(self, event: CandleClose):
+    async def _on_candle_close(self, event: CandleClose):
         if event.symbol.upper() != self.symbol:
             return
         
         self.candles.append(event.candle)
-        await self._update_and_publish()
+        await self.execute()
 
     # =====================================================
     # Calculs internes
@@ -101,7 +102,8 @@ class IndicatorSimpleSwingDetector:
 
     
 
-    async def _update_and_publish(self):
+    @override
+    async def execute(self):
         
         candles = list(self.candles)
 

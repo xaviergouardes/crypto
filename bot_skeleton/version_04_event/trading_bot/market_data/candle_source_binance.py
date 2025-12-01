@@ -31,6 +31,7 @@ class CandleSourceBinance(CandleSource):
         self._reconnect_delay = 5  # secondes
 
         self._seconds = int(self.interval[:-1]) * 60  # intervalle en secondes
+        self.logger.info(f"Initialisé - running={self.is_running()}")
 
     @override
     async def _warmup(self):

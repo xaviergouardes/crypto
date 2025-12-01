@@ -28,3 +28,8 @@ class EventBus:
         if event_type in self._subscribers:
             if callback in self._subscribers[event_type]:
                 self._subscribers[event_type].remove(callback)
+
+    def unsubscribe_all(self):
+        """Désinscrit tous les abonnés sans supprimer les types d'événements."""
+        for event_type in self._subscribers:
+            self._subscribers[event_type].clear()

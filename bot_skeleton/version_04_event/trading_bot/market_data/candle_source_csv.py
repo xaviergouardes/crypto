@@ -21,6 +21,7 @@ class CandleSourceCsv(CandleSource):
     def __init__(self, event_bus: EventBus, params: dict):
         super().__init__(event_bus)
         self.params = params
+        self.logger.info(f"Initialisé - running={self.is_running()}")
 
     def _read_csv(self) -> pd.DataFrame:
         """Lit le CSV et convertit les timestamps en datetime UTC."""

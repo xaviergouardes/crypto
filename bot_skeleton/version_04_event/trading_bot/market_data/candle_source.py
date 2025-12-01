@@ -4,11 +4,14 @@ from abc import ABC, abstractmethod
 import asyncio
 from typing import override
 
+from trading_bot.core.logger import Logger
 from trading_bot.core.startable import Startable
 from trading_bot.core.event_bus import EventBus
 
 
 class CandleSource(Startable, ABC):
+
+    _logger = Logger.get("CandleSource")
 
     def __init__(self, event_bus: EventBus):
         super().__init__()
@@ -22,7 +25,7 @@ class CandleSource(Startable, ABC):
 
     @override
     async def _on_start(self):
-        """Démarre warmup puis le flux."""
+        self._logger.info("Démarrage demandé")
         self._stop_event.clear()
 
         await self._warmup()
@@ -30,7 +33,7 @@ class CandleSource(Startable, ABC):
 
     @override
     def _on_stop(self):
-        """Arrêt propre du flux."""
+        self._logger.info("Arret demandé")
         self._stop_event.set()
 
         if self._stream_task:
