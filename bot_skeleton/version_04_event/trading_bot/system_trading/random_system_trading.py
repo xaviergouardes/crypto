@@ -8,8 +8,6 @@
 
 from typing import override
 
-from trading_bot.system_trading.system import System
-
 from trading_bot.core.event_bus import EventBus
 
 from trading_bot.signal_engines.random_signal_engine import RandomSignalEngine
@@ -23,20 +21,12 @@ from trading_bot.trade_journal.telegram_notifier import TelegramNotifier
 from trading_bot.trade_journal.portfolio_manager import PortfolioManager
 
 
-class RandomSystemTrading(System):
+class RandomSystemTrading():
 
     def __init__(self, event_bus:EventBus, params:dict):
         self.event_bus =  event_bus
         self.params = params
-        
-    @override
-    def compute_warmup_count(self) -> int:
-        warmup_count = 1 
-        self.params["warmup_count"] = warmup_count
-        return self.params
-    
-    @override
-    def start(self):
+
         p = self.params
 
         self.signal_engine = RandomSignalEngine(self.event_bus)      
@@ -46,3 +36,6 @@ class RandomSystemTrading(System):
         
         self.trader_journal = TradeJournal(self.event_bus)
         self.portefolio_manager = PortfolioManager(self.event_bus, starting_usdc=p["initial_capital"])
+        
+
+

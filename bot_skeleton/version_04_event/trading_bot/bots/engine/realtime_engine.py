@@ -7,7 +7,6 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.core.logger import Logger
 from trading_bot.core.startable import Startable
 from trading_bot.market_data.candle_source_binance import CandleSourceBinance
-from trading_bot.system_trading.system import System
 
 from trading_bot.trade_journal.telegram_notifier import TelegramNotifier
 
@@ -15,14 +14,10 @@ class RealTimeEngine(Startable):
       
     _logger = Logger.get("RealTimeEngine")
 
-    def __init__(self, event_bus:EventBus, system: System, params: dict):
+    def __init__(self, event_bus:EventBus, params: dict):
         super().__init__() 
         self._event_bus =  event_bus
         self._params = params
-        self._system = system
-
-        # Priorité au warmup_count fourni dans les params
-        # self.params = self.system.compute_warmup_count()
 
         self._candle_source = CandleSourceBinance(self._event_bus, self._params) 
         self._telegram_notifier = TelegramNotifier(self._event_bus)

@@ -99,13 +99,15 @@ class SweepBot(Startable):
         self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)
 
         if self._mode == "realtime":
-            self._engine = RealTimeEngine(self._event_bus, self._system_trading, self._params)
+            self._engine = RealTimeEngine(self._event_bus, self._params)
         elif self._mode == "backtest":
-            self._engine = BacktestEngine(self._event_bus, self._system_trading, self._params)
+            self._engine = BacktestEngine(self._event_bus, self._params)
         else:
             raise ValueError(f"Mode inconnu : {self._mode}. Valeurs acceptées : realtime, backtest.")
         
-        trades_list = await self._engine.start()
+        await self._engine.start()
+
+        trades_list = self._system_trading.get_trades_journal()
         return trades_list
 
     @override
