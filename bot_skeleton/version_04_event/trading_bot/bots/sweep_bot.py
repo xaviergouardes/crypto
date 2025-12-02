@@ -4,7 +4,6 @@ import logging
 from typing import override
 import argparse
 
-from trading_bot.bots.http.http_bot_server import HttpBotServer
 from trading_bot.core.logger import Logger
 
 from trading_bot.core.event_bus import EventBus
@@ -28,16 +27,15 @@ class SweepBot(Startable):
         self.bot_id = bot_id
         self.bot_type = "sweep_bot"
         
-        self._engine = None
         self._mode = None
+        self._engine = None
+        self._system_trading = None
 
         if params is None : 
             self._params = self._default_params()
         else:
             self._params = params
         self._params = self._compute_warmup_count(self._params)
-
-        self._system_trading = None
 
         self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
 
@@ -94,7 +92,7 @@ class SweepBot(Startable):
 
     @override
     async def _on_start(self) -> list:
-        self.logger.info("SweepBot démarré.")
+        self.logger.info("Demarrage Demandé.")
 
         self._system_trading = SimpleSweepSystemTrading(self._event_bus, self._params)
 
@@ -141,31 +139,3 @@ class SweepBot(Startable):
         return return_params
     
 
-
-# ----------------------------------------
-# Lancement direct
-# ----------------------------------------
-if __name__ == "__main__":
-    Logger.set_default_level(logging.INFO)
-
-    # Logger.set_level("BotManagerServer", logging.DEBUG)
-    # Logger.set_level("CommandDispatcher", logging.DEBUG)
-    # Logger.set_level("BotManager", logging.DEBUG)
-    # Logger.set_level("BotTrainer", logging.INFO)
-    # Logger.set_level("Backtest", logging.DEBUG)
-        
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--bot_id", default="sweep_bot_01")
-    parser.add_argument("--port", type=int, default=9101)
-    args = parser.parse_args()
-
-    # Création du bot avec paramètres dynamiques
-    bot = SweepBot(bot_id=args.bot_id)
-    http_server = HttpBotServer(bot, port=args.port)
-
-    async def main():
-        await http_server.start()
-        await http_server.register()
-        await http_server.wait_closed()
-
-    asyncio.run(main())
