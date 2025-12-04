@@ -123,6 +123,7 @@ class StatsEngine:
         self.indicators = indicators or []
 
     def analyze(self, df: pd.DataFrame, stats: dict = None, params: dict = None):
+
         stats = stats or {}
         params = params or {}
 

@@ -31,11 +31,13 @@ class RandomSystemTrading():
 
         self.signal_engine = RandomSignalEngine(self.event_bus)      
         
-        self.risk_manager = RiskManager(self.event_bus, tp_percent=p["tp_pct"], sl_percent=p["sl_pct"], solde_disponible=p["initial_capital"])     
+        self.risk_manager = RiskManager(self.event_bus, tp_percent=p["trading_system"]["tp_pct"], sl_percent=p["trading_system"]["sl_pct"], solde_disponible=p["trading_system"]["initial_capital"])     
         self.trader = TraderOnlyOnePosition(self.event_bus)
         
         self.trader_journal = TradeJournal(self.event_bus)
-        self.portefolio_manager = PortfolioManager(self.event_bus, starting_usdc=p["initial_capital"])
+        self.portefolio_manager = PortfolioManager(self.event_bus, starting_usdc=p["trading_system"]["initial_capital"])
         
 
-
+    def get_trades_journal(self) -> list:
+        trades =  self.trader_journal.get_trades_journal()
+        return trades

@@ -20,7 +20,7 @@ class RealTimeEngine(Startable):
         self._params = params
 
         self._candle_source = CandleSourceBinance(self._event_bus, self._params) 
-        self._telegram_notifier = TelegramNotifier(self._event_bus)
+        self._telegram_notifier = TelegramNotifier(self._event_bus, self._params) 
 
     @override
     async def _on_start(self):

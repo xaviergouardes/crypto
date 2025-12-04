@@ -79,7 +79,7 @@ class CandleSourceBinance(CandleSource):
                         k = data["k"]
                         if k["x"]:  # bougie clôturée
                             candle = self._ws_dict_to_candle(k)
-                            self.logger.info(f"Bougie Close : {candle}")
+                            self.logger.debug(f"Bougie Close : {candle}")
                             await self.event_bus.publish(CandleClose(
                                 symbol=self.symbol,
                                 candle=candle

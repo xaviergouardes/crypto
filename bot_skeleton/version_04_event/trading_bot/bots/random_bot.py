@@ -1,6 +1,7 @@
 
 import asyncio
 import logging
+from typing import override
 
 from trading_bot.core.event_bus import EventBus
 
@@ -8,74 +9,153 @@ from trading_bot.core.logger import Logger
 
 from trading_bot.bots.engine.realtime_engine import RealTimeEngine
 from trading_bot.bots.engine.backtest_engine import BacktestEngine
+from trading_bot.core.startable import Startable
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 
-# Niveau global : silence tout sauf WARNING et plus
-Logger.set_default_level(logging.DEBUG)
 
-# Niveau spécifique pour
-# Logger.set_level("BotTrainer", logging.INFO)
-# Logger.set_level("PortfolioManager", logging.DEBUG)
-# Logger.set_level("TradeJournal", logging.DEBUG)
+class RandomBot(Startable):
 
-class RandomBot:
     logger = Logger.get("RandomBot")
 
-    def __init__(self, params):
+    # def __init__(self, params, mode):
+    def __init__(self, bot_id="random_bot_01", params:dict = None):
+        super().__init__()
 
-        self.event_bus = EventBus()
+        self._event_bus = EventBus()
+
+        self.bot_id = bot_id
+        self.bot_type = "random_bot"
+
         
-        self.params = params
-        self.system_trading = RandomSystemTrading(self.event_bus, params)   
+        self._mode = None
+        self._engine = None
+        self._system_trading = None
 
-        if mode == "backtest":
-            self.engine = BacktestEngine(self.event_bus, self.system_trading, path=params["backtest"]["path"])
+        if params is None : 
+            self._params = self._default_params()
         else:
-            self.engine = RealTimeEngine(self.event_bus, self.system_trading, self.params)
+            self._params = params
+        self._params = self._compute_warmup_count(self._params)
 
-    def run(self):
-        asyncio.run(self.engine.run())
+        self._params["bot_id"] = bot_id
+        
+        self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
 
 
-if __name__ == "__main__":
+    def set_backtest_mode(self):
+        if self.is_running():
+            raise Exception("Pas possible de changer le mode en cours d'execution !")
+        self._mode = "backtest"
+        self.logger.info(f"Mode backtest positioné")
 
-    # Lancer le bot en mode backtest
+
+    def set_realtime_mode(self):
+        if self.is_running():
+            raise Exception("Pas possible de changer le mode en cours d'execution !")
+        self._mode = "realtime"
+        self.logger.info(f"Mode realtime positioné")
+
+
+    def sync(self, params: dict):
+        if self.is_running():
+            raise Exception("Impossible de changer les paramètres en cours d'exécution !")
+
+        def merge_dicts(default: dict, update: dict) -> dict:
+            """Merge profond limité au 1er niveau pour les sous-dicts."""
+            result = default.copy()
+            for k, v in update.items():
+                if isinstance(v, dict) and isinstance(result.get(k), dict):
+                    result[k] = {**result[k], **v}
+                else:
+                    result[k] = v
+            return result
+
+        # --- 1. Filtrer les paramètres inconnus ---
+        default_keys = set(self._params.keys())
+        valid_params = {k: v for k, v in params.items() if k in default_keys}
+
+        unknown_keys = set(params) - default_keys
+        if unknown_keys:
+            self.logger.warning(f"Paramètres inconnus ignorés : "
+                                f"{ {k: params[k] for k in unknown_keys} }")
+
+        # --- 2. Merge propre et automatique ---
+        merged = merge_dicts(self._params, valid_params)
+
+        # --- 3. Warmup ---
+        self._params = self._compute_warmup_count(merged)
+
+        self.logger.info(f"Paramètres synchronisés : {self._params}")
+
+
+    def get_trades_journal(self):
+        trades = self._system_trading.get_trades_journal()   
+        return trades 
+
+    @override
+    async def _on_start(self) -> list:
+        self.logger.info("Demarrage Demandé.")
+
+        self._system_trading = RandomSystemTrading(self._event_bus, self._params)
+
+        if self._mode == "realtime":
+            self._engine = RealTimeEngine(self._event_bus, self._params)
+        elif self._mode == "backtest":
+            self._engine = BacktestEngine(self._event_bus, self._params)
+        else:
+            raise ValueError(f"Mode inconnu : {self._mode}. Valeurs acceptées : realtime, backtest.")
+        
+        await self._engine.start()
+
+        trades_list = self._system_trading.get_trades_journal()
+        return trades_list
+
+    @override
+    def _on_stop(self):
+        if self.is_running():
+            self._engine.stop()
+            # Pour libérer les objets qui sont abonée sur le bus
+            self._event_bus.unsubscribe_all()
+            # Pour etre sur que l'aobjet soit bien rétinstancier
+            self._system_trading = None
+            self.logger.info("randomBot arrêté.")
+
+    def _default_params(self) -> dict:
+        return {
+            "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+            "symbol": "ethusdc",
+            "interval": "1m",
+            "initial_capital": 1000,
+            "trading_system": {
+                "warmup_count": 5,
+                "initial_capital": 1000,
+                "tp_pct": 0.05,
+                "sl_pct": 0.025
+            }
+        }
+
+    def _compute_warmup_count(self, params:dict) -> dict:
+        return_params = params.copy()
+        warmup_count = return_params["trading_system"]["warmup_count"]
+        return_params["trading_system"]["warmup_count"] = warmup_count
+        return return_params
+    
+
+
+
+
+
+
     # params = {
-    #     "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
-    #     "symbol": "ethusdc",
+    #    "symbol": "ethusdc",
     #     "interval": "1m",
     #     "warmup_count": 21,
     #     "initial_capital": 1000,
-    #     "ema_fast": 7,
-    #     "ema_slow": 21,
-    #     "swing_window": 21,
-    #     "swing_side": 2,
-    #     "tp_pct": 1.6,
-    #     "sl_pct": 1
+    #     "tp_pct": 0.05,
+    #     "sl_pct": 0.025
     # }
 
-    # bot = RandomBot(params, "backtest")
-    # asyncio.run(bot.run())
+    # bot = RandomBot(params, "realtime")
+    # bot.run()
 
-    # params = {
-    #     "symbol": "ethusdc",
-    #     "interval": "1m",
-    #     "warmup_count": 3,
-    #     "initial_capital": 1000,
-    #     "tp_pct": 0.1,
-    #     "sl_pct": 0.05
-    # }
-
-    params = {
-       "symbol": "ethusdc",
-        "interval": "1m",
-        "warmup_count": 21,
-        "initial_capital": 1000,
-        "tp_pct": 0.05,
-        "sl_pct": 0.025
-    }
-
-    bot = RandomBot(params, "realtime")
-    bot.run()
-
-    print("\n=== ✅ Bot terminé ===\n")
+    # print("\n=== ✅ Bot terminé ===\n")

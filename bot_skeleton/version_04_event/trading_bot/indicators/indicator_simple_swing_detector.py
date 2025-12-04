@@ -7,10 +7,9 @@ import json
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
-from trading_bot.system_trading.pipeline_component import PipelineComponent
 
 
-class IndicatorSimpleSwingDetector(PipelineComponent):
+class IndicatorSimpleSwingDetector():
     """
     Détecte les swings highs/lows sur une fenêtre historique de N bougies.
     Conserve le max swing high et le min swing low dans cette fenêtre.
@@ -101,8 +100,6 @@ class IndicatorSimpleSwingDetector(PipelineComponent):
         return swing_high, swing_low
 
     
-
-    @override
     async def execute(self):
         
         candles = list(self.candles)

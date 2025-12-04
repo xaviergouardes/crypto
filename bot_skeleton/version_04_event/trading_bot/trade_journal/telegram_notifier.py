@@ -1,45 +1,40 @@
-import subprocess
-import os
-import sys
-from datetime import datetime
-from zoneinfo import ZoneInfo 
+import aiohttp
 
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeClose, NewSoldes
-from trading_bot.core.startable import Startable
+
 
 class TelegramNotifier():
-    """
-    Envoie une notification Telegram quand un trade se ferme et que le solde a été mis à jour.
-    """
     logger = Logger.get("TelegramNotifier")
 
-    def __init__(self, event_bus: EventBus):
+    def __init__(self, event_bus: EventBus, params: dict):
         self.event_bus = event_bus
 
         self.token = "8112934779:AAHwOejwOxsPd5bryocGXDbilwR7tH1hbiA"
         self.chat_id = "6070936106"
-
-        # Pour synchroniser les événements
+        
         self.message_data = {
-            "program_name": os.path.splitext(os.path.basename(sys.argv[0]))[0],
+            "program_name": params["bot_id"],
             "gagne_perdu": None,
             "solde": None,
             "side": None,
             "pnl": None
         }
+        self.event_bus.subscribe(TradeClose, self.on_trade_close)
+        self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
+        # session aiohttp optionnelle, on peut la réutiliser
+        self._session = aiohttp.ClientSession()
+        self.logger.info("Initialisé")
 
-        self.logger.info(f"Initialisé  - {self.token}")
+    async def close(self):
+        await self._session.close()
 
     async def on_new_soldes(self, event: NewSoldes):
-        """Reçoit la mise à jour du solde."""
         self.message_data["solde"] = event.usdc
         await self.try_send_message()
 
     async def on_trade_close(self, event: TradeClose):
-        """Reçoit la clôture du trade."""
-        # Calcul du PnL (simplifié)
         if event.target == "TP":
             close_price = event.tp
         elif event.target == "SL":
@@ -60,19 +55,27 @@ class TelegramNotifier():
         await self.try_send_message()
 
     async def try_send_message(self):
-        """Vérifie si on a reçu à la fois TradeClose et NewSoldes."""
         data = self.message_data
-        if data["solde"] is not None and data["pnl"] is not None:
-            # Construire le message
-            message = (
-                f"{data['program_name']} — {data['gagne_perdu']} "
-                f"{data['side']} | PnL: {data['pnl']:.2f} | Solde: {data['solde']:.2f} USDC"
-            )
-            self.send_message(message)
-            self.reset_message_data()
+        if data["solde"] is None or data["pnl"] is None:
+            # rien à faire, on attend l'autre événement
+            self.logger.debug("try_send_message: données incomplètes")
+            return
+
+        message = (
+            f"{data['program_name']} — {data['gagne_perdu']} "
+            f"{data['side']} | PnL: {data['pnl']:.2f} | Solde: {data['solde']:.2f} USDC"
+        )
+
+        # Envoie asynchrone
+        try:
+            await self._send_message_aiohttp(message)
+            self.logger.debug("Message Telegram sent: %s", message)
+        except Exception as e:
+            self.logger.error("Erreur en envoyant Telegram: %r", e)
+
+        self.reset_message_data()
 
     def reset_message_data(self):
-        """Réinitialise le buffer pour le prochain trade."""
         self.message_data.update({
             "gagne_perdu": None,
             "solde": None,
@@ -80,15 +83,14 @@ class TelegramNotifier():
             "pnl": None
         })
 
-    def send_message(self, text: str):
-        """Envoie le message Telegram via curl sans afficher la sortie."""
-        cmd = [
-            "curl", "-s", "-X", "POST",
-            f"https://api.telegram.org/bot{self.token}/sendMessage",
-            "-d", f"chat_id={self.chat_id}",
-            "-d", f"text={text}"
-        ]
-        # -s (silent) est déjà là mais on peut aussi capturer stdout/stderr
-        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
-        self.logger.debug(f"Telegram response: {result.stdout}")
+    async def _send_message_aiohttp(self, text: str):
+        url = f"https://api.telegram.org/bot{self.token}/sendMessage"
+        payload = {"chat_id": self.chat_id, "text": text}
+        # timeout et gestion d'erreurs
+        async with self._session.post(url, data=payload, timeout=10) as resp:
+            txt = await resp.text()
+            self.logger.debug("Telegram response status=%s body=%s", resp.status, txt)
+            if resp.status != 200:
+                raise RuntimeError(f"TG non-200: {resp.status}")
+
 

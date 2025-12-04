@@ -1,8 +1,0 @@
-{
-  "trading_system": {
-    "swing_window": [100],
-    "tp_pct": [1.5, 2.0],
-    "sl_pct": [1.5]
-  }
-}
-

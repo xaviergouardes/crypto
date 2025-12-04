@@ -94,15 +94,3 @@ class CandleSourceCsv(CandleSource):
             candle = self._create_candle(row, seconds)
             await self.event_bus.publish(CandleClose(symbol=p["symbol"], candle=candle))
 
-
-    # def _dump_candles(self, candles):
-    #     """Affiche les bougies pour debug."""
-    #     for i, c in enumerate(candles, start=1):
-    #         start = c.start_time.replace(tzinfo=ZoneInfo("UTC"))
-    #         end = c.end_time.replace(tzinfo=ZoneInfo("UTC"))
-    #         print(
-    #             f"CandleSourceCsv - "
-    #             f"{i:02d}. "
-    #             f"[{start.strftime('%Y-%m-%d %H:%M:%S')} ➝ {end.strftime('%Y-%m-%d %H:%M:%S')}] "
-    #             f"{c.symbol} | O:{c.open:.2f} H:{c.high:.2f} L:{c.low:.2f} C:{c.close:.2f} V:{c.volume:.2f}"
-    #         )
