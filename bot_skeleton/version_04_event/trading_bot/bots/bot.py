@@ -1,6 +1,4 @@
 
-import asyncio
-import logging
 from typing import override
 
 from trading_bot.core.event_bus import EventBus
@@ -10,26 +8,29 @@ from trading_bot.core.logger import Logger
 from trading_bot.bots.engine.realtime_engine import RealTimeEngine
 from trading_bot.bots.engine.backtest_engine import BacktestEngine
 from trading_bot.core.startable import Startable
-from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 
 from trading_bot.trainer.statistiques_engine import *
 
-class RandomBot(Startable):
+from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 
-    logger = Logger.get("RandomBot")
+class Bot(Startable):
+
+    logger = Logger.get("Bot")
 
     # def __init__(self, params, mode):
-    def __init__(self, bot_id="random_bot_01", params:dict = None):
+    def __init__(self, bot_type="bot_type", bot_id="bot_01", system_trading_class=None, params:dict = None):
         super().__init__()
 
         self._event_bus = EventBus()
 
         self.bot_id = bot_id
-        self.bot_type = "random_bot"
+        self.bot_type = bot_type
 
         
         self._mode = None
         self._engine = None
+
+        self._system_trading_class = system_trading_class
         self._system_trading = None
 
         if params is None : 
@@ -40,7 +41,7 @@ class RandomBot(Startable):
 
         self._params["bot_id"] = bot_id
         
-        self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
+        self.logger.info(f"Bot {self.bot_type} {self.bot_id} Initilisation Terminée.")
 
 
     def set_backtest_mode(self):
@@ -119,7 +120,8 @@ class RandomBot(Startable):
     async def _on_start(self) -> list:
         self.logger.info("Demarrage Demandé.")
 
-        self._system_trading = RandomSystemTrading(self._event_bus, self._params)
+        # on reinstalcie tout le 
+        self._system_trading = self._system_trading_class(self._event_bus, self._params)
 
         if self._mode == "realtime":
             self._engine = RealTimeEngine(self._event_bus, self._params)
@@ -141,7 +143,7 @@ class RandomBot(Startable):
             self._event_bus.unsubscribe_all()
             # Pour etre sur que l'aobjet soit bien rétinstancier
             self._system_trading = None
-            self.logger.info("randomBot arrêté.")
+            self.logger.info(f"{self.bot_id} arrêté.")
 
     def _default_params(self) -> dict:
         return {
@@ -164,4 +166,6 @@ class RandomBot(Startable):
         return return_params
     
 
-
+    @staticmethod
+    def get_bot_by_type(bot_type="random_bot", bot_id="bot_01"):
+        return Bot(bot_type, bot_id, RandomSystemTrading)

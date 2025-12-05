@@ -114,8 +114,8 @@ class HttpBotServer:
 # Lancement direct
 # ----------------------------
 if __name__ == "__main__":
-    Logger.set_default_level(logging.DEBUG)
-    Logger.set_level("TradeJournal", logging.DEBUG)
+    Logger.set_default_level(logging.INFO)
+    Logger.set_level("TradeJournal", logging.INFO)
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--bot_type", default="sweep_bot")

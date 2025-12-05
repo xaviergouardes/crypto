@@ -4,14 +4,16 @@ from trading_bot.core.logger import Logger
 from trading_bot.trainer.backtest import Backtest
 from trading_bot.trainer.trainer import BotTrainer
 
+from trading_bot.bots.bot import Bot
 
 class BotControler:
     _logger = Logger.get("BotManager")
 
     def __init__(self, bot_type, bot_id="bot_01"):
         self.bot_type = bot_type
-        bot_class = BOT_CLASSES[bot_type]
-        self.bot = bot_class(bot_id)
+        # bot_class = BOT_CLASSES[bot_type]
+        # self.bot = bot_class(bot_id)
+        self.bot = Bot.get_bot_by_type(bot_type, bot_id)
 
         self.backtest_lock = asyncio.Lock()
         self.train_lock = asyncio.Lock()
