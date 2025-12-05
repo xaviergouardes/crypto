@@ -14,6 +14,8 @@ from trading_bot.bots.engine.backtest_engine import BacktestEngine
 
 from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSystemTrading
 
+from trading_bot.trainer.statistiques_engine import *
+
 class SweepBot(Startable):
 
     logger = Logger.get("SweepBot")
@@ -37,6 +39,8 @@ class SweepBot(Startable):
             self._params = params
         self._params = self._compute_warmup_count(self._params)
 
+        self._params["bot_id"] = bot_id
+        
         self.logger.info(f"Bot {self.__class__.__name__} Initilisation Terminée.")
 
 
@@ -89,6 +93,29 @@ class SweepBot(Startable):
     def get_trades_journal(self):
         trades = self._system_trading.get_trades_journal()   
         return trades 
+
+    def get_stats(self):
+        stats_engine = StatsEngine(indicators=[
+            TotalProfitIndicator(),
+            WinRateIndicator(),
+            NumTradesIndicator(),
+            MaxDrawdownIndicator(),
+            MaxWinningStreakIndicator(),
+            NormalizedScoreIndicator(weights={
+                "s_total_profit": 0.3,
+                "s_win_rate": 0.4,
+                "s_max_drawdown_pct": 0.2,
+                "s_num_trades": 0.1
+            })
+        ])
+        
+        trades = self._system_trading.get_trades_journal()   
+        stats, trades_list = stats_engine.analyze(
+            df=pd.DataFrame(trades),
+            params={**self._params}
+        )
+        return stats 
+
 
     @override
     async def _on_start(self) -> list:

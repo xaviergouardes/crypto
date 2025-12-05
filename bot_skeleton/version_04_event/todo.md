@@ -2,13 +2,14 @@
 # Todo : 
 
 - Je me demande si le Bot ne pourrais pas etre générique , il n'y a que son nom, id, port, et System de Trading qui sont spécialisé et les paramétres par défaut
+- Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Lancer les bt et train en mode asynchrone et vernir récupérer le dernier résultat via un autre endpoint ``` /last_backtest ou last_trainnig ```
 - Lancer le bt et train dans un vrai thread
 - Positionner le niveau de Log a chaud quand le serveur http est lancé
 
 - Mieux gérer les status du serveur http et du bot en retour des commande http
 - BUG : Pour le random bot le backtest renvoi un total profit démesuré 8000
-
+- refactorer l'appel a l'engine Stat qui je pense devrait etre dans le bot uniquement avec une methode get_stats pour les distribuer.
 
 # Doing : 
 - Faire un end point /info qui renvoi les paramétres (et les dernière stats)

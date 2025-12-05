@@ -25,7 +25,7 @@ class TelegramNotifier():
         self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
         # session aiohttp optionnelle, on peut la réutiliser
         self._session = aiohttp.ClientSession()
-        self.logger.info("Initialisé")
+        self.logger.info(f"Initialisé chat_id = {self.chat_id}")
 
     async def close(self):
         await self._session.close()

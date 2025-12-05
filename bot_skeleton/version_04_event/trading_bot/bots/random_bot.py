@@ -12,6 +12,7 @@ from trading_bot.bots.engine.backtest_engine import BacktestEngine
 from trading_bot.core.startable import Startable
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 
+from trading_bot.trainer.statistiques_engine import *
 
 class RandomBot(Startable):
 
@@ -92,6 +93,28 @@ class RandomBot(Startable):
         trades = self._system_trading.get_trades_journal()   
         return trades 
 
+    def get_stats(self):
+        stats_engine = StatsEngine(indicators=[
+            TotalProfitIndicator(),
+            WinRateIndicator(),
+            NumTradesIndicator(),
+            MaxDrawdownIndicator(),
+            MaxWinningStreakIndicator(),
+            NormalizedScoreIndicator(weights={
+                "s_total_profit": 0.3,
+                "s_win_rate": 0.4,
+                "s_max_drawdown_pct": 0.2,
+                "s_num_trades": 0.1
+            })
+        ])
+        
+        trades = self._system_trading.get_trades_journal()   
+        stats, trades_list = stats_engine.analyze(
+            df=pd.DataFrame(trades),
+            params={**self._params}
+        )
+        return stats 
+    
     @override
     async def _on_start(self) -> list:
         self.logger.info("Demarrage Demandé.")

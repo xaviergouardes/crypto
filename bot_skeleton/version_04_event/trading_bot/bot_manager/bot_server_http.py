@@ -25,6 +25,8 @@ class HttpBotServer:
             web.post("/backtest", self._handle_backtest),
             web.post("/train", self._handle_train),
             web.get("/status", self._handle_status),
+            web.get("/stats", self._handle_stats)
+
         ])
 
         self._runner = None
@@ -72,6 +74,14 @@ class HttpBotServer:
             "bot_id": self.bot_controler.bot.bot_id,
             "running": self.bot_controler.bot.is_running(),
             "type": self.bot_controler.bot_type
+        })
+
+    async def _handle_stats(self, request):
+        stats = self.bot_controler.get_stats()
+        return web.json_response({
+            "bot_id": self.bot_controler.bot.bot_id,
+            "type": self.bot_controler.bot_type,
+            "stats": stats
         })
 
     # ----------------------------

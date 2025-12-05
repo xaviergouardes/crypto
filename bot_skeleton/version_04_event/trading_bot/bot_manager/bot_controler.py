@@ -45,3 +45,7 @@ class BotControler:
                 .to_dict(orient="records")
             )
             return top5
+        
+    def get_stats(self):
+        self._logger.info(f"Bot stats asked")
+        return self.bot.get_stats()
