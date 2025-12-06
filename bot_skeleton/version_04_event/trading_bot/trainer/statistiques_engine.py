@@ -119,8 +119,20 @@ class NormalizedScoreIndicator(BaseIndicator):
 # 2) StatsEngine
 # --------------------------
 class StatsEngine:
-    def __init__(self, indicators=None):
-        self.indicators = indicators or []
+    def __init__(self):
+        self.indicators=[
+            TotalProfitIndicator(),
+            WinRateIndicator(),
+            NumTradesIndicator(),
+            MaxDrawdownIndicator(),
+            MaxWinningStreakIndicator(),
+            NormalizedScoreIndicator(weights={
+                "s_total_profit": 0.3,
+                "s_win_rate": 0.4,
+                "s_max_drawdown_pct": 0.2,
+                "s_num_trades": 0.1
+            })
+        ]
 
     def analyze(self, df: pd.DataFrame, stats: dict = None, params: dict = None):
 

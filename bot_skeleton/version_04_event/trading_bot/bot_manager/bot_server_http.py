@@ -35,54 +35,79 @@ class HttpBotServer:
         self._shutdown_event = asyncio.Event()
 
     async def _handle_start(self, request):
-        data = await request.json()
-        await self.bot_controler.start_bot(data)
-        return web.json_response({"status": "started", "bot_id": self.bot_controler.bot.bot_id})
+        try:
+            data = await request.json()
+            await self.bot_controler.start_bot(data)       
+            return web.json_response({"status": "started", "bot_id": self.bot_controler.bot.bot_id}, status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_stop(self, request):
-        self.bot_controler.stop_bot()
-        return web.json_response({"status": "stopped", "bot_id": self.bot_controler.bot.bot_id})
+        try:
+            self.bot_controler.stop_bot()
+            return web.json_response({"status": "stopped", "bot_id": self.bot_controler.bot.bot_id}, status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_shutdown(self, request):
-        """Arrête le bot et le serveur HTTP proprement."""
-        self._logger.info(f"Shutdown requested for bot {self.bot_controler.bot.bot_id}")
-        self.bot_controler.stop_bot()
-        # Lance le shutdown du serveur en tâche de fond pour ne pas bloquer la requête
-        asyncio.create_task(self.stop())
-        return web.json_response({"status": "server_shutting_down", "bot_id": self.bot_controler.bot.bot_id})
+        try:
+            """Arrête le bot et le serveur HTTP proprement."""
+            self._logger.info(f"Shutdown requested for bot {self.bot_controler.bot.bot_id}")
+            self.bot_controler.stop_bot()
+            # Lance le shutdown du serveur en tâche de fond pour ne pas bloquer la requête
+            asyncio.create_task(self.stop())
+            return web.json_response({"status": "server_shutting_down", "bot_id": self.bot_controler.bot.bot_id}, status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_backtest(self, request):
-        data = await request.json()
-        stats = await self.bot_controler.run_backtest(data)
-        return web.json_response({
-            "status": "ok",
-            "bot_id": self.bot_controler.bot.bot_id,
-            "stats": stats
-        })
+        try:
+            data = await request.json()
+            stats = await self.bot_controler.run_backtest(data)
+            return web.json_response({
+                "status": "ok",
+                "bot_id": self.bot_controler.bot.bot_id,
+                "stats": stats
+            },
+            status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_train(self, request):
-        data = await request.json()
-        top5 = await self.bot_controler.run_training(data)
-        return web.json_response({
-            "status": "ok",
-            "bot_id": self.bot_controler.bot.bot_id,
-            "stats": top5
-        })
+        try:
+            data = await request.json()
+            top5 = await self.bot_controler.run_training(data)
+            return web.json_response({
+                "status": "ok",
+                "bot_id": self.bot_controler.bot.bot_id,
+                "stats": top5
+            },
+            status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_status(self, request):
-        return web.json_response({
-            "bot_id": self.bot_controler.bot.bot_id,
-            "running": self.bot_controler.bot.is_running(),
-            "type": self.bot_controler.bot_type
-        })
+        try:
+            return web.json_response({
+                "bot_id": self.bot_controler.bot.bot_id,
+                "running": self.bot_controler.bot.is_running(),
+                "type": self.bot_controler.bot_type
+            },
+            status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_stats(self, request):
-        stats = self.bot_controler.get_stats()
-        return web.json_response({
-            "bot_id": self.bot_controler.bot.bot_id,
-            "type": self.bot_controler.bot_type,
-            "stats": stats
-        })
+        try:
+            stats = self.bot_controler.get_stats()
+            return web.json_response({
+                "bot_id": self.bot_controler.bot.bot_id,
+                "type": self.bot_controler.bot_type,
+                "stats": stats
+            },
+            status=200)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
     # ----------------------------
     # Server lifecycle
@@ -114,9 +139,10 @@ class HttpBotServer:
 # Lancement direct
 # ----------------------------
 if __name__ == "__main__":
-    Logger.set_default_level(logging.INFO)
+    Logger.set_default_level(logging.DEBUG)
     Logger.set_level("TradeJournal", logging.INFO)
-    
+    # Logger.set_level("TradeJournal", logging.WARN)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--bot_type", default="sweep_bot")
     # parser.add_argument("--bot_id", default="bot_id")

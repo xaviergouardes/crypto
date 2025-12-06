@@ -20,20 +20,6 @@ class TradeJournal:
         self._total_pnl = 0.0
         self._pnl_total_avec_frais = 0.0
         self._frais_par_transaction = 0.01
-
-        self.stats_engine = StatsEngine(indicators=[
-            TotalProfitIndicator(),
-            WinRateIndicator(),
-            NumTradesIndicator(),
-            MaxDrawdownIndicator(),
-            MaxWinningStreakIndicator(),
-            NormalizedScoreIndicator(weights={
-                "s_total_profit": 0.3,
-                "s_win_rate": 0.4,
-                "s_max_drawdown_pct": 0.2,
-                "s_num_trades": 0.1
-            })
-        ])
         
         self._event_bus.subscribe(TradeClose, self._on_trade_close)
         
@@ -103,7 +89,7 @@ class TradeJournal:
         )
 
         # Analyse via StatsEngine
-        stats, trades_list = self.stats_engine.analyze(
+        stats, trades_list = StatsEngine().analyze(
             df=pd.DataFrame(self._trades),
         )
         self.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))

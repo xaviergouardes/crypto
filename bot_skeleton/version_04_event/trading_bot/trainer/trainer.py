@@ -4,7 +4,6 @@ import pandas as pd
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-from trading_bot.bots import BOT_CLASSES
 from trading_bot.core.logger import Logger
 from trading_bot.trainer.backtest import Backtest
 
@@ -12,8 +11,8 @@ from trading_bot.trainer.backtest import Backtest
 class BotTrainer:
     logger = Logger.get("BotTrainer")
 
-    def __init__(self, bot_class):
-        self._bot_class = bot_class      # garder la classe pour ré-instancier
+    def __init__(self, bot_type):
+        self._bot_type = bot_type      # garder la classe pour ré-instancier
  
     def _all_param_grids(self, param_grid):
         """Génère toutes les combinaisons valides avec les règles appliquées."""
@@ -51,7 +50,7 @@ class BotTrainer:
             self.logger.debug(f"[{idx}] Running Bot with params: {params}")
 
             # Créer une instance du bot et du Backtest
-            bt_executor = Backtest(self._bot_class)
+            bt_executor = Backtest(self._bot_type)
             stats, trades_list = await bt_executor.execute(params)
             
             # Ajouter le nom du bot dans les stats
@@ -105,7 +104,7 @@ class BotTrainer:
         return all_stats, results
 
 
-    def log_summary_df_one_line(self, df, col_width=12, float_precision=2):
+    def log_summary_df_one_line(self, df, col_width=11, float_precision=2):
         """
         Log toutes les statistiques et paramètres d'un DataFrame en forme de tableau.
         Colonnes statistiques : préfixées par 's_'
@@ -162,8 +161,6 @@ class BotTrainer:
 
 
 if __name__ == "__main__":
-    from trading_bot.bots.sweep_bot import SweepBot
-
     # Niveau global : silence tout sauf WARNING et plus
     Logger.set_default_level(logging.WARNING)
 
@@ -188,7 +185,7 @@ if __name__ == "__main__":
         }
     }
 
-    trainer = BotTrainer(BOT_CLASSES["sweep_bot"])
+    trainer = BotTrainer("sweep_bot")
     summary_df, results = asyncio.run(trainer.run(param_grid))
     # print(summary_df.columns)
 

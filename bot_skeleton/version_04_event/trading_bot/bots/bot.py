@@ -1,6 +1,8 @@
 
 from typing import override
+import copy
 
+from trading_bot.bots import BOTS_CONFIG
 from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
@@ -11,30 +13,26 @@ from trading_bot.core.startable import Startable
 
 from trading_bot.trainer.statistiques_engine import *
 
-from trading_bot.system_trading.random_system_trading import RandomSystemTrading
-
 class Bot(Startable):
 
     logger = Logger.get("Bot")
 
     # def __init__(self, params, mode):
-    def __init__(self, bot_type="bot_type", bot_id="bot_01", system_trading_class=None, params:dict = None):
+    def __init__(self, bot_type="bot_type", bot_id="bot_01", params:dict = None):
         super().__init__()
+        self.config = BOTS_CONFIG[bot_type]
 
         self._event_bus = EventBus()
 
         self.bot_id = bot_id
         self.bot_type = bot_type
 
-        
         self._mode = None
         self._engine = None
-
-        self._system_trading_class = system_trading_class
         self._system_trading = None
 
         if params is None : 
-            self._params = self._default_params()
+            self._params = copy.deepcopy(self.config["default_parameters"])
         else:
             self._params = params
         self._params = self._compute_warmup_count(self._params)
@@ -91,37 +89,28 @@ class Bot(Startable):
 
 
     def get_trades_journal(self):
+        if self._system_trading is None:
+            raise RuntimeError("System trading non initialisé")
         trades = self._system_trading.get_trades_journal()   
         return trades 
 
-    def get_stats(self):
-        stats_engine = StatsEngine(indicators=[
-            TotalProfitIndicator(),
-            WinRateIndicator(),
-            NumTradesIndicator(),
-            MaxDrawdownIndicator(),
-            MaxWinningStreakIndicator(),
-            NormalizedScoreIndicator(weights={
-                "s_total_profit": 0.3,
-                "s_win_rate": 0.4,
-                "s_max_drawdown_pct": 0.2,
-                "s_num_trades": 0.1
-            })
-        ])
-        
+    def get_stats(self):    
+        if self._system_trading is None:
+            raise RuntimeError("System trading non initialisé")   
         trades = self._system_trading.get_trades_journal()   
-        stats, trades_list = stats_engine.analyze(
+        stats, trades_list = StatsEngine().analyze(
             df=pd.DataFrame(trades),
             params={**self._params}
         )
-        return stats 
+        return stats, trades_list
     
     @override
     async def _on_start(self) -> list:
         self.logger.info("Demarrage Demandé.")
 
-        # on reinstalcie tout le 
-        self._system_trading = self._system_trading_class(self._event_bus, self._params)
+        # on reinstalcie tout le System avec les paramétres en cours
+        system_class = self.config["system_class"]
+        self._system_trading = system_class(self._event_bus, self._params)
 
         if self._mode == "realtime":
             self._engine = RealTimeEngine(self._event_bus, self._params)
@@ -145,27 +134,21 @@ class Bot(Startable):
             self._system_trading = None
             self.logger.info(f"{self.bot_id} arrêté.")
 
-    def _default_params(self) -> dict:
-        return {
-            "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
-            "symbol": "ethusdc",
-            "interval": "1m",
-            "initial_capital": 1000,
-            "trading_system": {
-                "warmup_count": 5,
-                "initial_capital": 1000,
-                "tp_pct": 0.05,
-                "sl_pct": 0.025
-            }
-        }
 
-    def _compute_warmup_count(self, params:dict) -> dict:
+    def _compute_warmup_count(self, params: dict) -> dict:
+        """
+        Met à jour le warmup_count en prenant le max des attributs listés dans warmup_attributs.
+        """
         return_params = params.copy()
-        warmup_count = return_params["trading_system"]["warmup_count"]
-        return_params["trading_system"]["warmup_count"] = warmup_count
-        return return_params
-    
+        trading_system = return_params.get("trading_system", {})
 
-    @staticmethod
-    def get_bot_by_type(bot_type="random_bot", bot_id="bot_01"):
-        return Bot(bot_type, bot_id, RandomSystemTrading)
+        warmup_attrs = BOTS_CONFIG[self.bot_type].get("warmup_attributs", [])
+
+        # Récupérer les valeurs des attributs et prendre le max
+        values = [trading_system.get(attr, 0) for attr in warmup_attrs]
+        warmup_count = max(values) if values else 0
+
+        trading_system["warmup_count"] = warmup_count
+        return_params["trading_system"] = trading_system
+
+        return return_params
