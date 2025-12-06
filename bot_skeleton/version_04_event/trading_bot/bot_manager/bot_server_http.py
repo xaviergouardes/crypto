@@ -5,9 +5,16 @@ import logging
 import aiohttp
 from aiohttp import web
 
+from trading_bot.bot_manager.bot_hanlder.bot_handler_backtest import BotHandlerBacktest
+from trading_bot.bot_manager.bot_hanlder.bot_handler_start import BotHandlerStart
+from trading_bot.bot_manager.bot_hanlder.bot_handler_stats import BotHandlerStats
+from trading_bot.bot_manager.bot_hanlder.bot_handler_status import BotHandlerStatus
+from trading_bot.bot_manager.bot_hanlder.bot_handler_stop import BotHandlerStop
+from trading_bot.bot_manager.bot_hanlder.bot_handler_train import BotHandlerTrain
+from trading_bot.bot_manager.bot_hanlder.server_http_handler_change_logs import HttpServerChangeLogs
+from trading_bot.bot_manager.bot_hanlder.server_http_handler_logs import HttpServerLogs
 from trading_bot.core.logger import Logger
 from trading_bot.bot_manager.bot_controler import BotControler
-
 
 class HttpBotServer:
     _logger = Logger.get("HttpBotServer")
@@ -19,84 +26,25 @@ class HttpBotServer:
 
         self.app = web.Application()
         self.app.add_routes([
-            web.post("/start", self._handle_start),
-            web.post("/stop", self._handle_stop),
-            web.post("/shutdown", self._handle_shutdown),
-            web.post("/backtest", self._handle_backtest),
-            web.post("/train", self._handle_train),
-            web.get("/status", self._handle_status),
-            web.get("/stats", self._handle_stats),
-            web.get("/log-level", self._handle_get_log_level),
-            web.post("/log-level", self._handle_set_log_level),
+            web.post("/server/shutdown", self._handle_shutdown),
+            web.get("/server/status", self._handle_status),
+            web.post("/server/log-level", HttpServerChangeLogs().execute),
+            web.get("/server/log-level", HttpServerLogs().execute),
+        ])
+
+        self.app.add_routes([
+            web.post("/bot/start", BotHandlerStart(self.bot_controler).execute),
+            web.post("/bot/stop", BotHandlerStop(self.bot_controler).execute),
+            web.post("/bot/backtest", BotHandlerBacktest(self.bot_controler).execute),
+            web.post("/bot/train", BotHandlerTrain(self.bot_controler).execute),
+            web.get("/bot/status", BotHandlerStatus(self.bot_controler).execute),
+            web.get("/bot/stats", BotHandlerStats(self.bot_controler).execute),
         ])
 
         self._runner = None
         self._site = None
         self._is_running = False
         self._shutdown_event = asyncio.Event()
-
-    async def _handle_get_log_level(self, request):
-        try:
-            levels = Logger.get_all_levels()   # À ajouter dans ton Logger
-            return web.json_response({"status": "ok", "levels": levels})
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
-
-
-    async def _handle_set_log_level(self, request):
-        try:
-            data = await request.json()
-            logger_name = data.get("logger")      # ex: "Backtest", "TradeJournal", "Bot.sweep_bot_01"
-            level       = data.get("level")       # ex: "DEBUG", "INFO", "WARN", "ERROR"
-            
-            if not logger_name or not level:
-                return web.json_response(
-                    {"error": "Fields 'logger' and 'level' are required"},
-                    status=400
-                )
-
-            # Si ALL → changer tous les loggers
-            if logger_name.upper() == "ALL":
-                ok = Logger.change_all_levels(level)
-                if not ok:
-                    return web.json_response({"error": "Invalid level"}, status=400)
-
-                return web.json_response({
-                    "status": "ok",
-                    "logger": "ALL",
-                    "new_level": level
-                })
-        
-
-            ok = Logger.change_level(logger_name, level)
-
-            if not ok:
-                return web.json_response({"error": "Unknown logger or invalid level"}, status=404)
-
-            return web.json_response({
-                "status": "ok",
-                "logger": logger_name,
-                "new_level": level
-            })
-
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
-
-
-    async def _handle_start(self, request):
-        try:
-            data = await request.json()
-            await self.bot_controler.start_bot(data)       
-            return web.json_response({"status": "started", "bot_id": self.bot_controler.bot.bot_id}, status=200)
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
-
-    async def _handle_stop(self, request):
-        try:
-            self.bot_controler.stop_bot()
-            return web.json_response({"status": "stopped", "bot_id": self.bot_controler.bot.bot_id}, status=200)
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
 
     async def _handle_shutdown(self, request):
         try:
@@ -109,54 +57,17 @@ class HttpBotServer:
         except Exception as e:
             return web.json_response({"error": str(e)}, status=500)
 
-    async def _handle_backtest(self, request):
-        try:
-            data = await request.json()
-            stats = await self.bot_controler.run_backtest(data)
-            return web.json_response({
-                "status": "ok",
-                "bot_id": self.bot_controler.bot.bot_id,
-                "stats": stats
-            },
-            status=200)
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
-
-    async def _handle_train(self, request):
-        try:
-            data = await request.json()
-            top5 = await self.bot_controler.run_training(data)
-            return web.json_response({
-                "status": "ok",
-                "bot_id": self.bot_controler.bot.bot_id,
-                "stats": top5
-            },
-            status=200)
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
-
     async def _handle_status(self, request):
         try:
             return web.json_response({
+                "serveur": self.bot_controler.bot.is_running(),
                 "bot_id": self.bot_controler.bot.bot_id,
-                "running": self.bot_controler.bot.is_running(),
                 "type": self.bot_controler.bot_type
             },
             status=200)
         except Exception as e:
             return web.json_response({"error": str(e)}, status=500)
-
-    async def _handle_stats(self, request):
-        try:
-            stats = self.bot_controler.get_stats()
-            return web.json_response({
-                "bot_id": self.bot_controler.bot.bot_id,
-                "type": self.bot_controler.bot_type,
-                "stats": stats
-            },
-            status=200)
-        except Exception as e:
-            return web.json_response({"error": str(e)}, status=500)
+        
 
     # ----------------------------
     # Server lifecycle

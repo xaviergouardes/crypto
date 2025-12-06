@@ -9,12 +9,15 @@
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 
-- Mieux structurer le classe bot_serveur_http
 
 # Doing : 
-- Positionner le niveau de Log a chaud quand le serveur http est lancé
+
+
 
 # Done : 
+- Mieux structurer le classe bot_serveur_http
+- Restrcutuer le ser http en externalisant l'implementation des commande dans des handler
+- Positionner le niveau de Log a chaud quand le serveur http est lancé
 - BUG : Pour le random bot le backtest renvoi un total profit démesuré 8000
 - refactorer l'appel a l'engine Stat qui je pense devrait etre dans le bot uniquement avec une methode get_stats pour les distribuer.
 - Faire le clair sur les bot_id et bot_class 
