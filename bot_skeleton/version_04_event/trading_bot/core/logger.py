@@ -5,6 +5,16 @@ class Logger:
     _default_level = logging.INFO
     _custom_levels = {}
 
+    _LEVEL_MAP = {
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARN": logging.WARNING,
+        "WARNING": logging.WARNING,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+        "NOTSET": logging.NOTSET,
+    }
+
     @classmethod
     def set_default_level(cls, level):
         cls._default_level = level
@@ -21,6 +31,39 @@ class Logger:
         if name in cls._loggers:
             cls._loggers[name].setLevel(level)
             cls._loggers[name].propagate = False
+
+    @classmethod
+    def change_level(cls, name: str, level: str) -> bool:
+        """
+        Change le niveau d'un logger déjà existant à chaud.
+        Retourne True si succès, False si logger inconnu ou niveau invalide.
+        """
+        if name not in cls._loggers:
+            return False
+
+        # Convertir "INFO" → logging.INFO
+        lvl = cls._LEVEL_MAP.get(level.upper())
+        if lvl is None:
+            return False
+
+        logger = cls._loggers[name]
+        logger.setLevel(lvl)
+        logger.propagate = False
+
+        # Mettre à jour les niveaux custom
+        cls._custom_levels[name] = lvl
+
+        return True
+
+    @classmethod
+    def change_all_levels(cls, level: str) -> bool:
+        lvl = cls._LEVEL_MAP.get(level.upper())
+        if lvl is None:
+            return False
+
+        for logger in cls._loggers.values():
+            logger.setLevel(lvl)
+        return True
 
     @classmethod
     def get(cls, name="App"):
@@ -79,6 +122,10 @@ class Logger:
         for name, logger in Logger._loggers.items():
             result[name] = logging.getLevelName(logger.level)
         return result
+
+    @staticmethod
+    def level_from_string(level:str):
+        return Logger._LEVEL_MAP[level]
 
     # Accès rapide via classe pour conserver compatibilité
     @classmethod

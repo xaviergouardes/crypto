@@ -27,7 +27,7 @@ class HttpBotServer:
             web.get("/status", self._handle_status),
             web.get("/stats", self._handle_stats),
             web.get("/log-level", self._handle_get_log_level),
-            # web.post("/log-level", self._handle_set_log_level),
+            web.post("/log-level", self._handle_set_log_level),
         ])
 
         self._runner = None
@@ -43,32 +43,44 @@ class HttpBotServer:
             return web.json_response({"error": str(e)}, status=500)
 
 
-    # async def _handle_set_log_level(self, request):
-    #     try:
-    #         data = await request.json()
+    async def _handle_set_log_level(self, request):
+        try:
+            data = await request.json()
+            logger_name = data.get("logger")      # ex: "Backtest", "TradeJournal", "Bot.sweep_bot_01"
+            level       = data.get("level")       # ex: "DEBUG", "INFO", "WARN", "ERROR"
+            
+            if not logger_name or not level:
+                return web.json_response(
+                    {"error": "Fields 'logger' and 'level' are required"},
+                    status=400
+                )
 
-    #         logger_name = data.get("logger")      # ex: "Backtest", "TradeJournal", "Bot.sweep_bot_01"
-    #         level       = data.get("level")       # ex: "DEBUG", "INFO", "WARN", "ERROR"
+            # Si ALL → changer tous les loggers
+            if logger_name.upper() == "ALL":
+                ok = Logger.change_all_levels(level)
+                if not ok:
+                    return web.json_response({"error": "Invalid level"}, status=400)
 
-    #         if not logger_name or not level:
-    #             return web.json_response(
-    #                 {"error": "Fields 'logger' and 'level' are required"},
-    #                 status=400
-    #             )
+                return web.json_response({
+                    "status": "ok",
+                    "logger": "ALL",
+                    "new_level": level
+                })
+        
 
-    #         ok = Logger.set_level(logger_name, level)
+            ok = Logger.change_level(logger_name, level)
 
-    #         if not ok:
-    #             return web.json_response({"error": "Unknown logger or invalid level"}, status=404)
+            if not ok:
+                return web.json_response({"error": "Unknown logger or invalid level"}, status=404)
 
-    #         return web.json_response({
-    #             "status": "ok",
-    #             "logger": logger_name,
-    #             "new_level": level
-    #         })
+            return web.json_response({
+                "status": "ok",
+                "logger": logger_name,
+                "new_level": level
+            })
 
-    #     except Exception as e:
-    #         return web.json_response({"error": str(e)}, status=500)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
 
 
     async def _handle_start(self, request):

@@ -90,7 +90,19 @@ curl -X POST "http://127.0.0.1:9101/backtest" \
   "trading_system": {
       "warmup_count": 5,
       "initial_capital": 1000,
-      "tp_pct": 0.05,
-      "sl_pct": 0.025
+      "tp_pct": 2,
+      "sl_pct": 1
+  }
+}' | jq
+
+curl -X POST "http://127.0.0.1:9101/train" \
+    -H "Content-Type: application/json" \
+    -d '
+{
+  "trading_system": {
+      "warmup_count": [5],
+      "initial_capital": [1000],
+      "tp_pct": [2,3],
+      "sl_pct": [1,2]
   }
 }' | jq
