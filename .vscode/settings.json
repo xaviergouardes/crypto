@@ -1,6 +1,8 @@
 {
-    "python.analysis.extraPaths": [
-        "./arbitrage-ces-sur-triple-paires-binance/mainnet/ordre-achat-vente",
-        "./bot_skeleton/version_04_event"
-    ]
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "./bot_skeleton/version_04_event/tests"
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true
 }

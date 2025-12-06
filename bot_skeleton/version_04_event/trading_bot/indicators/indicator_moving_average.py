@@ -89,8 +89,9 @@ class IndicatorMovingAverage:
     async def on_candle_close(self, event: CandleClose):
         """Met à jour la moyenne mobile à chaque clôture de bougie."""
 
-        if not self._initialized or event.symbol.upper() != self.symbol:
+        if not self._initialized or event.symbol.upper() != self.symbol.upper():
             return
+        print("===> Toto")
 
         close_price = event.candle.close
 
@@ -102,7 +103,7 @@ class IndicatorMovingAverage:
             if len(self.candles) < self.period:
                 return
             self.current_value = self._sum / self.period
-            # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] SMA mise à jour = {self.current_value:.5f}")
+            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] SMA mise à jour = {self.current_value:.5f}")
 
         elif self.mode == "EMA":
             if self.current_value is None and len(self.candles) < self.period:

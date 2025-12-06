@@ -1,10 +1,10 @@
 /* ======================================= */
-curl -X POST "http://127.0.0.1:9101/shutdown" \
+curl -X POST "http://127.0.0.1:9101/server/shutdown" \
     -H "Content-Type: application/json" \
    | jq
 
 /* ======================================= */
-curl -X POST "http://127.0.0.1:9101/backtest" \
+curl -X POST "http://127.0.0.1:9101/bot/backtest" \
     -H "Content-Type: application/json" \
     -d '
 {
@@ -16,12 +16,12 @@ curl -X POST "http://127.0.0.1:9101/backtest" \
     "swing_window": 21,
     "swing_side": 2,
     "tp_pct": 1.5,
-    "sl_pct": 1.0
+    "sl_pct": 1.5
   }
 }' | jq
 
 /* ======================================= */
-curl -X POST "http://127.0.0.1:9101/backtest" \
+curl -X POST "http://127.0.0.1:9101/bot/backtest" \
     -H "Content-Type: application/json" \
     -d '
 {
@@ -33,7 +33,7 @@ curl -X POST "http://127.0.0.1:9101/backtest" \
 }' | jq
 
 /* ======================================= */
-curl -X POST "http://127.0.0.1:9101/train" \
+curl -X POST "http://127.0.0.1:9101/bot/train" \
     -H "Content-Type: application/json" \
     -d '
 {
@@ -45,7 +45,7 @@ curl -X POST "http://127.0.0.1:9101/train" \
 }' | jq
 
 /* ======================================= */
-curl -X POST "http://127.0.0.1:9101/start" \
+curl -X POST "http://127.0.0.1:9101/bot/start" \
     -H "Content-Type: application/json" \
     -d '
 {
@@ -63,7 +63,7 @@ curl -X POST "http://127.0.0.1:9101/start" \
 /* ======================================= */
 /* ======         Random Bot         ======*/
 /* ======================================= */
-curl -X POST "http://127.0.0.1:9101/start" \
+curl -X POST "http://127.0.0.1:9101/bot/start" \
     -H "Content-Type: application/json" \
     -d '
 {
@@ -79,7 +79,7 @@ curl -X POST "http://127.0.0.1:9101/start" \
   }
 }' | jq
 
-curl -X POST "http://127.0.0.1:9101/backtest" \
+curl -X POST "http://127.0.0.1:9101/bot/backtest" \
     -H "Content-Type: application/json" \
     -d '
 {
@@ -95,7 +95,7 @@ curl -X POST "http://127.0.0.1:9101/backtest" \
   }
 }' | jq
 
-curl -X POST "http://127.0.0.1:9101/train" \
+curl -X POST "http://127.0.0.1:9101/bot/train" \
     -H "Content-Type: application/json" \
     -d '
 {
