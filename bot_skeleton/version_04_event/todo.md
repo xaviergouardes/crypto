@@ -3,14 +3,16 @@
 - Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Lancer les bt et train en mode asynchrone et vernir récupérer le dernier résultat via un autre endpoint ``` /last_backtest ou last_trainnig ```
 - Lancer le bt et train dans un vrai thread
-- Positionner le niveau de Log a chaud quand le serveur http est lancé
 - Vérifier que le TradeList en sortie du calcul des stats a un vrai interet ?
 - Mieux gérer les status du serveur http et du bot en retour des commande http
 - Rennomer EventBus en BotEventBus -> en efftet il s'agit d'un bus onterne au bot + etudier la question d'injecter le bot dasn tous ses composants.
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 
+- Mieux structurer le classe bot_serveur_http
+
 # Doing : 
+- Positionner le niveau de Log a chaud quand le serveur http est lancé
 
 # Done : 
 - BUG : Pour le random bot le backtest renvoi un total profit démesuré 8000

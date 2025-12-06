@@ -25,14 +25,51 @@ class HttpBotServer:
             web.post("/backtest", self._handle_backtest),
             web.post("/train", self._handle_train),
             web.get("/status", self._handle_status),
-            web.get("/stats", self._handle_stats)
-
+            web.get("/stats", self._handle_stats),
+            web.get("/log-level", self._handle_get_log_level),
+            # web.post("/log-level", self._handle_set_log_level),
         ])
 
         self._runner = None
         self._site = None
         self._is_running = False
         self._shutdown_event = asyncio.Event()
+
+    async def _handle_get_log_level(self, request):
+        try:
+            levels = Logger.get_all_levels()   # À ajouter dans ton Logger
+            return web.json_response({"status": "ok", "levels": levels})
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
+
+
+    # async def _handle_set_log_level(self, request):
+    #     try:
+    #         data = await request.json()
+
+    #         logger_name = data.get("logger")      # ex: "Backtest", "TradeJournal", "Bot.sweep_bot_01"
+    #         level       = data.get("level")       # ex: "DEBUG", "INFO", "WARN", "ERROR"
+
+    #         if not logger_name or not level:
+    #             return web.json_response(
+    #                 {"error": "Fields 'logger' and 'level' are required"},
+    #                 status=400
+    #             )
+
+    #         ok = Logger.set_level(logger_name, level)
+
+    #         if not ok:
+    #             return web.json_response({"error": "Unknown logger or invalid level"}, status=404)
+
+    #         return web.json_response({
+    #             "status": "ok",
+    #             "logger": logger_name,
+    #             "new_level": level
+    #         })
+
+    #     except Exception as e:
+    #         return web.json_response({"error": str(e)}, status=500)
+
 
     async def _handle_start(self, request):
         try:

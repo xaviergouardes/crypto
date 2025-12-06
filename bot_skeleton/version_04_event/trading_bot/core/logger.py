@@ -73,6 +73,13 @@ class Logger:
 
         return LoggerWrapper(logger)
 
+    @staticmethod
+    def get_all_levels():
+        result = {}
+        for name, logger in Logger._loggers.items():
+            result[name] = logging.getLevelName(logger.level)
+        return result
+
     # Accès rapide via classe pour conserver compatibilité
     @classmethod
     def info(cls, msg, name="App"): cls.get(name).info(msg)
