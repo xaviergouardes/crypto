@@ -3,11 +3,13 @@ from typing import Deque, Optional
 from datetime import datetime
 import numpy as np
 
+from bot_skeleton.version_04_event.trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
 
 
 class IndicatorMovingAverage:
+    _logger = Logger.get("IndicatorSimpleSwingDetector")
     """
     Calcule une moyenne mobile (SMA ou EMA) à partir des bougies clôturées.
 
@@ -36,11 +38,11 @@ class IndicatorMovingAverage:
         # Souscription aux événements
         self.event_bus.subscribe(CandleClose, self.on_candle_close)
         self.event_bus.subscribe(CandleHistoryReady, self.on_history_ready)
-        print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] mode={self.mode} period={self.period}")
+        self._logger.info(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  mode={self.mode} period={self.period}")
 
     # ------------------- Historique -------------------
     async def on_history_ready(self, event: CandleHistoryReady):
-        print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Initialisation ...")
+        self._logger.info(f"{datetime.now():%Y-%m-%d %H:%M:%S}  Initialisation ...")
 
         if not event.candles:
             return
@@ -48,19 +50,19 @@ class IndicatorMovingAverage:
         self.symbol = event.symbol.upper()
         candles_slice = event.candles[-self.period:]
         if not candles_slice:
-            print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Pas de bougies disponibles pour {self.symbol}")
+            self._logger.warning(f"{datetime.now():%Y-%m-%d %H:%M:%S}  Pas de bougies disponibles pour {self.symbol}")
             return
 
         first_candle = candles_slice[0]
         last_candle = candles_slice[-1]
-        # print(f"==> EMA period={self.period} Première bougie: {first_candle.start_time} / close={first_candle.close}")
-        # print(f"==> EMA period={self.period} Dernière bougie: {last_candle.start_time} / close={last_candle.close}")
+        # self._logger.debug(f"==> EMA period={self.period} Première bougie: {first_candle.start_time} / close={first_candle.close}")
+        # self._logger.debug(f"==> EMA period={self.period} Dernière bougie: {last_candle.start_time} / close={last_candle.close}")
 
         closes = np.array([c.close for c in candles_slice], dtype=np.float64)
         self.candles = deque(closes, maxlen=self.period)
 
         if len(closes) < self.period:
-            print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Pas assez de données ({len(closes)}/{self.period})")
+            self._logger.warning(f"{datetime.now():%Y-%m-%d %H:%M:%S}  Pas assez de données ({len(closes)}/{self.period})")
             return
 
         if self.mode == "SMA":
@@ -75,11 +77,11 @@ class IndicatorMovingAverage:
         self._initialized = True
         await self._publish(last_candle.end_time)
 
-        # print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Bougies utilisées pour le calcul initial de {self.mode}:")
+        # self._logger.debug(f"{datetime.now():%Y-%m-%d %H:%M:%S}  Bougies utilisées pour le calcul initial de {self.mode}:")
         # for c in candles_slice:
-        #     print(f"    {c}")
+        #     self._logger.debug(f"    {c}")
 
-        print(f"{datetime.now():%Y-%m-%d %H:%M:%S} [IndicatorMovingAverage] Initialisation Terminée — "
+        self._logger.info(f"{datetime.now():%Y-%m-%d %H:%M:%S}  Initialisation Terminée — "
               f"{last_candle} "
               f"{self.mode}({self.period}) = {self.current_value:.5f}"
               )
@@ -91,7 +93,6 @@ class IndicatorMovingAverage:
 
         if not self._initialized or event.symbol.upper() != self.symbol.upper():
             return
-        print("===> Toto")
 
         close_price = event.candle.close
 
@@ -103,18 +104,18 @@ class IndicatorMovingAverage:
             if len(self.candles) < self.period:
                 return
             self.current_value = self._sum / self.period
-            print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] SMA mise à jour = {self.current_value:.5f}")
+            self._logger.debug(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  SMA mise à jour = {self.current_value:.5f}")
 
         elif self.mode == "EMA":
             if self.current_value is None and len(self.candles) < self.period:
                 self.candles.append(close_price)
                 if len(self.candles) == self.period:
                     self.current_value = sum(self.candles) / self.period
-                    # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] EMA initialisée = {self.current_value:.5f}")
+                    self._logger.debug(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  EMA initialisée = {self.current_value:.5f}")
             else:
                 old_value = self.current_value
                 self.current_value = (close_price - self.current_value) * self.multiplier + self.current_value
-                # print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [IndicatorMovingAverage] EMA({self.period})"
+                # self._logger.debug(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  EMA({self.period})"
                 #       f" mise à jour {old_value:.5f} → {self.current_value:.5f}"              
                 #       f"{event.candle} "
                 #       )
