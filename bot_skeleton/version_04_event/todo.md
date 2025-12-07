@@ -1,5 +1,6 @@
 
 # Todo : 
+- Travailler avec de timeframe différent. Pas exemple stratégie de MM sur 3 échelle de temps
 - Faire un Front VUEJS por piloter les Bots
 - Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Lancer les bt et train en mode asynchrone et vernir récupérer le dernier résultat via un autre endpoint ``` /last_backtest ou last_trainnig ```
@@ -8,11 +9,13 @@
 - Rennomer EventBus en BotEventBus -> en efftet il s'agit d'un bus onterne au bot + etudier la question d'injecter le bot dasn tous ses composants.
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
+- Voir comment faire pour mettre des filtres optionnels dnas le pipline de trading -> prevoir des event spéciaux
 
 # Doing : 
-- Terminer les TU aux limite pour l'indicateur Moving Average
+- construction du ema_cross_detector - indicateur
 
 # Done : 
+- Terminer les TU aux limite pour l'indicateur Moving Average
 - Mettre en place de TU
 - Mieux gérer les status du serveur http et du bot en retour des commande http
 - Mieux structurer le classe bot_serveur_http
