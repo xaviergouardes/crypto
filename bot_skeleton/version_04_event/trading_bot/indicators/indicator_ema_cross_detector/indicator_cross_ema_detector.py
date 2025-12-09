@@ -1,11 +1,11 @@
 
 
-from bot_skeleton.version_04_event.trading_bot.core.event_bus import EventBus
-from bot_skeleton.version_04_event.trading_bot.core.events import IndicatorUpdated
-from bot_skeleton.version_04_event.trading_bot.indicators.indicator_ema_cross_detector.ema_cross_strategy import EmaCrossStrategy
-from bot_skeleton.version_04_event.trading_bot.indicators.indicator_ema_cross_detector.signal_emitter import SignalEmitter
-from bot_skeleton.version_04_event.trading_bot.indicators.indicator_ema_cross_detector.timestamphelper import TimestampHelper
-from bot_skeleton.version_04_event.trading_bot.indicators.indicator_ema_cross_detector.value_buffer import ValueBuffer
+from trading_bot.core.event_bus import EventBus
+from trading_bot.core.events import IndicatorUpdated
+from trading_bot.indicators.indicator_ema_cross_detector.ema_cross_strategy import EmaCrossStrategy
+from trading_bot.indicators.indicator_ema_cross_detector.signal_emitter import SignalEmitter
+from trading_bot.indicators.indicator_ema_cross_detector.timestamphelper import TimestampHelper
+from trading_bot.indicators.indicator_ema_cross_detector.value_buffer import ValueBuffer
 
 
 class IndicatorEmaCrossDetector:
@@ -52,7 +52,7 @@ class IndicatorEmaCrossDetector:
                                             self.slow_buffer.last_values(),
                                             fast_slope, slow_slope)
         if cross_signal:
-            await self.emitter.emit(event.symbol, event.timestamp, cross_signal,
+             await self.emitter.emit(event.symbol, event.timestamp, cross_signal,
                                     self.fast_period, self.slow_period)
 
     def _update_buffers(self, period, value, timestamp):

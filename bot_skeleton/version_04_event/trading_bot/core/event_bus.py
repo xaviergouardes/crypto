@@ -22,7 +22,7 @@ class EventBus:
         """Publie un événement et appelle tous les abonnés."""
         event_type = type(event)
         if event_type in self._subscribers:
-            await asyncio.gather(*[cb(event) for cb in self._subscribers[event_type]])
+             await asyncio.gather(*[cb(event) for cb in self._subscribers[event_type]])
 
     def unsubscribe(self, event_type, callback):
         if event_type in self._subscribers:

@@ -1,6 +1,7 @@
 
 # Todo : 
 - Travailler avec de timeframe différent. Pas exemple stratégie de MM sur 3 échelle de temps
+- Réflechir si on ne pourrait pas simplifier la gestion des events  au sein du pipeline - il n'y aurait que le système qui ecoute des events tick candle et ensuite qu passe la dernière chandelle à tous les composants du pipeline pour qu'ils se mettent a jour. => plus event inter composant.
 - Faire un Front VUEJS por piloter les Bots
 - Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Lancer les bt et train en mode asynchrone et vernir récupérer le dernier résultat via un autre endpoint ``` /last_backtest ou last_trainnig ```
@@ -10,11 +11,16 @@
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - Voir comment faire pour mettre des filtres optionnels dnas le pipline de trading -> prevoir des event spéciaux
+- Dans les stats indiuer la date de début du bot et/ou  la durée execution
+
 
 # Doing : 
-- construction du ema_cross_detector - indicateur
+- Construction d'un SignalEngine basé sur le crossing
+
 
 # Done : 
+- construction du ema_cross_detector - indicateur
+- Mise au point d'un TU nominal pour l'indicateur
 - Terminer les TU aux limite pour l'indicateur Moving Average
 - Mettre en place de TU
 - Mieux gérer les status du serveur http et du bot en retour des commande http

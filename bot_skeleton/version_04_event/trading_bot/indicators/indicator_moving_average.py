@@ -3,7 +3,7 @@ from typing import Deque, Optional
 from datetime import datetime
 import numpy as np
 
-from bot_skeleton.version_04_event.trading_bot.core.logger import Logger
+from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
 
