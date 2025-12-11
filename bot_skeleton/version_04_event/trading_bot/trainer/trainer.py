@@ -18,6 +18,7 @@ class BotTrainer:
         """Génère toutes les combinaisons valides avec les règles appliquées."""
         rules = [
             lambda p: p['trading_system']['tp_pct'] >= p['trading_system']['sl_pct'],  # Take profit >= Stop loss
+            lambda p: p['trading_system']['slow_period'] > p['trading_system']['fast_period'],  # Période longue > période courte pour les xMA
         ]
 
         if "trading_system" not in param_grid:

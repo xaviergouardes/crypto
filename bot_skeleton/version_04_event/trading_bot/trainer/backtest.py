@@ -36,27 +36,34 @@ class Backtest:
 if __name__ == "__main__":
 
     import logging
-    from trading_bot.bots.sweep_bot import SweepBot
+    from trading_bot.bots.bot import Bot
 
-    Logger.set_default_level(logging.INFO)
+    Logger.set_default_level(logging.ERROR)
 
     # # Niveau spécifique pour
-    Logger.set_level("Backtest", logging.DEBUG)
-    # Logger.set_level("BacktestEngine", logging.INFO)
+    # Logger.set_level("Backtest", logging.INFO)
+    Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)
+    # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
 
     params = {
+        "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+        "symbol": "ethusdc",
+        "interval": "5m",
+        "initial_capital": 1000,
         "trading_system": {
-            "swing_window": 21,
-            "tp_pct": 1.0,
-            "sl_pct": 1.0,
-            "swing_side": 2,
+            "fast_period": 14,
+            "slow_period": 50,
+            "buffer_size": 2,
+            "slope_threshold": 0.5,
+            "tp_pct": 1.5,
+            "sl_pct": 1.5
         }
     }
 
-    backtest_executor = Backtest("sweep_bot")
+    backtest_executor = Backtest("ma_cross_fast_slow_bot")
     stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
 
     # Backtest.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))

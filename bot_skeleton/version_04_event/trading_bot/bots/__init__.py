@@ -1,3 +1,4 @@
+from trading_bot.system_trading.ma_cross_fast_slow_system_trading import MaCrossFastSlowSystemTrading
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSystemTrading
 
@@ -33,7 +34,25 @@ BOTS_CONFIG = {
                 "sl_pct": 1.5
             }
         },
-        "warmup_attributs": ["warmup_count", "swing_window"]
+        "warmup_attributs": ["swing_window"]
+    },
+    "ma_cross_fast_slow_bot": {
+        "system_class": MaCrossFastSlowSystemTrading,
+        "default_parameters": {
+            "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+            "symbol": "ethusdc",
+            "interval": "5m",
+            "initial_capital": 1000,
+            "trading_system": {
+                "fast_period": 14,
+                "slow_period": 50,
+                "buffer_size": 2,
+                "slope_threshold": 0.5,
+                "tp_pct": 1.5,
+                "sl_pct": 1.5
+            }
+        },
+        "warmup_attributs": ["slow_period"]
     }
 }
 

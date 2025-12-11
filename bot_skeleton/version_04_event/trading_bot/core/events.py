@@ -24,6 +24,30 @@ class Price(Event):
                 f"{time_paris:%Y-%m-%d %H:%M:%S}"
                 )
 
+# Une structure de type Chandelier
+@dataclass
+class Candle(Event):
+    symbol: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+    start_time: datetime
+    end_time: datetime
+
+    def __str__(self):
+        # Conversion UTC → Paris
+        paris_tz = ZoneInfo("Europe/Paris")
+        start_paris = self.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+        end_paris = self.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
+
+        return (f"Candle({self.symbol}) | "
+                f"o: {self.open:.2f}, h: {self.high:.2f}, l: {self.low:.2f}, c: {self.close:.2f}, "
+                f"v: {self.volume:.3f} | "
+                f"{start_paris:%Y-%m-%d %H:%M:%S} / {end_paris:%Y-%m-%d %H:%M:%S})")
+
+
 # 🪟 Événement : carnet d’ordre mis à jour
 @dataclass
 class OrderBookUpdated(Event):
@@ -43,7 +67,7 @@ class IndicatorUpdated(Event):
     """Événement publié lorsque les indicateurs sont recalculés."""
     symbol: str
     timestamp: datetime
-    values: dict  # ex: {"sma": 123.45, "momentum": 0.67}
+    values: dict 
 
 # 📊 Signal de stratégie
 @dataclass
@@ -81,30 +105,6 @@ class TradeClose(Event):
 @dataclass
 class TradeRejected(Event):
     reason: str
-
-# Une structure de type Chandelier
-@dataclass
-class Candle(Event):
-    symbol: str
-    open: float
-    high: float
-    low: float
-    close: float
-    volume: float
-    start_time: datetime
-    end_time: datetime
-
-    def __str__(self):
-        # Conversion UTC → Paris
-        paris_tz = ZoneInfo("Europe/Paris")
-        start_paris = self.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
-        end_paris = self.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
-
-        return (f"Candle({self.symbol}) | "
-                f"o: {self.open:.2f}, h: {self.high:.2f}, l: {self.low:.2f}, c: {self.close:.2f}, "
-                f"v: {self.volume:.3f} | "
-                f"{start_paris:%Y-%m-%d %H:%M:%S} / {end_paris:%Y-%m-%d %H:%M:%S})")
-
 
 # Event émis a chaque fermeture de bougie
 @dataclass
