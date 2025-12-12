@@ -12,11 +12,12 @@
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - Voir comment faire pour mettre des filtres optionnels dnas le pipline de trading -> prevoir des event spéciaux
 - Dans les stats indiuer la date de début du bot et/ou  la durée execution
-- Ajouter la candle dans l'event IndicatorUpdated => supprimer le candle close dans IndicatorEmaCrossDetector
-
+- Faire une EMA with Buffer
 
 # Doing : 
-
+- Ajouter la candle dans l'event IndicatorUpdated => supprimer le candle close dans IndicatorEmaCrossDetector
+- Faire une acrchi plus prorpo pour les indicaterus dissociant l'indicateur et les event
+- Faire un test avec double calcul pandas et mon indicateur pour valider
 
 # Done : 
 - Tester le backtest du bot ma_cross -> il ne fait jamais aucun trade ?!?

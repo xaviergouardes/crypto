@@ -14,7 +14,7 @@ curl -X POST "http://127.0.0.1:9101/bot/backtest" \
   "trading_system": {
       "fast_period": 14,
       "slow_period": 50,
-      "buffer_size": 2,
+      "min_gap_pct": 0.01,
       "slope_threshold": 0.5,
       "tp_pct": 1.5,
       "sl_pct": 1.5
@@ -29,7 +29,7 @@ curl -X POST "http://127.0.0.1:9101/bot/train" \
   "trading_system": {
       "fast_period": [14],
       "slow_period": [50],
-      "buffer_size": [2],
+      "min_gap_pct": [2],
       "slope_threshold": [0.5],
       "tp_pct": [1.5],
       "sl_pct": [1.5]
@@ -48,7 +48,7 @@ curl -X POST "http://127.0.0.1:9101/bot/start" \
   "trading_system": {
       "fast_period": 14,
       "slow_period": 50,
-      "buffer_size": 2,
+      "min_gap_pct": 0.01,
       "slope_threshold": 0.5,
       "tp_pct": 1.5,
       "sl_pct": 1.5

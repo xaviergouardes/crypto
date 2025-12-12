@@ -1,9 +1,7 @@
-from datetime import datetime, timezone
-
+from trading_bot.indicators.indicator_ema_cross_detector.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, CandleClose, Price
-
+from trading_bot.core.events import Candle, Price, TradeSignalGenerated, IndicatorUpdated
 
 class MaCrossFastSlowSignalEngine:
 
@@ -18,33 +16,20 @@ class MaCrossFastSlowSignalEngine:
         self.periode_slow_ema = periode_slow_ema
         self.periode_fast_ema = periode_fast_ema
 
-        self.candle = None
         self.entry_price = None
 
         self.event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
-        self.event_bus.subscribe(CandleClose, self.on_candle_close)
-
-    async def on_candle_close(self, event: CandleClose):
-        """Chaque clôture de bougie déclenche une évaluation de la stratégie."""
-        self.candle = event.candle
-
-        now_ts = datetime.now(timezone.utc)
-        self.entry_price = Price(
-            symbol=self.candle.symbol,
-            price=self.candle.close,  # valeur du prix
-            volume=self.candle.volume,            # volume à zéro
-            timestamp=self.candle.end_time     # timestamp maintenant
-        )
-
-        await self.evaluate_strategy()
 
     async def on_indicator_update(self, event: IndicatorUpdated):
         # update des donnée selemnt , la stratégie est déclacnché par le candle close
         if event.values.get("type") != "IndicatorEmaCrossDetector":
             return
-        
+            
         fast_period = event.values.get("fast_period")
         slow_period = event.values.get("slow_period")
+        fast_value = event.values.get("fast_value")
+        slow_value = event.values.get("slow_value")
+
         if fast_period != self.periode_fast_ema or slow_period != self.periode_slow_ema:
             return     
 
@@ -52,32 +37,34 @@ class MaCrossFastSlowSignalEngine:
         self.cross = event.values.get("signal")
         if self.cross not in ("bullish", "bearish"):
             return
-        self._logger.debug(f"Mise à jour du signal : {self.cross}")
 
-    async def evaluate_strategy(self):
-        # Évite de répéter le même signal consécutif
         signal = "BUY" if self.cross == "bullish" else "SELL"
         if self.last_signal == signal:
             return
         
         self.last_signal = signal  
-        self._logger.debug(f"Signal => {self.last_signal}")
+        self._logger.debug(f"signal={self.last_signal} [ EMA({fast_period })={fast_value:.2f}] | EMA({slow_period})={slow_value:.2f} | candle={event.candle}")
 
-        await self.signal_emit()  
+        await self._signal_emit(event.candle)  
 
-    async def signal_emit(self):
-        event = TradeSignalGenerated(
+
+    async def _signal_emit(self, candle: Candle):
+        price = Price(
+            symbol=candle.symbol,
+            price=candle.close,
+            volume=candle.volume,
+            timestamp=candle.end_time,
+        )
+        await self.event_bus.publish(TradeSignalGenerated(
                     side=self.last_signal,
                     confidence=1.0,
-                    price=self.entry_price,
+                    price=price,
                     strategie=self.__class__.__name__,
                     strategie_parameters={
                         "periode_fast_ema": self.periode_fast_ema,
                         "periode_slow_ema": self.periode_slow_ema,
                     },
                     strategie_values={
-                        "cross_signal": self.cross,
+                        "signal": self.last_signal,
                     },
-                )
-        await self.event_bus.publish(event)
-        self._logger.debug(event)
+                ))

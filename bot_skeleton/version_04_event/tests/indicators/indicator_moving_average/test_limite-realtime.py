@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.indicator_moving_average import IndicatorMovingAverage
+from trading_bot.indicators.indicator_moving_average.indicator_moving_average import IndicatorMovingAverage
 from trading_bot.core.event_bus import Event, EventBus
 
 # Mock pour une bougie
@@ -34,10 +34,9 @@ async def test_on_close_wrong_symbol():
             close = 123
             end_time = datetime.now()
 
-    await indicator.on_candle_close(MockEvent())
-
-    # Historique pas assez grand pour calculer 1 bougie et période = 3
-    assert indicator.current_value is None
+    # ✅ On valide que l’exception est attendue
+    with pytest.raises(ValueError, match=r"Erreur de symbole"):
+        await indicator.on_candle_close(MockEvent())
 
     # Vérifier qu'il n'y a pas d'elements pubié
     assert len(published) == 0 
@@ -76,13 +75,11 @@ async def test_on_close_first_update():
     event = CandleClose(symbol="ethusdc", candle=MockCandle(13))
     await indicator.on_candle_close(event)
 
-    assert indicator.current_value == pytest.approx(11.5)
-
     assert len(published) == 2, "Un seul event doit etre publié"
     last_event = published[-1]
-    assert last_event.values["ema_candle"] is not None, "'ema_candle' est None"
-    assert last_event.values["ema_candle"] == pytest.approx(11.5), "'ema_candle' n'a pas la valeur attendu"
-    assert last_event.values["ema_candle_period"] == 3, "'ema_candle_period' est None"
+    assert last_event.values["ema_value"] is not None, "'ema_value' est None"
+    assert last_event.values["ema_value"] == pytest.approx(11.5), "'ema_value' n'a pas la valeur attendu"
+    assert last_event.values["ema_period"] == 3, "'ema_period' est None"
 
 
 @pytest.mark.asyncio
@@ -112,10 +109,8 @@ async def test_sma_sliding_window():
     event = CandleClose(symbol="ethusdc", candle=MockCandle(40))
     await indicator.on_candle_close(event)
 
-    assert indicator.current_value == 30
-
     assert len(published) == 2, "Un seul event doit etre publié"
     last_event = published[-1]
-    assert last_event.values["sma_candle"] is not None, "'sma_candle' est None"
-    assert last_event.values["sma_candle"] == 30, "'sma_candle' n'a pas la valeur attendu"
-    assert last_event.values["sma_candle_period"] == 3, "'sma_candle_period' est None"
+    assert last_event.values["sma_value"] is not None, "'sma_value' est None"
+    assert last_event.values["sma_value"] == 30, "'sma_value' n'a pas la valeur attendu"
+    assert last_event.values["sma_period"] == 3, "'sma_period' est None"

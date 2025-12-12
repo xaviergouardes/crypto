@@ -66,7 +66,7 @@ class SupportResistanceDetected(Event):
 class IndicatorUpdated(Event):
     """Événement publié lorsque les indicateurs sont recalculés."""
     symbol: str
-    timestamp: datetime
+    candle: Candle
     values: dict 
 
 # 📊 Signal de stratégie

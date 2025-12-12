@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 import pytest
 
-from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.indicator_moving_average import IndicatorMovingAverage
+from trading_bot.core.events import CandleHistoryReady, IndicatorUpdated
+from trading_bot.indicators.indicator_moving_average.indicator_moving_average import IndicatorMovingAverage
 from trading_bot.core.event_bus import EventBus
 
 # Mock pour une bougie
@@ -43,7 +43,6 @@ async def test_history_empty():
 
     # Historique pas assez grand pour calculer 1 bougie et période = 3
     assert indicator._initialized is False
-    assert indicator.current_value is None
 
     # Vérifier qu'il n'y a pas d'elements pubié
     assert len(published) == 0 
@@ -72,7 +71,6 @@ async def test_history_not_enough_candles():
 
     # Historique pas assez grand pour calculer 1 bougie et période = 3
     assert not indicator._initialized
-    assert indicator.current_value is None
 
     # Vérifier qu'il n'y a pas d'elements pubié
     assert len(published) == 0 

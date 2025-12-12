@@ -38,12 +38,12 @@ if __name__ == "__main__":
     import logging
     from trading_bot.bots.bot import Bot
 
-    Logger.set_default_level(logging.ERROR)
+    Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
     # Logger.set_level("Backtest", logging.INFO)
-    Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)
-    # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
+    # Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)
+    Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
@@ -56,10 +56,10 @@ if __name__ == "__main__":
         "trading_system": {
             "fast_period": 14,
             "slow_period": 50,
-            "buffer_size": 2,
-            "slope_threshold": 0.5,
+            "min_gap_pct": 0.0,
+            "slope_threshold": 0.0,
             "tp_pct": 1.5,
-            "sl_pct": 1.5
+            "sl_pct": 1,
         }
     }
 

@@ -46,8 +46,8 @@ BOTS_CONFIG = {
             "trading_system": {
                 "fast_period": 14,
                 "slow_period": 50,
-                "buffer_size": 2,
-                "slope_threshold": 0.5,
+                "min_gap": 0.01,
+                "slope_threshold": 0.01,
                 "tp_pct": 1.5,
                 "sl_pct": 1.5
             }
