@@ -56,7 +56,7 @@ class BotTrainer:
             
             # Ajouter le nom du bot dans les stats
             stats["name"] = bot_name
-
+ 
             self.logger.debug(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
 
             return stats
@@ -178,15 +178,24 @@ if __name__ == "__main__":
     #     "swing_side": [2, 3]
     # }
 
+    # param_grid = {
+    #     "trading_system": {
+    #         "swing_window": [200],
+    #         "tp_pct": [2.0, 2.5],
+    #         "sl_pct": [1.0]
+    #     }
+    # }
     param_grid = {
         "trading_system": {
-            "swing_window": [200],
-            "tp_pct": [2.0, 2.5],
-            "sl_pct": [1.0]
+            "fast_period": [21, 50],
+            "slow_period": [50, 100, 150 , 200],
+            "min_gap": [0, 1],
+            "slope_threshold": [0.5, 1, 1.5, 2],
+            "tp_pct": [1.5, 2],
+            "sl_pct": [1]
         }
     }
-
-    trainer = BotTrainer("sweep_bot")
+    trainer = BotTrainer("ma_cross_fast_slow_bot")
     summary_df, results = asyncio.run(trainer.run(param_grid))
     # print(summary_df.columns)
 

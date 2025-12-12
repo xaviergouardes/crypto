@@ -26,6 +26,7 @@ class IndicatorEmaCrossCalculator:
             fast_slope = self.fast_values[-1] - self.fast_values[-2]
             slow_slope = self.slow_values[-1] - self.slow_values[-2]
 
+
         # Différences pour croisement
         prev_diff = self.fast_values[-2] - self.slow_values[-2]
         curr_diff = self.fast_values[-1] - self.slow_values[-1]
@@ -47,10 +48,11 @@ class IndicatorEmaCrossCalculator:
         if (fast_slope > 0 > slow_slope) or (fast_slope < 0 < slow_slope):
             return None
 
+        signal = None
         # Détection bullish / bearish
         if prev_diff < 0 < curr_diff and fast_slope > 0:
-            return "bullish"
+            signal = "bullish"
         if prev_diff > 0 > curr_diff and fast_slope < 0:
-            return "bearish"
+            signal = "bearish"
 
-        return None
+        return signal

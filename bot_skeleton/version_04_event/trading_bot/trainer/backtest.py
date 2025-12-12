@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # # Niveau spécifique pour
     # Logger.set_level("Backtest", logging.INFO)
     # Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)
-    Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
+    # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
     # Logger.set_level("TradeJournal", logging.DEBUG)
@@ -54,12 +54,12 @@ if __name__ == "__main__":
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
-            "fast_period": 14,
-            "slow_period": 50,
-            "min_gap_pct": 0.0,
-            "slope_threshold": 0.0,
+            "fast_period": 50,
+            "slow_period": 150,
+            "min_gap": 0,
+            "slope_threshold": 0.5,
             "tp_pct": 1.5,
-            "sl_pct": 1,
+            "sl_pct": 1
         }
     }
 
