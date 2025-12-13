@@ -94,19 +94,11 @@ class SimpleSweepSwingSignalEngine:
         #       f"swing  low={self.last_swing_low}"
         # )
 
-        now_ts = datetime.now(timezone.utc)
-        price = Price(
-            symbol=self.candle.symbol,
-            price=self.candle.close,  # valeur du prix
-            volume=self.candle.volume,            # volume à zéro
-            timestamp=self.candle.end_time     # timestamp maintenant
-        )
-
         # Publication du signal
         await self.event_bus.publish(TradeSignalGenerated(
             side=signal,
             confidence=1.0,
-            price=price,
+            price=self.candle.close,
             strategie = self.__class__.__name__,
             strategie_parameters = None,
             strategie_values = {

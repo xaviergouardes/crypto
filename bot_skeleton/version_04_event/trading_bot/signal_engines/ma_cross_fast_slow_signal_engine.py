@@ -49,16 +49,10 @@ class MaCrossFastSlowSignalEngine:
 
 
     async def _signal_emit(self, candle: Candle):
-        price = Price(
-            symbol=candle.symbol,
-            price=candle.close,
-            volume=candle.volume,
-            timestamp=candle.end_time,
-        )
         await self.event_bus.publish(TradeSignalGenerated(
                     side=self.last_signal,
                     confidence=1.0,
-                    price=price,
+                    price=candle.close,
                     strategie=self.__class__.__name__,
                     strategie_parameters={
                         "periode_fast_ema": self.periode_fast_ema,

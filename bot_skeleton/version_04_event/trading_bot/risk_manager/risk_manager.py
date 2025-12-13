@@ -39,7 +39,7 @@ class RiskManager:
             self.logger.error("[RiskManager] Trade rejeté : position size non autorisée")
             return
 
-        entry_price = event.price.price
+        entry_price = event.price
 
         # Calcul TP et SL selon le type de trade
         if event.side == "BUY":

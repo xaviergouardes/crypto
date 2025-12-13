@@ -31,19 +31,11 @@ class RandomSignalEngine:
               f"Signal {signal} | candle={candle} "
         )
 
-        now_ts = datetime.now(timezone.utc)
-        price = Price(
-            symbol=event.symbol,
-            price=candle.close,  # valeur du prix
-            volume=0,            # volume à zéro
-            timestamp=now_ts     # timestamp maintenant
-        )
-
         # Publication du signal
         await self.event_bus.publish(TradeSignalGenerated(
             side=signal,
             confidence=1.0,
-            price=price,
+            price=candle.close,
             strategie = self.__class__.__name__,
             strategie_parameters = None,
             strategie_values = None,

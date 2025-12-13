@@ -74,7 +74,7 @@ class IndicatorUpdated(Event):
 class TradeSignalGenerated(Event):
     side: str   # "BUY" ou "SELL"
     confidence: float
-    price: Price
+    price: float
     strategie: str
     strategie_parameters: dict
     strategie_values: dict

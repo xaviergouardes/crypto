@@ -25,7 +25,7 @@ def test_no_cross_when_same_sign():
 # 3) Cross détecté mais rejeté par min_gap_pct (micro touch)
 # ---------------------------------------------------------------------------
 def test_cross_rejected_by_min_gap():
-    calc = IndicatorEmaCrossCalculator(min_gap_pct=0.01)
+    calc = IndicatorEmaCrossCalculator(min_gap=0.01)
 
     calc.update(1.00, 1.01)     # prev_diff < 0
     result = calc.update(1.01005, 1.01)  # cross mais gap < 1%
@@ -71,7 +71,7 @@ def test_reject_cross_inconsistent_slopes():
 # 6) Détection bullish validée
 # ---------------------------------------------------------------------------
 def test_bullish_cross():
-    calc = IndicatorEmaCrossCalculator(min_gap_pct=0.001)
+    calc = IndicatorEmaCrossCalculator(min_gap=0.001)
 
     calc.update(1.00, 1.02)     # prev_diff < 0
     result = calc.update(1.06, 1.03)  # pente positive + diff > 0
@@ -83,7 +83,7 @@ def test_bullish_cross():
 # 7) Détection bearish validée
 # ---------------------------------------------------------------------------
 def test_bearish_cross():
-    calc = IndicatorEmaCrossCalculator(min_gap_pct=0.001)
+    calc = IndicatorEmaCrossCalculator(min_gap=0.001)
 
     # 1er update : fast > slow
     calc.update(1.05, 1.02)     # prev_diff > 0

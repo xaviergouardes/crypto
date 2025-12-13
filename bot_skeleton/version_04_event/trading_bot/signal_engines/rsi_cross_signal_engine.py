@@ -121,20 +121,13 @@ class RSICrossSignalEngine:
             await self._signal_emit(signal, self.candle)
 
     async def _signal_emit(self, signal:str, candle: Candle):
-        # Création du prix
-        price = Price(
-            symbol=self.candle.symbol,
-            price=self.candle.close,
-            volume=self.candle.volume,
-            timestamp=self.candle.end_time,
-        )
 
         # Publication du signal
         await self.event_bus.publish(
             TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=price,
+                price=candle.close,
                 strategie=self.__class__.__name__,
                 strategie_parameters={
                     "rsi_fast_period": self.rsi_fast_period,
