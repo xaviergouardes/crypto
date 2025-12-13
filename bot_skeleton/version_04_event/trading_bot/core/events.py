@@ -136,11 +136,6 @@ class CandleHistoryReady(Event):
     period: timedelta
     candles: List[Candle]
 
-# 
-@dataclass
-class StopBot(Event):
-    timestamp: datetime
-
 # ❌ Trade rejeté
 @dataclass
 class NewSoldes(Event):

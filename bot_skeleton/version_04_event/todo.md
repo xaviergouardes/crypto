@@ -11,12 +11,12 @@
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - Voir comment faire pour mettre des filtres optionnels dnas le pipline de trading -> prevoir des event spéciaux
-- Dans les stats indiuer la date de début du bot et/ou  la durée execution
 - Faire une EMA with Buffer
 - Synchroniser les event avec la candle partout
+- Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
 
 # Doing : 
-- Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
+- Dans les stats indiuer la date de début du bot et/ou  la durée execution
 
 # Done : 
 - retirer le Price de partout et ajouter une cancdle dans tous les events

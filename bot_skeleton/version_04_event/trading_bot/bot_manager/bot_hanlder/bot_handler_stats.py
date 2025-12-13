@@ -13,6 +13,7 @@ class BotHandlerStats():
             return web.json_response({
                 "bot_id": self.bot_controler.bot.bot_id,
                 "type": self.bot_controler.bot_type,
+                "uptime": str(self.bot_controler.bot.uptime),
                 "stats": stats
             },
             status=200)

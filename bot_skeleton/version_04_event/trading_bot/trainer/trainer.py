@@ -199,10 +199,10 @@ if __name__ == "__main__":
     param_grid = {
         "trading_system": {
             "fast_period": [21],
-            "slow_period": [50],
+            "slow_period": [150],
             "min_gap": [0],
-            "slope_threshold": [0, 1],
-            "tp_pct": [1.5, 2],
+            "slope_threshold": [0.5],
+            "tp_pct": [1.5],
             "sl_pct": [1]
         }
     }

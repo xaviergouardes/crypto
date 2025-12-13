@@ -2,6 +2,9 @@
 from typing import override
 import copy
 
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
 from trading_bot.bots import BOTS_CONFIG
 from trading_bot.core.event_bus import EventBus
 
@@ -26,6 +29,8 @@ class Bot(Startable):
 
         self.bot_id = bot_id
         self.bot_type = bot_type
+        self.started_at: Optional[datetime] = None
+        self.stopped_at: Optional[datetime] = None
 
         self._mode = None
         self._engine = None
@@ -41,7 +46,18 @@ class Bot(Startable):
         
         self.logger.info(f"Bot {self.bot_type} {self.bot_id} Initilisation Terminée.")
 
+    @property
+    def uptime(self) -> Optional[timedelta]:
+        if self.started_at is None:
+            return None
+        return datetime.now(timezone.utc) - self.started_at
 
+    @property
+    def execution_time(self):
+        if self.started_at and self.stopped_at:
+            return self.stopped_at - self.started_at
+        return None
+    
     def set_backtest_mode(self):
         if self.is_running():
             raise Exception("Pas possible de changer le mode en cours d'execution !")
@@ -121,6 +137,9 @@ class Bot(Startable):
         
         await self._engine.start()
 
+        self.started_at = datetime.now(timezone.utc)
+
+        # a quoi ça sert de renvoyer le journal des trades ?
         trades_list = self._system_trading.get_trades_journal()
         return trades_list
 
@@ -132,6 +151,7 @@ class Bot(Startable):
             self._event_bus.unsubscribe_all()
             # Pour etre sur que l'aobjet soit bien rétinstancier
             self._system_trading = None
+            self.stopped_at = datetime.now(timezone.utc)
             self.logger.info(f"{self.bot_id} arrêté.")
 
 

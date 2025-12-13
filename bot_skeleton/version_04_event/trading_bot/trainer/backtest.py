@@ -59,8 +59,8 @@ if __name__ == "__main__":
             "warmup_count": 22,
             "fast_period": 5,
             "slow_period": 21,
-            "tp_pct": 2,
-            "sl_pct": 1
+            "tp_pct": 9,
+            "sl_pct": 4
         }
     }
 
@@ -68,6 +68,6 @@ if __name__ == "__main__":
     stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
 
     # Backtest.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
-    # Backtest.logger.info(f"trades_list : {trades_list}")
+    Backtest.logger.info(f"trades_list : {trades_list}")
 
  
