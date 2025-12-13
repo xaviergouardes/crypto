@@ -36,31 +36,19 @@ class TradeJournal:
         - timestamp : date/heure du trade
         """
 
-        # Déterminer le prix de clôture en fonction du target
-        if event.target == "TP":
-            close_price = event.tp
-        elif event.target == "SL":
-            close_price = event.sl
-        else:
-            close_price = event.price.price  # fallback
-
         # Calcul du PnL en tenant compte du type de trade et de la taille
-        pnl = 0.0
-        if event.side == "BUY":
-            pnl = (close_price - event.price.price) * event.size
-        elif event.side == "SELL":
-            pnl = (event.price.price - close_price) * event.size
+        pnl = event.pnl
 
         # Enregistrer le trade dans le journal
         trade_record = {
             "side": event.side,
-            "entry": event.price,
+            "entry": event.exit_price,
             "tp": event.tp,
             "sl": event.sl,
             "size": event.size,
             "target": event.target,
-            "open_timestamp": event.open_timestamp,
-            "close_timestamp": event.close_timestamp,
+            "open_timestamp": event.candle_open.end_time,
+            "close_timestamp": event.candle_close.end_time,
             "pnl": pnl
         }
         self._trades.append(trade_record)

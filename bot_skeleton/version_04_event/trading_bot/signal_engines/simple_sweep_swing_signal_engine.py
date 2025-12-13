@@ -1,8 +1,6 @@
-from datetime import datetime, timezone
-
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, CandleClose, Price
+from trading_bot.core.events import TradeSignalGenerated, IndicatorUpdated, CandleClose
 
 
 class SimpleSweepSwingSignalEngine:
@@ -98,7 +96,7 @@ class SimpleSweepSwingSignalEngine:
         await self.event_bus.publish(TradeSignalGenerated(
             side=signal,
             confidence=1.0,
-            price=self.candle.close,
+            candle=self.candle,
             strategie = self.__class__.__name__,
             strategie_parameters = None,
             strategie_values = {

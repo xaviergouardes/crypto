@@ -38,10 +38,10 @@ if __name__ == "__main__":
     import logging
     from trading_bot.bots.bot import Bot
 
-    Logger.set_default_level(logging.WARN)
+    Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
-    Logger.set_level("RSICrossSignalEngine", logging.DEBUG)
+    # Logger.set_level("RSICrossSignalEngine", logging.DEBUG)
     # Logger.set_level("IndicatorRSI", logging.DEBUG)
     # Logger.set_level("Backtest", logging.INFO)
     # Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)

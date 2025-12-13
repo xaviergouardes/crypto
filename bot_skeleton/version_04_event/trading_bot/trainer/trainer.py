@@ -185,12 +185,23 @@ if __name__ == "__main__":
     #         "sl_pct": [1.0]
     #     }
     # }
+
+    # param_grid = {
+    #     "trading_system": {
+    #         "fast_period": [21, 50],
+    #         "slow_period": [50, 100, 150 , 200],
+    #         "min_gap": [0, 1],
+    #         "slope_threshold": [0.5, 1, 1.5, 2],
+    #         "tp_pct": [1.5, 2],
+    #         "sl_pct": [1]
+    #     }
+    # }
     param_grid = {
         "trading_system": {
-            "fast_period": [21, 50],
-            "slow_period": [50, 100, 150 , 200],
-            "min_gap": [0, 1],
-            "slope_threshold": [0.5, 1, 1.5, 2],
+            "fast_period": [21],
+            "slow_period": [50],
+            "min_gap": [0],
+            "slope_threshold": [0, 1],
             "tp_pct": [1.5, 2],
             "sl_pct": [1]
         }

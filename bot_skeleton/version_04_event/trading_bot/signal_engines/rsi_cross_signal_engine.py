@@ -6,8 +6,7 @@ from trading_bot.core.events import (
     Candle,
     IndicatorUpdated,
     CandleClose,
-    TradeSignalGenerated,
-    Price,
+    TradeSignalGenerated
 )
 
 
@@ -127,7 +126,7 @@ class RSICrossSignalEngine:
             TradeSignalGenerated(
                 side=signal,
                 confidence=1.0,
-                price=candle.close,
+                candle=candle,
                 strategie=self.__class__.__name__,
                 strategie_parameters={
                     "rsi_fast_period": self.rsi_fast_period,

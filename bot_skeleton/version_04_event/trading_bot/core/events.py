@@ -5,24 +5,6 @@ from .event_bus import Event
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-# 📈 Structure de type prix
-@dataclass
-class Price(Event):
-    symbol: str
-    price: float
-    volume: float
-    timestamp: datetime
-
-    def __str__(self):
-        # Conversion UTC → Paris
-        paris_tz = ZoneInfo("Europe/Paris")
-        time_paris = self.timestamp.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
-
-        return (f"Price ({self.symbol}) | "
-                f"p: {self.price:.2f} | "
-                f"v: {self.volume:.3f} | "
-                f"{time_paris:%Y-%m-%d %H:%M:%S}"
-                )
 
 # Une structure de type Chandelier
 @dataclass
@@ -74,7 +56,7 @@ class IndicatorUpdated(Event):
 class TradeSignalGenerated(Event):
     side: str   # "BUY" ou "SELL"
     confidence: float
-    price: float
+    candle: Candle
     strategie: str
     strategie_parameters: dict
     strategie_values: dict
@@ -85,7 +67,7 @@ class TradeSignalGenerated(Event):
 class TradeApproved(Event):
     side: str
     size: float
-    price: Price
+    candle: Candle
     tp: float
     sl: float
 
@@ -94,12 +76,46 @@ class TradeApproved(Event):
 class TradeClose(Event):
     side: str
     size: float
-    price: Price
+    candle_open: Candle
+    candle_close: Candle
     tp: float
     sl: float
     target: str # TP / SL
-    open_timestamp: datetime
-    close_timestamp: datetime
+
+    @property
+    def entry_price(self) -> float:
+        return self.candle_open.close
+    
+    @property
+    def exit_price(self) -> float:
+        # prix de référence selon la cible
+        ref_price = self.tp if self.target == "TP" else self.sl
+
+        candle_prices = [
+            self.candle_close.open,
+            self.candle_close.high,
+            self.candle_close.low,
+            self.candle_close.close,
+        ]
+
+        return min(ref_price, *candle_prices)
+    
+    @property
+    def pnl(self) -> float:
+        """
+        PnL brut (sans spread / commission)
+        """
+        pnl = None
+        if self.side == "BUY":
+            pnl = (self.exit_price - self.entry_price) * self.size
+            # print(f"==> BUY => pnl={pnl} | exit_price={self.exit_price},  entry_price={self.entry_price}, size={self.size}")
+        elif self.side == "SELL":
+            pnl = (self.entry_price - self.exit_price) * self.size
+            # print(f"==> SELL => pnl={pnl} | exit_price={self.exit_price},  entry_price={self.entry_price}, size={self.size}")
+        else:
+            raise ValueError(f"Side inconnu : {self.side}")
+        return pnl
+    
 
 # ❌ Trade rejeté
 @dataclass

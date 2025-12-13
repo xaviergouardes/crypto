@@ -1,6 +1,4 @@
-# trading_bot/trader/trader.py
-from datetime import timedelta, datetime
-
+from datetime import timedelta
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeApproved, TradeClose, CandleClose
@@ -26,19 +24,20 @@ class TraderOnlyOnePosition:
 
         # Ignorer si la période de cooldown n'est pas écoulée
         if self.last_close_timestamp is not None:
-            elapsed = event.price.timestamp - self.last_close_timestamp
+            elapsed = event.candle.end_time - self.last_close_timestamp
             if elapsed < self.cooldown:
                 # print(f"[Trader] ⚠️ Cooldown actif ({elapsed}). Signal ignoré.")
                 return
             
         self.active_trade = {
             "side": event.side,
-            "entry": event.price,
+            "entry": event.candle.close,
             "tp": event.tp,
             "sl": event.sl,
             "size": event.size,
-            "open_timestamp": event.price.timestamp,
-            "close_timestamp": None
+            "open_timestamp": event.candle.end_time,
+            "close_timestamp": None,
+            "candle_open": event.candle
         }
         self.logger.debug(f"✅ Nouvelle position ouverte : {self.active_trade}"
               f"TradeApproved={event}"
@@ -64,17 +63,16 @@ class TraderOnlyOnePosition:
                 target = "TP"
             elif event.candle.high >= trade["sl"]:
                 target = "SL"
-
+    
         if target:
             await self.event_bus.publish(TradeClose(
                 side=side,
-                price=trade["entry"],
+                size=trade["size"],
+                candle_open=trade["candle_open"],
+                candle_close=event.candle,
                 tp=trade["tp"],
                 sl=trade["sl"],
-                size=trade["size"],
-                target=target,
-                open_timestamp=trade["open_timestamp"],
-                close_timestamp=event.candle.end_time
+                target=target
             ))
 
             self.active_trade = None

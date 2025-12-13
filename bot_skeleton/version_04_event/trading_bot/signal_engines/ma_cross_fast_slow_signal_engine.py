@@ -1,7 +1,7 @@
 from trading_bot.indicators.indicator_ema_cross_detector.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import Candle, Price, TradeSignalGenerated, IndicatorUpdated
+from trading_bot.core.events import Candle, TradeSignalGenerated, IndicatorUpdated
 
 class MaCrossFastSlowSignalEngine:
 
@@ -52,7 +52,7 @@ class MaCrossFastSlowSignalEngine:
         await self.event_bus.publish(TradeSignalGenerated(
                     side=self.last_signal,
                     confidence=1.0,
-                    price=candle.close,
+                    candle=candle,
                     strategie=self.__class__.__name__,
                     strategie_parameters={
                         "periode_fast_ema": self.periode_fast_ema,

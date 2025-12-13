@@ -1,9 +1,6 @@
-from datetime import datetime
-from zoneinfo import ZoneInfo 
-
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeClose, StopBot, NewSoldes
+from trading_bot.core.events import TradeClose, NewSoldes
 
 class PortfolioManager:
     """Journalise tous les trades fermés et calcule le P&L total, ainsi que le solde max et min."""
@@ -25,20 +22,8 @@ class PortfolioManager:
 
     async def on_trade_close(self, event: TradeClose) -> None:
 
-        # Déterminer le prix de clôture en fonction du target
-        if event.target == "TP":
-            close_price = event.tp
-        elif event.target == "SL":
-            close_price = event.sl
-        else:
-            close_price = event.price.price  # fallback
-
         # Calcul du PnL en tenant compte du type de trade et de la taille
-        pnl = 0.0
-        if event.side == "BUY":
-            pnl = (close_price - event.price.price) * event.size
-        elif event.side == "SELL":
-            pnl = (event.price.price - close_price) * event.size
+        pnl = event.pnl
 
         # Mise à jour du solde
         self.usdc_balance += pnl

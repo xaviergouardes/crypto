@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from trading_bot.core.logger import Logger
-from trading_bot.core.events import Candle, CandleHistoryReady, Price, CandleClose
+from trading_bot.core.events import Candle, CandleHistoryReady, CandleClose
 from trading_bot.market_data.candle_source import CandleSource
 from trading_bot.core.event_bus import EventBus
 

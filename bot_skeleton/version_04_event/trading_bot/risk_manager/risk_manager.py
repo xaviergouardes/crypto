@@ -1,6 +1,3 @@
-# trading_bot/risk/risk_manager.py
-from datetime import datetime
-
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import TradeSignalGenerated, TradeApproved, TradeRejected, NewSoldes
@@ -30,16 +27,16 @@ class RiskManager:
         self.solde_disponible = event.usdc
 
     async def on_trade_signal(self, event: TradeSignalGenerated):
-        # Vérifier la présence du prix
-        if not hasattr(event, "price") or event.price is None:
-            raise MissingPriceError(f"Le signal de trading ne contient pas de prix : {event}")
+        # Vérifier la présence de la bougie
+        if not hasattr(event, "candle") or event.candle is None:
+            raise MissingPriceError(f"Le signal de trading ne contient pas la bougie : {event}")
 
         if self.max_position_size <= 0:
             await self.event_bus.publish(TradeRejected(reason="Position size non autorisée"))
             self.logger.error("[RiskManager] Trade rejeté : position size non autorisée")
             return
 
-        entry_price = event.price
+        entry_price = event.candle.close
 
         # Calcul TP et SL selon le type de trade
         if event.side == "BUY":
@@ -60,7 +57,7 @@ class RiskManager:
         await self.event_bus.publish(TradeApproved(
             side=event.side,
             size=size,
-            price=event.price,
+            candle=event.candle,
             tp=tp,
             sl=sl
         ))

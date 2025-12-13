@@ -16,10 +16,11 @@
 - Synchroniser les event avec la candle partout
 
 # Doing : 
-- retirer le price du TradeSignalGenerated
 - Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
 
 # Done : 
+- retirer le Price de partout et ajouter une cancdle dans tous les events
+- retirer le price du TradeSignalGenerated
 - Faire un indicateur RSI pour la stratégie double RSI
 - Faire une acrchi plus prorpo pour les indicaterus dissociant l'indicateur et les event
 - Ajouter la candle dans l'event IndicatorUpdated => supprimer le candle close dans IndicatorEmaCrossDetector

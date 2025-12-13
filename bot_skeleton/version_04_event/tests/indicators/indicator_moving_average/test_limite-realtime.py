@@ -64,14 +64,6 @@ async def test_on_close_first_update():
             )
     await indicator.on_history_ready(event)
 
-    # calcul de la prochaine valeur => 
-    # La formule EMA standard :
-    #     EMAnew​=(Pricenew​−EMAold​)×multiplier+EMAold​ 
-    #         • multiplier = 2 / (period + 1) → ici 2 / (3 + 1) = 0.5
-    #         • Valeur précédente (EMA_old) = 10
-    #         • Nouvelle valeur (Price_new) = 13
-    #     Donc :
-    #     EMAnew​=(13−10)×0.5+10=3×0.5+10=1.5+10=11.5
     event = CandleClose(symbol="ethusdc", candle=MockCandle(13))
     await indicator.on_candle_close(event)
 

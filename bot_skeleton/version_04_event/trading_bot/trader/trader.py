@@ -2,7 +2,7 @@
 
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeApproved, PriceUpdated, TradeClose
+from trading_bot.core.events import CandleClose, TradeApproved, TradeClose
 
 class Trader:
     """Simule l'exécution d'un trade approuvé avec TP et SL."""
@@ -11,54 +11,52 @@ class Trader:
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
         self.event_bus.subscribe(TradeApproved, self.on_trade_approved)
-        self.event_bus.subscribe(PriceUpdated, self.on_price)
         self.active_trades = []  # trades en cours
 
     async def on_trade_approved(self, event: TradeApproved):
-        trade = {
+ 
+        self.active_trade = {
             "side": event.side,
-            "entry": event.price,
+            "entry": event.candle.close,
             "tp": event.tp,
             "sl": event.sl,
-            "size": event.size
+            "size": event.size,
+            "open_timestamp": event.candle.end_time,
+            "close_timestamp": None,
+            "candle_open": event.candle
         }
-        self.active_trades.append(trade)
-        # print(f"[Trader] Trade ouvert : {trade}")
+        self.logger.debug(f"✅ Nouvelle position ouverte : {self.active_trade}"
+              f"TradeApproved={event}"
+              )
 
-    async def on_price(self, event: PriceUpdated):
-        to_close = []
-        for trade in self.active_trades:
-            price = event.price.price
-            if trade["side"] == "BUY":
-                if price >= trade["tp"]:
-                    print(f"[Trader] TP atteint ! Clôture trade BUY à {price:.2f}")
-                    trade["target"] = "TP"
-                    to_close.append(trade)
-                elif price <= trade["sl"]:
-                    print(f"[Trader] SL atteint ! Clôture trade BUY à {price:.2f}")
-                    trade["target"] = "SL"
-                    to_close.append(trade)
-            elif trade["side"] == "SELL":
-                if price <= trade["tp"]:
-                    print(f"[Trader] TP atteint ! Clôture trade SELL à {price:.2f}")
-                    trade["target"] = "TP"
-                    to_close.append(trade)
-                elif price >= trade["sl"]:
-                    print(f"[Trader] SL atteint ! Clôture trade SELL à {price:.2f}")
-                    trade["target"] = "SL"
-                    to_close.append(trade)
+    async def on_candle_close(self, event: CandleClose):
+            """Vérifie si le trade actif atteint le TP ou SL à chaque bougie close (high/low inclus)."""
+            if not self.active_trade:
+                return
 
-        for trade in to_close:
-            self.active_trades.remove(trade)
-            await self.event_bus.publish(TradeClose(
-                side=trade["side"],
-                price=trade["entry"],
-                tp=trade["tp"],
-                sl=trade["sl"],
-                size=trade["size"],
-                target=trade["target"]
-            ))
+            trade = self.active_trade
+            side = trade["side"]
 
-    async def run(self):
-        # Tout est événementiel, rien à faire ici
-        pass
+            # Vérifie si TP ou SL a été touché pendant la bougie
+            target = None
+            if side == "BUY":
+                if event.candle.high >= trade["tp"]:
+                    target = "TP"
+                elif event.candle.low <= trade["sl"]:
+                    target = "SL"
+            elif side == "SELL":
+                if event.candle.low <= trade["tp"]:
+                    target = "TP"
+                elif event.candle.high >= trade["sl"]:
+                    target = "SL"
+        
+            if target:
+                await self.event_bus.publish(TradeClose(
+                    side=side,
+                    size=trade["size"],
+                    candle_open=trade["candle_open"],
+                    candle_close=event.candle,
+                    tp=trade["tp"],
+                    sl=trade["sl"],
+                    target=target
+                ))

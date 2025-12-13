@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
-from trading_bot.core.events import TradeSignalGenerated, CandleClose, Price
+from trading_bot.core.events import TradeSignalGenerated, CandleClose
 
 
 class RandomSignalEngine:
@@ -35,7 +35,7 @@ class RandomSignalEngine:
         await self.event_bus.publish(TradeSignalGenerated(
             side=signal,
             confidence=1.0,
-            price=candle.close,
+            candle=event.candle,
             strategie = self.__class__.__name__,
             strategie_parameters = None,
             strategie_values = None,
