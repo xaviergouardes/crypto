@@ -1,3 +1,4 @@
+from trading_bot.system_trading.rsi_cross_system_trading import RSICrossSystemTrading
 from trading_bot.system_trading.ma_cross_fast_slow_system_trading import MaCrossFastSlowSystemTrading
 from trading_bot.system_trading.random_system_trading import RandomSystemTrading
 from trading_bot.system_trading.simple_sweep_system_trading import SimpleSweepSystemTrading
@@ -48,6 +49,23 @@ BOTS_CONFIG = {
                 "slow_period": 150,
                 "min_gap": 1,
                 "slope_threshold": 0.5,
+                "tp_pct": 2,
+                "sl_pct": 1
+            }
+        },
+        "warmup_attributs": ["slow_period"]
+    },
+    "rsi_cross_bot": {
+        "system_class": RSICrossSystemTrading,
+        "default_parameters": {
+            "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+            "symbol": "ethusdc",
+            "interval": "5m",
+            "initial_capital": 1000,
+            "trading_system": {
+                "warmup_count": 22,
+                "fast_period": 5,
+                "slow_period": 21,
                 "tp_pct": 2,
                 "sl_pct": 1
             }

@@ -13,13 +13,16 @@
 - Voir comment faire pour mettre des filtres optionnels dnas le pipline de trading -> prevoir des event spéciaux
 - Dans les stats indiuer la date de début du bot et/ou  la durée execution
 - Faire une EMA with Buffer
+- retirer le price du TradeSignalGenerated
+- Synchroniser les event avec la candle partout
 
 # Doing : 
-- Ajouter la candle dans l'event IndicatorUpdated => supprimer le candle close dans IndicatorEmaCrossDetector
-- Faire une acrchi plus prorpo pour les indicaterus dissociant l'indicateur et les event
-- Faire un test avec double calcul pandas et mon indicateur pour valider
+- Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
 
 # Done : 
+- Faire un indicateur RSI pour la stratégie double RSI
+- Faire une acrchi plus prorpo pour les indicaterus dissociant l'indicateur et les event
+- Ajouter la candle dans l'event IndicatorUpdated => supprimer le candle close dans IndicatorEmaCrossDetector
 - Tester le backtest du bot ma_cross -> il ne fait jamais aucun trade ?!?
 - construction du ema_cross_detector - indicateur
 - Mise au point d'un TU nominal pour l'indicateur

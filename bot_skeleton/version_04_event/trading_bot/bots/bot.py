@@ -142,6 +142,11 @@ class Bot(Startable):
         return_params = params.copy()
         trading_system = return_params.get("trading_system", {})
 
+        explicit_warmup = trading_system.get("warmup_count")
+        if isinstance(explicit_warmup, int) and explicit_warmup > 0:
+            return_params["trading_system"] = trading_system
+            return return_params
+
         warmup_attrs = BOTS_CONFIG[self.bot_type].get("warmup_attributs", [])
 
         # Récupérer les valeurs des attributs et prendre le max

@@ -38,32 +38,33 @@ if __name__ == "__main__":
     import logging
     from trading_bot.bots.bot import Bot
 
-    Logger.set_default_level(logging.INFO)
+    Logger.set_default_level(logging.WARN)
 
     # # Niveau spécifique pour
+    Logger.set_level("RSICrossSignalEngine", logging.DEBUG)
+    # Logger.set_level("IndicatorRSI", logging.DEBUG)
     # Logger.set_level("Backtest", logging.INFO)
     # Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)
     # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
-    # Logger.set_level("TradeJournal", logging.DEBUG)
+    Logger.set_level("TradeJournal", logging.INFO)
 
     params = {
-        "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20250914_20251114.csv",
+        "path": "/home/xavier/Documents/gogs-repository/crypto/bot_skeleton/hitorique_binance/ETHUSDC_5m_historique_20251014_20251214.csv",
         "symbol": "ethusdc",
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
-            "fast_period": 50,
-            "slow_period": 150,
-            "min_gap": 0,
-            "slope_threshold": 0.5,
-            "tp_pct": 1.5,
+            "warmup_count": 22,
+            "fast_period": 5,
+            "slow_period": 21,
+            "tp_pct": 2,
             "sl_pct": 1
         }
     }
 
-    backtest_executor = Backtest("ma_cross_fast_slow_bot")
+    backtest_executor = Backtest("rsi_cross_bot")
     stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
 
     # Backtest.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
