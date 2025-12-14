@@ -18,11 +18,12 @@ from trading_bot.trainer.statistiques_engine import *
 
 class Bot(Startable):
 
-    logger = Logger.get("Bot")
-
     # def __init__(self, params, mode):
     def __init__(self, bot_type="bot_type", bot_id="bot_01", params:dict = None):
         super().__init__()
+
+        self.logger = Logger.get(f"Bot {bot_type} {bot_id}")
+
         self.config = BOTS_CONFIG[bot_type]
 
         self._event_bus = EventBus()

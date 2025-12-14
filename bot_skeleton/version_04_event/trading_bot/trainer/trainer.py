@@ -196,20 +196,32 @@ if __name__ == "__main__":
     #         "sl_pct": [1]
     #     }
     # }
-    param_grid = {
-        "trading_system": {
-            "fast_period": [21],
-            "slow_period": [150],
-            "min_gap": [0],
-            "slope_threshold": [0.5],
-            "tp_pct": [1.5],
-            "sl_pct": [1]
-        }
-    }
-    trainer = BotTrainer("ma_cross_fast_slow_bot")
-    summary_df, results = asyncio.run(trainer.run(param_grid))
+    # param_grid = {
+    #     "trading_system": {
+    #         "fast_period": [21],
+    #         "slow_period": [150],
+    #         "min_gap": [0],
+    #         "slope_threshold": [0.5],
+    #         "tp_pct": [1.5],
+    #         "sl_pct": [1]
+    #     }
+    # }
+    # trainer = BotTrainer("ma_cross_fast_slow_bot")
+    # summary_df, results = asyncio.run(trainer.run(param_grid))
     # print(summary_df.columns)
 
+
+    param_grid = {
+        "trading_system": {
+            "warmup_count": [101],
+            "fast_period": [5,14, 21],
+            "slow_period": [21, 50, 75, 100],
+            "tp_pct": [1, 2],
+            "sl_pct": [0.5, 1]
+        }
+    }
+    trainer = BotTrainer("rsi_cross_bot")
+    summary_df, results = asyncio.run(trainer.run(param_grid))
     pd.set_option('display.max_rows', None)
     # pd.set_option("display.max_columns", None)
     # print(summary_df[["name", "total_profit", "win_rate", "num_trades", "total_score", "swing_window", "tp_pct", "sl_pct"]])

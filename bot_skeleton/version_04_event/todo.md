@@ -3,22 +3,27 @@
 - Travailler avec de timeframe différent. Pas exemple stratégie de MM sur 3 échelle de temps
 - Réflechir si on ne pourrait pas simplifier la gestion des events  au sein du pipeline - il n'y aurait que le système qui ecoute des events tick candle et ensuite qu passe la dernière chandelle à tous les composants du pipeline pour qu'ils se mettent a jour. => plus event inter composant.
 - Faire un Front VUEJS por piloter les Bots
-- Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Lancer les bt et train en mode asynchrone et vernir récupérer le dernier résultat via un autre endpoint ``` /last_backtest ou last_trainnig ```
 - Lancer le bt et train dans un vrai thread
 - Vérifier que le TradeList en sortie du calcul des stats a un vrai interet ?
 - Rennomer EventBus en BotEventBus -> en efftet il s'agit d'un bus onterne au bot + etudier la question d'injecter le bot dasn tous ses composants.
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
-- Voir comment faire pour mettre des filtres optionnels dnas le pipline de trading -> prevoir des event spéciaux
 - Faire une EMA with Buffer
 - Synchroniser les event avec la candle partout
 - Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
+- Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
+- Réflechir a la réunification de system et signal engine dans le package bot cat il sont très liée 1 bot = 1 systeme = 1 signal engine
 
 # Doing : 
-- Dans les stats indiuer la date de début du bot et/ou  la durée execution
+- refactor du __init__.py pour faire un fichier par bot
+- Faire juste un ifltre pour le moment, pas de multi filtrer dnas le pipline de trading -> plutot avec un argument dans l'event Trade Detect
+- Premier Filtre ATR pour détecter les zone d'accumulation et les prémices d'une phase d'expansion
+
+
 
 # Done : 
+- Dans les stats indiuer la date de début du bot et/ou  la durée execution
 - retirer le Price de partout et ajouter une cancdle dans tous les events
 - retirer le price du TradeSignalGenerated
 - Faire un indicateur RSI pour la stratégie double RSI
