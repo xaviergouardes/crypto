@@ -11,6 +11,7 @@ BOT_CONFIG =  {
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
+            "filter": False,
             "fast_period": 50,
             "slow_period": 150,
             "min_gap": 1,
@@ -19,5 +20,7 @@ BOT_CONFIG =  {
             "sl_pct": 1
         }
     },
-    "warmup_attributs": ["slow_period"]
+    "warmup_rules": {
+        "slow_period": 1
+    }
 }

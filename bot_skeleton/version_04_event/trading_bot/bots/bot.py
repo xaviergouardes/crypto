@@ -158,21 +158,23 @@ class Bot(Startable):
 
     def _compute_warmup_count(self, params: dict) -> dict:
         """
-        Met à jour le warmup_count en prenant le max des attributs listés dans warmup_attributs.
+        Met à jour le warmup_count en prenant le max des attributs listés dans warmup_rules.
         """
         return_params = params.copy()
         trading_system = return_params.get("trading_system", {})
 
+        # Priorité à warmup explicite
         explicit_warmup = trading_system.get("warmup_count")
         if isinstance(explicit_warmup, int) and explicit_warmup > 0:
             return_params["trading_system"] = trading_system
             return return_params
 
-        warmup_attrs = BOTS_CONFIG[self.bot_type].get("warmup_attributs", [])
-
-        # Récupérer les valeurs des attributs et prendre le max
-        values = [trading_system.get(attr, 0) for attr in warmup_attrs]
-        warmup_count = max(values) if values else 0
+        # Calcul automatique à partir de warmup_rules
+        warmup_rules = BOTS_CONFIG[self.bot_type].get("warmup_rules", {})
+        candidates = [
+            trading_system[k] * v for k, v in warmup_rules.items() if k in trading_system
+        ]
+        warmup_count = max(candidates) if candidates else 0
 
         trading_system["warmup_count"] = warmup_count
         return_params["trading_system"] = trading_system

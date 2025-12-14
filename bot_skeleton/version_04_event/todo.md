@@ -14,15 +14,20 @@
 - Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
 - Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Réflechir a la réunification de system et signal engine dans le package bot cat il sont très liée 1 bot = 1 systeme = 1 signal engine
+- Est-ce que ca a un sens de faire des bot avec du paramétrage plutot que du code : BotAbstrait + bot concret avec une surcharge des méthodes spécifiques ??? à réfléchir.
 
 # Doing : 
-- refactor du __init__.py pour faire un fichier par bot
 - Faire juste un ifltre pour le moment, pas de multi filtrer dnas le pipline de trading -> plutot avec un argument dans l'event Trade Detect
+--> Ajouter un filtre NOP dans le pipeline
 - Premier Filtre ATR pour détecter les zone d'accumulation et les prémices d'une phase d'expansion
 
 
 
 # Done : 
+- Indicateurs ATR avec detection des phase accumulation et expansion
+--> Ajouter un filter=on/off dans le RiskManager
+--> Ajouter un filtred dans l'event : TradeSignalGenerated
+- refactor du __init__.py pour faire un fichier par bot
 - Dans les stats indiuer la date de début du bot et/ou  la durée execution
 - retirer le Price de partout et ajouter une cancdle dans tous les events
 - retirer le price du TradeSignalGenerated

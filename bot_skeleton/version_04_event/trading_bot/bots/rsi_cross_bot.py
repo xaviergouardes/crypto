@@ -11,12 +11,15 @@ BOT_CONFIG = {
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
-            "warmup_count": 22,
-            "fast_period": 5,
-            "slow_period": 21,
+            "filter": False,
+            "rsi_fast_period": 5,
+            "rsi_slow_period": 21,
+            "atr_period":14,
             "tp_pct": 2,
             "sl_pct": 1
         }
     },
-    "warmup_attributs": ["slow_period"]
+    "warmup_rules": {
+        "atr_period": 3
+    }
 }

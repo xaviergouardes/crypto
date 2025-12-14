@@ -41,6 +41,7 @@ if __name__ == "__main__":
     Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
+    # Logger.set_level("IndicatorAtr", logging.DEBUG)
     # Logger.set_level("RSICrossSignalEngine", logging.DEBUG)
     # Logger.set_level("IndicatorRSI", logging.DEBUG)
     # Logger.set_level("Backtest", logging.INFO)
@@ -56,11 +57,12 @@ if __name__ == "__main__":
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
-            "warmup_count": 22,
-            "fast_period": 5,
-            "slow_period": 21,
-            "tp_pct": 9,
-            "sl_pct": 4
+            "filter": True,
+            "rsi_fast_period": 5,
+            "rsi_slow_period": 21,
+            "atr_period":14,
+            "tp_pct": 2,
+            "sl_pct": 1
         }
     }
 

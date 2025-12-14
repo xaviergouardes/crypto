@@ -11,11 +11,14 @@ BOT_CONFIG =  {
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
+            "filter": False,
             "swing_window": 21,
             "swing_side": 2,
             "tp_pct": 1.5,
             "sl_pct": 1.5
         }
     },
-    "warmup_attributs": ["swing_window"]
+    "warmup_rules": {
+        "swing_window": 1
+    }
 }

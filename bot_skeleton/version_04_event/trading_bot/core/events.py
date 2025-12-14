@@ -54,12 +54,18 @@ class IndicatorUpdated(Event):
 # 📊 Signal de stratégie
 @dataclass
 class TradeSignalGenerated(Event):
-    side: str   # "BUY" ou "SELL"
+    side: str
     confidence: float
     candle: Candle
     strategie: str
     strategie_parameters: dict
     strategie_values: dict
+    filtred: bool = False
+
+    def mark_filtered(self, reason: str | None = None):
+        self.filtred = True
+        if reason:
+            self.strategie_values["filter_reason"] = reason
 
 
 # ✅ Trade validé par le Risk Manager

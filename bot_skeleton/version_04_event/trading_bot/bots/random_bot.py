@@ -11,11 +11,14 @@ BOT_CONFIG =  {
         "interval": "1m",
         "initial_capital": 1000,
         "trading_system": {
+            "filter": False,
             "warmup_count": 5,
             "initial_capital": 1000,
             "tp_pct": 0.05,
             "sl_pct": 0.025
         }
     },
-    "warmup_attributs": ["warmup_count"]
+     "warmup_rules": {
+        "warmup_count": 1
+    }
 },

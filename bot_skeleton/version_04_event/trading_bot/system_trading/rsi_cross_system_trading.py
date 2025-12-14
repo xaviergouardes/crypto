@@ -13,6 +13,8 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.indicators.indicator_rsi.indicator_rsi import IndicatorRSI
 from trading_bot.signal_engines.rsi_cross_signal_engine import RSICrossSignalEngine
 
+from trading_bot.indicators.atr_filter.indicator_atr import IndicatorAtr
+
 from trading_bot.risk_manager.risk_manager import RiskManager 
 
 from trading_bot.trader.trader_only_one_position import TraderOnlyOnePosition
@@ -38,23 +40,36 @@ class RSICrossSystemTrading():
 
         p = self.params
 
-        self._ema_fast = IndicatorRSI(
+        self.ema_fast = IndicatorRSI(
             event_bus, 
-            period=p["trading_system"]["fast_period"]
+            period=p["trading_system"]["rsi_fast_period"]
         )
 
-        self._ema_slow = IndicatorRSI(
+        self.ema_slow = IndicatorRSI(
             event_bus, 
-            period=p["trading_system"]["slow_period"]
+            period=p["trading_system"]["rsi_slow_period"]
         )
      
+        self.atr = IndicatorAtr(
+            event_bus, 
+            period=p["trading_system"]["atr_period"]
+        )  
+
         self.signal_engine = RSICrossSignalEngine(
                 self.event_bus, 
-                rsi_fast_period=p["trading_system"]["fast_period"], 
-                rsi_slow_period=p["trading_system"]["slow_period"]
-            )      
+                rsi_fast_period=p["trading_system"]["rsi_fast_period"], 
+                rsi_slow_period=p["trading_system"]["rsi_slow_period"]
+            )   
+
         
-        self.risk_manager = RiskManager(self.event_bus, tp_percent=p["trading_system"]["tp_pct"], sl_percent=p["trading_system"]["sl_pct"], solde_disponible=p["initial_capital"])     
+        self.risk_manager = RiskManager(
+            self.event_bus, 
+            tp_percent=p["trading_system"]["tp_pct"], 
+            sl_percent=p["trading_system"]["sl_pct"], 
+            solde_disponible=p["initial_capital"],
+            with_filter=p.get("trading_system", {}).get("filter", False)
+            )     
+        
         self.trader = TraderOnlyOnePosition(self.event_bus)
         
         self.trader_journal = TradeJournal(self.event_bus)

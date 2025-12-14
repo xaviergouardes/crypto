@@ -10,23 +10,35 @@ class RiskManager:
     """Valide ou rejette les signaux de trading et calcule TP/SL."""
     logger = Logger.get("RiskManager")
     
-    def __init__(self, event_bus: EventBus, tp_percent: float = 1.0, sl_percent: float = 0.5, solde_disponible: float = None):
+    def __init__(self, event_bus: EventBus, 
+                 tp_percent: float = 1.0, 
+                 sl_percent: float = 0.5, 
+                 solde_disponible: float = None,
+                 with_filter:bool = False):
+        
         self.event_bus = event_bus
 
         self.max_position_size = 1.0  # taille fixe pour la simulation
         self.tp_percent = tp_percent
         self.sl_percent = sl_percent
         self.solde_disponible = solde_disponible
+        self.with_filter = with_filter
 
         # S'abonner aux signaux de la stratégie
         self.event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal)
         self.event_bus.subscribe(NewSoldes, self.on_new_soldes)
-        self.logger.info(f"Initialisation terminée, riskmanager opérationnel. tp_percent={self.tp_percent} / sl_percent={self.sl_percent}")
+        self.logger.info(f"Initialisation terminée, riskmanager opérationnel. tp_percent={self.tp_percent} / sl_percent={self.sl_percent} / with_filter={self.with_filter}")
 
     async def on_new_soldes(self, event: NewSoldes):
         self.solde_disponible = event.usdc
 
     async def on_trade_signal(self, event: TradeSignalGenerated):
+
+        # Vérifier son on travaille sur des event filtrés
+        should_process = (event.filtred == self.with_filter)
+        if not should_process:
+            return
+        
         # Vérifier la présence de la bougie
         if not hasattr(event, "candle") or event.candle is None:
             raise MissingPriceError(f"Le signal de trading ne contient pas la bougie : {event}")
