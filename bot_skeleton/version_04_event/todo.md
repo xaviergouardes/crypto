@@ -18,12 +18,10 @@
 
 # Doing : 
 - Faire juste un ifltre pour le moment, pas de multi filtrer dnas le pipline de trading -> plutot avec un argument dans l'event Trade Detect
---> Ajouter un filtre NOP dans le pipeline
-- Premier Filtre ATR pour détecter les zone d'accumulation et les prémices d'une phase d'expansion
-
 
 
 # Done : 
+- Premier Filtre ATR pour détecter les zone d'accumulation et les prémices d'une phase d'expansion
 - Indicateurs ATR avec detection des phase accumulation et expansion
 --> Ajouter un filter=on/off dans le RiskManager
 --> Ajouter un filtred dans l'event : TradeSignalGenerated

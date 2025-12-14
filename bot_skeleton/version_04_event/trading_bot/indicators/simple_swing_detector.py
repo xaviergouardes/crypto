@@ -9,7 +9,7 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
 
 
-class IndicatorSimpleSwingDetector():
+class SimpleSwingDetector():
     """
     Détecte les swings highs/lows sur une fenêtre historique de N bougies.
     Conserve le max swing high et le min swing low dans cette fenêtre.

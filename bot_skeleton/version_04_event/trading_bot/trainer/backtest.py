@@ -41,11 +41,11 @@ if __name__ == "__main__":
     Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
-    # Logger.set_level("IndicatorAtr", logging.DEBUG)
+    # Logger.set_level("Atr", logging.DEBUG)
     # Logger.set_level("RSICrossSignalEngine", logging.DEBUG)
-    # Logger.set_level("IndicatorRSI", logging.DEBUG)
+    # Logger.set_level("RSI", logging.DEBUG)
     # Logger.set_level("Backtest", logging.INFO)
-    # Logger.set_level("IndicatorEmaCrossDetector", logging.DEBUG)
+    # Logger.set_level("EmaCrossDetector", logging.DEBUG)
     # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
     # Logger.set_level("PortfolioManager", logging.DEBUG)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
-            "filter": True,
+            "filter": False,
             "rsi_fast_period": 5,
             "rsi_slow_period": 21,
             "atr_period":14,

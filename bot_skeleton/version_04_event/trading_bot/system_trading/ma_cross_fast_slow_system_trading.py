@@ -10,8 +10,8 @@
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.indicator_moving_average.indicator_moving_average import IndicatorMovingAverage
-from trading_bot.indicators.indicator_ema_cross_detector.indicator_ema_cross_detector import IndicatorEmaCrossDetector
+from trading_bot.indicators.moving_average.moving_average import MovingAverage
+from trading_bot.indicators.ema_cross_detector.ema_cross_detector import EmaCrossDetector
 
 from trading_bot.signal_engines.ma_cross_fast_slow_signal_engine import MaCrossFastSlowSignalEngine
 
@@ -40,19 +40,19 @@ class MaCrossFastSlowSystemTrading():
 
         p = self.params
 
-        self._ema_fast = IndicatorMovingAverage(
+        self._ema_fast = MovingAverage(
             event_bus, 
             period=p["trading_system"]["fast_period"], 
             mode="EMA"
         )
 
-        self._ema_slow = IndicatorMovingAverage(
+        self._ema_slow = MovingAverage(
             event_bus, 
             period=p["trading_system"]["slow_period"], 
             mode="EMA"
         )
      
-        self._indicator_ema_cross_detector = IndicatorEmaCrossDetector(
+        self._indicator_ema_cross_detector = EmaCrossDetector(
                 self.event_bus,               
                 fast_period=p["trading_system"]["fast_period"],  
                 slow_period=p["trading_system"]["slow_period"], 

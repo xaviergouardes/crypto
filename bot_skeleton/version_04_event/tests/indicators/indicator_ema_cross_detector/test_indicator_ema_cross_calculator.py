@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from trading_bot.indicators.indicator_ema_cross_detector.ema_cross_calculator import IndicatorEmaCrossCalculator
+from trading_bot.indicators.ema_cross_detector.ema_cross_calculator import IndicatorEmaCrossCalculator
 
 
 # ---------------------------------------------------------------------------

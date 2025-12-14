@@ -7,13 +7,13 @@ from trading_bot.core.events import (
 )
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.indicator_rsi.indicator_rsi_calculator import IndicatorRSICalculator
+from trading_bot.indicators.rsi.rsi_calculator import IndicatorRSICalculator
 
 
-class IndicatorRSI:
+class RSI:
     """Wrapper EventBus autour du calculateur RSI."""
 
-    _logger = Logger.get("IndicatorRSI")
+    _logger = Logger.get("RSI")
 
     def __init__(self, event_bus: EventBus, period: int = 14, oversold: float = 30.0, overbought: float = 70.0,):
         self.event_bus = event_bus
@@ -63,7 +63,7 @@ class IndicatorRSI:
 
         candle = event.candle
         value, state = self.calculator.update(candle.close)
-        self._logger.debug(f"Nouvelle valeur : value={value} | state={state} | candle={candle}")
+        self._logger.debug(f" RSI({self.calculator.period}) -> Nouvelle valeur : value={value} | state={state} | candle={candle}")
 
         if value is None:
             return

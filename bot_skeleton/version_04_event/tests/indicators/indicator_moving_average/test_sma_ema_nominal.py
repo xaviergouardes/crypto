@@ -5,7 +5,7 @@ from collections import deque
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.indicator_moving_average.indicator_moving_average import IndicatorMovingAverage
+from trading_bot.indicators.moving_average.moving_average import IndicatorMovingAverage
 
 # Mock pour une bougie
 class MockCandle:

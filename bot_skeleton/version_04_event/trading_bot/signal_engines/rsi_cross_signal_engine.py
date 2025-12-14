@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import (
@@ -8,7 +6,7 @@ from trading_bot.core.events import (
     CandleClose,
     TradeSignalGenerated
 )
-
+from trading_bot.indicators.rsi.rsi import RSI
 
 class RSICrossSignalEngine:
     """
@@ -49,7 +47,7 @@ class RSICrossSignalEngine:
     # ------------------- RSI updates -------------------
     async def on_indicator_update(self, event: IndicatorUpdated):
         values = event.values
-        if values.get("type") != "IndicatorRSI":
+        if values.get("type") != "RSI":
             return
 
         period = values.get("rsi_period")

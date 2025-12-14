@@ -3,13 +3,13 @@ from trading_bot.core.logger import Logger
 from trading_bot.core.events import Candle, CandleClose, CandleHistoryReady, IndicatorUpdated
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.indicator_moving_average.moving_average_calculator import IndicatorMovingAverageCalculator
+from trading_bot.indicators.moving_average.moving_average_calculator import IndicatorMovingAverageCalculator
 
 
-class IndicatorMovingAverage:
+class MovingAverage:
     """Wrapper EventBus autour du calculateur."""
 
-    _logger = Logger.get("IndicatorMovingAverage")
+    _logger = Logger.get("MovingAverage")
 
     def __init__(self, event_bus: EventBus, period: int = 20, mode: str = "EMA"):
         self.event_bus = event_bus

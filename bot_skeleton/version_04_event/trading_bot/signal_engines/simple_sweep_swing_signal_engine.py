@@ -28,7 +28,7 @@ class SimpleSweepSwingSignalEngine:
     async def on_indicator_update(self, event: IndicatorUpdated):
         """Récupère les swings forts émis par l'indicateur. IndicatorSimpleSwingDetector"""
         event_type = event.values.get("type")
-        if event_type not in ("IndicatorSimpleSwingDetector",):
+        if event_type not in ("SimpleSwingDetector"):
             return
         
         self.last_swing_high = event.values["last_swing_high"]

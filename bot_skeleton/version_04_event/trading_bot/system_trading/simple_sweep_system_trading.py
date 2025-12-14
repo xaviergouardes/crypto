@@ -13,7 +13,7 @@ from trading_bot.core.logger import Logger
 
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.indicator_simple_swing_detector import IndicatorSimpleSwingDetector
+from trading_bot.indicators.simple_swing_detector import SimpleSwingDetector
 from trading_bot.signal_engines.simple_sweep_swing_signal_engine import  SimpleSweepSwingSignalEngine
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
@@ -41,7 +41,7 @@ class SimpleSweepSystemTrading():
 
         p = self.params
     
-        self._indicator_swing_detector = IndicatorSimpleSwingDetector(self.event_bus, swing_side=p["trading_system"]["swing_side"], swing_window=p["trading_system"]["swing_window"])
+        self._indicator_swing_detector = SimpleSwingDetector(self.event_bus, swing_side=p["trading_system"]["swing_side"], swing_window=p["trading_system"]["swing_window"])
 
         self.signal_engine = SimpleSweepSwingSignalEngine(self.event_bus)      
         

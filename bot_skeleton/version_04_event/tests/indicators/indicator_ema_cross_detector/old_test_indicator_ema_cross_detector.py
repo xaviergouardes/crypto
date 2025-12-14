@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import IndicatorUpdated
-from bot_skeleton.version_04_event.trading_bot.indicators.indicator_ema_cross_detector.indicator_ema_cross_detector import IndicatorEmaCrossDetector
+from trading_bot.indicators.ema_cross_detector.ema_cross_detector import IndicatorEmaCrossDetector
 
 
 # -----------------------------

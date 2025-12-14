@@ -1,4 +1,3 @@
-from trading_bot.indicators.indicator_ema_cross_detector.indicator_ema_cross_detector import IndicatorEmaCrossDetector
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import Candle, TradeSignalGenerated, IndicatorUpdated
@@ -22,7 +21,7 @@ class MaCrossFastSlowSignalEngine:
 
     async def on_indicator_update(self, event: IndicatorUpdated):
         # update des donnée selemnt , la stratégie est déclacnché par le candle close
-        if event.values.get("type") != "IndicatorEmaCrossDetector":
+        if event.values.get("type") != "EmaCrossDetector":
             return
             
         fast_period = event.values.get("fast_period")

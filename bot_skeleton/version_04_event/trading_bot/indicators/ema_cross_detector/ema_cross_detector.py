@@ -3,16 +3,16 @@ from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import Candle, IndicatorUpdated
 
-from trading_bot.indicators.indicator_ema_cross_detector.ema_cross_calculator import IndicatorEmaCrossCalculator
+from trading_bot.indicators.ema_cross_detector.ema_cross_calculator import IndicatorEmaCrossCalculator
 
 
-class IndicatorEmaCrossDetector:
+class EmaCrossDetector:
     """
     Écoute IndicatorUpdated, met à jour fast/slow EMA, applique le calcul
     via IndicatorEmaCrossCalculator, et émet des signaux.
     """
 
-    _logger = Logger.get("IndicatorEmaCrossDetector")
+    _logger = Logger.get("EmaCrossDetector")
 
     def __init__(self, event_bus: EventBus, fast_period: int, slow_period: int, min_gap=0.01, slope_threshold: float = 0):
 

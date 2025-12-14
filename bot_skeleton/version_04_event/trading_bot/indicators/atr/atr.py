@@ -7,16 +7,16 @@ from trading_bot.core.events import (
 )
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.atr_filter.atr_calculator import ATRCalculator
+from trading_bot.indicators.atr.atr_calculator import ATRCalculator
 
 
-class IndicatorAtr:
+class Atr:
     """
     Wrapper EventBus autour de l'ATR Wilder.
     Sert de filtre de régime de marché (accumulation / expansion).
     """
 
-    _logger = Logger.get("IndicatorAtr")
+    _logger = Logger.get("Atr")
 
     def __init__(
         self,

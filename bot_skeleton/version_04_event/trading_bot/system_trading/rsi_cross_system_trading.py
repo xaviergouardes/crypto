@@ -10,10 +10,12 @@
 from trading_bot.core.logger import Logger
 from trading_bot.core.event_bus import EventBus
 
-from trading_bot.indicators.indicator_rsi.indicator_rsi import IndicatorRSI
+from trading_bot.bots import BOTS_CONFIG
+
+from trading_bot.indicators.rsi.rsi import RSI
 from trading_bot.signal_engines.rsi_cross_signal_engine import RSICrossSignalEngine
 
-from trading_bot.indicators.atr_filter.indicator_atr import IndicatorAtr
+from trading_bot.indicators.atr.atr import Atr
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
 
@@ -40,17 +42,17 @@ class RSICrossSystemTrading():
 
         p = self.params
 
-        self.ema_fast = IndicatorRSI(
+        self.rsi_fast = RSI(
             event_bus, 
             period=p["trading_system"]["rsi_fast_period"]
         )
 
-        self.ema_slow = IndicatorRSI(
+        self.rsi_slow = RSI(
             event_bus, 
             period=p["trading_system"]["rsi_slow_period"]
         )
      
-        self.atr = IndicatorAtr(
+        self.atr = Atr(
             event_bus, 
             period=p["trading_system"]["atr_period"]
         )  
@@ -61,7 +63,8 @@ class RSICrossSystemTrading():
                 rsi_slow_period=p["trading_system"]["rsi_slow_period"]
             )   
 
-        
+        # self.filter = AtrFilter()
+
         self.risk_manager = RiskManager(
             self.event_bus, 
             tp_percent=p["trading_system"]["tp_pct"], 
