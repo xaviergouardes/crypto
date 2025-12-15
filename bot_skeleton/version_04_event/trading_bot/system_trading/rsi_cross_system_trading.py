@@ -13,9 +13,10 @@ from trading_bot.core.event_bus import EventBus
 from trading_bot.bots import BOTS_CONFIG
 
 from trading_bot.indicators.rsi.rsi import RSI
-from trading_bot.signal_engines.rsi_cross_signal_engine import RSICrossSignalEngine
-
 from trading_bot.indicators.atr.atr import Atr
+
+from trading_bot.signal_engines.rsi_cross_signal_engine import RSICrossSignalEngine
+from trading_bot.indicators.atr.atr_filter import AtrFilter
 
 from trading_bot.risk_manager.risk_manager import RiskManager 
 
@@ -63,14 +64,14 @@ class RSICrossSystemTrading():
                 rsi_slow_period=p["trading_system"]["rsi_slow_period"]
             )   
 
-        # self.filter = AtrFilter()
+        self.filter = AtrFilter(self.event_bus)
 
         self.risk_manager = RiskManager(
             self.event_bus, 
             tp_percent=p["trading_system"]["tp_pct"], 
             sl_percent=p["trading_system"]["sl_pct"], 
             solde_disponible=p["initial_capital"],
-            with_filter=p.get("trading_system", {}).get("filter", False)
+            with_filter=p.get("trading_system", {}).get("atr_filter", False)
             )     
         
         self.trader = TraderOnlyOnePosition(self.event_bus)

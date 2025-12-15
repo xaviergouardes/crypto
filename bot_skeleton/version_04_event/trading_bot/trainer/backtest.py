@@ -38,13 +38,15 @@ if __name__ == "__main__":
     import logging
     from trading_bot.bots.bot import Bot
 
-    Logger.set_default_level(logging.INFO)
+    Logger.set_default_level(logging.ERROR)
 
     # # Niveau spécifique pour
+    # Logger.set_level("AtrFilter", logging.DEBUG)
     # Logger.set_level("Atr", logging.DEBUG)
     # Logger.set_level("RSICrossSignalEngine", logging.DEBUG)
+    # Logger.set_level("CandleSourceCsv", logging.DEBUG)
     # Logger.set_level("RSI", logging.DEBUG)
-    # Logger.set_level("Backtest", logging.INFO)
+    Logger.set_level("Backtest", logging.INFO)
     # Logger.set_level("EmaCrossDetector", logging.DEBUG)
     # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
@@ -57,10 +59,10 @@ if __name__ == "__main__":
         "interval": "5m",
         "initial_capital": 1000,
         "trading_system": {
-            "filter": False,
+            "atr_filter": True,
             "rsi_fast_period": 5,
             "rsi_slow_period": 21,
-            "atr_period":14,
+            "atr_period":35,
             "tp_pct": 2,
             "sl_pct": 1
         }
