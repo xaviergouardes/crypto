@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from trading_bot.core.events import CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.moving_average.moving_average import IndicatorMovingAverage
+from trading_bot.indicators.moving_average.moving_average import MovingAverage
 from trading_bot.core.event_bus import EventBus
 
 # Mock pour une bougie
@@ -18,13 +18,13 @@ class MockCandle:
 def test_invalid_mode():
     bus = EventBus()
     with pytest.raises(ValueError):
-        IndicatorMovingAverage(bus, period=20, mode="INVALID")
+        MovingAverage(bus, period=20, mode="INVALID")
 
 
 @pytest.mark.asyncio
 async def test_period_1_initialization():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=1, mode="SMA")
+    indicator = MovingAverage(event_bus, period=1, mode="SMA")
 
     # Stocker les événements publiés pour vérification
     published = []

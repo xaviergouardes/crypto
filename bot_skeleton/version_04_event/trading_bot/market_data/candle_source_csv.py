@@ -23,6 +23,7 @@ class CandleSourceCsv(CandleSource):
         super().__init__(event_bus)
         self.params = params
         self.logger.info(f"Initialisé - running={self.is_running()}")
+        self.index = 0
 
     def _read_csv(self) -> pd.DataFrame:
         """Lit le CSV et convertit les timestamps en datetime UTC."""
@@ -35,7 +36,8 @@ class CandleSourceCsv(CandleSource):
     def _create_candle(self, row, seconds) -> Candle:
         start_time = row["timestamp"].to_pydatetime()
         end_time = start_time + timedelta(seconds=seconds)
-        return Candle(
+        candle = Candle(
+            index=self.index,
             symbol=self.params["symbol"],
             open=float(row["open"]),
             high=float(row["high"]),
@@ -45,6 +47,8 @@ class CandleSourceCsv(CandleSource):
             start_time=start_time,
             end_time=end_time
         )
+        self.index += 1
+        return candle
     
     @override
     async def _warmup(self):
@@ -57,6 +61,8 @@ class CandleSourceCsv(CandleSource):
             df = df.head(warmup_count)
 
         seconds = int(p["interval"][:-1]) * 60
+
+        self.index += 0
         candles: List[Candle] = [self._create_candle(row, seconds) for _, row in df.iterrows()]
 
         self.logger.info(f"Snapshot CSV chargé ({len(candles)} bougies)")

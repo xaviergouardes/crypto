@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 import pytest
 
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.moving_average.moving_average import IndicatorMovingAverage
-from trading_bot.core.event_bus import Event, EventBus
+from trading_bot.indicators.moving_average.moving_average import MovingAverage
+from trading_bot.core.event_bus import EventBus
 
 # Mock pour une bougie
 class MockCandle:
@@ -18,7 +18,7 @@ class MockCandle:
 @pytest.mark.asyncio
 async def test_on_close_wrong_symbol():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=13, mode="SMA")
+    indicator = MovingAverage(event_bus, period=13, mode="SMA")
     indicator._initialized = True # on se demande si c'est vraiment bien d'utiliser directement une varibale privée
     indicator.symbol = "ETH"
 
@@ -45,7 +45,7 @@ async def test_on_close_wrong_symbol():
 @pytest.mark.asyncio
 async def test_on_close_first_update():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=3, mode="EMA")
+    indicator = MovingAverage(event_bus, period=3, mode="EMA")
     indicator.symbol = "ethusdc"
 
     # Stocker les événements publiés pour vérification
@@ -77,7 +77,7 @@ async def test_on_close_first_update():
 @pytest.mark.asyncio
 async def test_sma_sliding_window():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=3, mode="SMA")
+    indicator = MovingAverage(event_bus, period=3, mode="SMA")
     indicator.symbol = "ethusdc"
 
     # Stocker les événements publiés pour vérification

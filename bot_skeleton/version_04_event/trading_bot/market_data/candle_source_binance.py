@@ -22,6 +22,8 @@ class CandleSourceBinance(CandleSource):
         super().__init__(event_bus)
         self.params = params
 
+        self.index = 0
+
         self.symbol = params["symbol"]
         self.interval = params["interval"]
         self.warmup_count = params["trading_system"]["warmup_count"]
@@ -48,6 +50,8 @@ class CandleSourceBinance(CandleSource):
             return pd.DataFrame(columns=["timestamp", "timestamp_paris", "open", "high", "low", "close", "volume"])
 
         data = data[:-1]  # ignorer la dernière bougie potentiellement en cours
+
+        self.index = 0
 
         candles = [self._dict_to_candle(k) for k in data[-self.warmup_count:]]
 
@@ -96,7 +100,7 @@ class CandleSourceBinance(CandleSource):
     def _dict_to_candle(self, k) -> Candle:
         """Transforme une entrée REST en Candle."""
         ts_utc = pd.to_datetime(k[0], unit="ms", utc=True)
-        return Candle(
+        candle = Candle(
             symbol=self.symbol,
             open=float(k[1]),
             high=float(k[2]),
@@ -106,11 +110,13 @@ class CandleSourceBinance(CandleSource):
             start_time=ts_utc,
             end_time=ts_utc + timedelta(seconds=self._seconds)
         )
+        self.index += 1
+        return candle
 
     def _ws_dict_to_candle(self, k) -> Candle:
         """Transforme une entrée websocket en Candle."""
         ts_utc = datetime.fromtimestamp(k["t"] / 1000, tz=pytz.UTC)
-        return Candle(
+        candle = Candle(
             symbol=self.symbol,
             open=float(k["o"]),
             high=float(k["h"]),
@@ -120,3 +126,5 @@ class CandleSourceBinance(CandleSource):
             start_time=ts_utc,
             end_time=ts_utc + timedelta(seconds=self._seconds)
         )
+        self.index += 1
+        return candle

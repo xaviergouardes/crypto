@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from trading_bot.core.events import CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.moving_average.moving_average import IndicatorMovingAverage
+from trading_bot.indicators.moving_average.moving_average import MovingAverage
 from trading_bot.core.event_bus import EventBus
 
 # Mock pour une bougie
@@ -23,7 +23,7 @@ class MockHistory:
 @pytest.mark.asyncio
 async def test_history_empty():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=13, mode="SMA")
+    indicator = MovingAverage(event_bus, period=13, mode="SMA")
 
     # Stocker les événements publiés pour vérification
     published = []
@@ -51,7 +51,7 @@ async def test_history_empty():
 @pytest.mark.asyncio
 async def test_history_not_enough_candles():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=20, mode="EMA")
+    indicator = MovingAverage(event_bus, period=20, mode="EMA")
 
     # Stocker les événements publiés pour vérification
     published = []

@@ -1,11 +1,10 @@
 import pytest
-import asyncio
 from datetime import datetime, timedelta
-from collections import deque
+
 
 from trading_bot.core.event_bus import EventBus
 from trading_bot.core.events import CandleClose, CandleHistoryReady, IndicatorUpdated
-from trading_bot.indicators.moving_average.moving_average import IndicatorMovingAverage
+from trading_bot.indicators.moving_average.moving_average import MovingAverage
 
 # Mock pour une bougie
 class MockCandle:
@@ -20,7 +19,7 @@ class MockCandle:
 @pytest.mark.asyncio
 async def test_sma_calculation():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=3, mode="SMA")
+    indicator = MovingAverage(event_bus, period=3, mode="SMA")
 
     # Stocker les événements publiés pour vérification
     published = []
@@ -57,7 +56,7 @@ async def test_sma_calculation():
 @pytest.mark.asyncio
 async def test_ema_calculation():
     event_bus = EventBus()
-    indicator = IndicatorMovingAverage(event_bus, period=3, mode="EMA")
+    indicator = MovingAverage(event_bus, period=3, mode="EMA")
 
     published = []
     async def capture(event):

@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 # Une structure de type Chandelier
 @dataclass
 class Candle(Event):
+    index:int
     symbol: str
     open: float
     high: float
@@ -28,6 +29,18 @@ class Candle(Event):
                 f"o: {self.open:.2f}, h: {self.high:.2f}, l: {self.low:.2f}, c: {self.close:.2f}, "
                 f"v: {self.volume:.3f} | "
                 f"{start_paris:%Y-%m-%d %H:%M:%S} / {end_paris:%Y-%m-%d %H:%M:%S})")
+    
+    def is_next_of(self, other: "Candle") -> bool:
+        """
+        Retourne True si self est la bougie N+1 par rapport à other
+        """
+        return self.index == other.index + 1
+
+    def is_previous_of(self, other: "Candle") -> bool:
+        """
+        Retourne True si self est la bougie N-1 par rapport à other
+        """
+        return self.index == other.index - 1
 
 
 # 🪟 Événement : carnet d’ordre mis à jour
@@ -94,17 +107,9 @@ class TradeClose(Event):
     
     @property
     def exit_price(self) -> float:
-        # prix de référence selon la cible
-        ref_price = self.tp if self.target == "TP" else self.sl
-
-        candle_prices = [
-            self.candle_close.open,
-            self.candle_close.high,
-            self.candle_close.low,
-            self.candle_close.close,
-        ]
-
-        return min(ref_price, *candle_prices)
+        if self.target == "TP": return self.tp
+        if self.target == "SL": return self.sl
+        return None
     
     @property
     def pnl(self) -> float:

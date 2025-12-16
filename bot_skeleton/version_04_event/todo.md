@@ -17,12 +17,13 @@
 - Est-ce que ca a un sens de faire des bot avec du paramétrage plutot que du code : BotAbstrait + bot concret avec une surcharge des méthodes spécifiques ??? à réfléchir.
 - BUG : le RSI n'est pas correctement initialisé, mais il se stablise après quelque jours.
 
-
 # Doing : 
+- La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
 - Dans le RSICrossSignalEngine => prendre la notion de surcaht dasn l'indicateur et ne pas la mettre en dur < 70
-- Vérifier aussi les calculs des trades ils me semble louche -> total profit
 
 # Done : 
+- Vérifier aussi les calculs des trades ils me semble louche -> total profit
+  -> les tp / sl / entry /exit aussi
 - Vérifier les signaux proposé par le cross RSI, ca me parait bizarre
 - Faire juste un ifltre pour le moment, pas de multi filtrer dnas le pipline de trading -> plutot avec un argument dans l'event Trade Detect
 - Premier Filtre ATR pour détecter les zone d'accumulation et les prémices d'une phase d'expansion

@@ -42,7 +42,8 @@ class TradeJournal:
         # Enregistrer le trade dans le journal
         trade_record = {
             "side": event.side,
-            "entry": event.exit_price,
+            "entry_price": event.entry_price,
+            "exit_price": event.exit_price,
             "tp": event.tp,
             "sl": event.sl,
             "size": event.size,

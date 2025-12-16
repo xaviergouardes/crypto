@@ -35,18 +35,8 @@ class TelegramNotifier():
         await self.try_send_message()
 
     async def on_trade_close(self, event: TradeClose):
-        if event.target == "TP":
-            close_price = event.tp
-        elif event.target == "SL":
-            close_price = event.sl
-        else:
-            close_price = event.price.price
 
-        pnl = 0.0
-        if event.side == "BUY":
-            pnl = (close_price - event.price.price) * event.size
-        elif event.side == "SELL":
-            pnl = (event.price.price - close_price) * event.size
+        pnl = event.pnl
 
         self.message_data["pnl"] = pnl
         self.message_data["gagne_perdu"] = "🟢" if pnl >= 0 else "🔴"
