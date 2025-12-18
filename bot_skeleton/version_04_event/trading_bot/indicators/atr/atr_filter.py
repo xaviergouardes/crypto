@@ -24,7 +24,7 @@ class AtrFilter:
         self.symbol: str | None = None
 
         self.market_phase = None
-        self.last_market_phase_update = None
+        self.candle_market_phase_update = None
 
         event_bus.subscribe(IndicatorUpdated, self.on_indicator_update)
         event_bus.subscribe(TradeSignalGenerated, self.on_trade_signal_generated)
@@ -37,21 +37,21 @@ class AtrFilter:
     async def on_indicator_update(self, event: IndicatorUpdated):
         if event.values.get("type") != "Atr":
             return
-        ts = datetime.now(timezone.utc)
         self.market_phase = event.values["market_phase"]
-        self.last_market_phase_update = ts
+        self.candle_market_phase_update = event.candle
 
     async def on_trade_signal_generated(self, event: TradeSignalGenerated):
         
         # Ne pas traiter les event qui ont déjà été trité par moi-meme
         if event.filtred:
             return
-
+        if not self.candle_market_phase_update:
+            return
+        
         # vérifier que l'écart de temps entres les deux events soit inférieur à la seconde.
-        tolerance_sec = 1.0 # une seconde max d'écart
-        ts = datetime.now(timezone.utc)
-        ecart  = abs((self.last_market_phase_update - ts).total_seconds()) <= tolerance_sec
-        if not ecart:
+        ecart  = abs(self.candle_market_phase_update.index - event.candle.index)
+        if ecart != 0:
+            self._logger.warning(f" Attention ATR et signal désynchronisé atr = {self.candle_market_phase_update} / signal = {event.candle}")
             return
         
         if self.market_phase == "expansion":

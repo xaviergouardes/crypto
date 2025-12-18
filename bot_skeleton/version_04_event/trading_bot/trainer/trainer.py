@@ -13,33 +13,47 @@ class BotTrainer:
 
     def __init__(self, bot_type):
         self._bot_type = bot_type      # garder la classe pour ré-instancier
+
  
     def _all_param_grids(self, param_grid):
         """Génère toutes les combinaisons valides avec les règles appliquées."""
-        rules = [
-            lambda p: p['trading_system']['tp_pct'] >= p['trading_system']['sl_pct'],  # Take profit >= Stop loss
-            lambda p: p['trading_system']['slow_period'] > p['trading_system']['fast_period'],  # Période longue > période courte pour les xMA
-        ]
 
         if "trading_system" not in param_grid:
-            return param_grid
+            return [param_grid]  # Retourne le param_grid original sous forme de liste
 
         sys_grid = param_grid["trading_system"]
         keys, values = zip(*sys_grid.items())
 
+        # --- Définition des règles ---
+        def rule_tp_sl(p):
+            ts = p['trading_system']
+            if 'tp_pct' not in ts or 'sl_pct' not in ts:
+                return True  # Ignorer la règle si une clé manque
+            return ts['tp_pct'] >= ts['sl_pct']
+
+        def rule_ma_periods(p):
+            ts = p['trading_system']
+            if 'slow_period' not in ts or 'fast_period' not in ts:
+                return True
+            return ts['slow_period'] > ts['fast_period']
+
+        def rule_rsi_periods(p):
+            ts = p['trading_system']
+            if 'rsi_slow_period' not in ts or 'rsi_fast_period' not in ts:
+                return True
+            return ts['rsi_slow_period'] > ts['rsi_fast_period']
+
+        rules = [rule_tp_sl, rule_ma_periods, rule_rsi_periods]
+
+        # --- Génération des combinaisons ---
         combinations = []
         for combo in product(*values):
-            combinations.append({
-                "trading_system": dict(zip(keys, combo))
-            })
+            candidate = {"trading_system": dict(zip(keys, combo))}
+            # Appliquer toutes les règles, en ignorant celles qui ne s'appliquent pas
+            if all(rule(candidate) for rule in rules):
+                combinations.append(candidate)
 
-        # Appliquer les règles de filtrage
-        valid_combinations = [
-            p for p in combinations
-            if all(rule(p) for rule in rules)
-        ]
-
-        return valid_combinations
+        return combinations
 
     ###########################################################################
     # 1) Exécution d'un backtest sur un set de paramètres
@@ -213,13 +227,15 @@ if __name__ == "__main__":
 
     param_grid = {
         "trading_system": {
-            "warmup_count": [101],
-            "fast_period": [5,14, 21],
-            "slow_period": [21, 50, 75, 100],
-            "tp_pct": [1, 2],
-            "sl_pct": [0.5, 1]
+            "atr_filter": [True],
+            "rsi_fast_period": [5,14, 21],
+            "rsi_slow_period": [21, 50, 75, 100],
+            "atr_period":[25, 50, 75],
+            "tp_pct": [1, 1.5, 2],
+            "sl_pct": [0.5, 1, 1.5]
         }
     }
+
     trainer = BotTrainer("rsi_cross_bot")
     summary_df, results = asyncio.run(trainer.run(param_grid))
     pd.set_option('display.max_rows', None)

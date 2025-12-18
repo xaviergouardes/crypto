@@ -66,7 +66,7 @@ class CandleSourceCsv(CandleSource):
         candles: List[Candle] = [self._create_candle(row, seconds) for _, row in df.iterrows()]
 
         self.logger.info(f"Snapshot CSV chargé ({len(candles)} bougies)")
-
+        # self.logger.debug(f"candles {candles} ")
         await self.event_bus.publish(
             CandleHistoryReady(
                 symbol=p["symbol"],
@@ -99,5 +99,6 @@ class CandleSourceCsv(CandleSource):
                 return
         
             candle = self._create_candle(row, seconds)
+            # self.logger.debug(f"candles {candle} ")
             await self.event_bus.publish(CandleClose(symbol=p["symbol"], candle=candle))
 

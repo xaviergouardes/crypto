@@ -2,6 +2,12 @@ from typing import Optional
 from collections import deque
 import numpy as np
 
+from enum import Enum
+
+class RSIState(str, Enum):
+    OVERSOLD = "oversold"
+    OVERBOUGHT = "overbought"
+    NEUTRAL = "neutral"
 
 class IndicatorRSICalculator:
     """
@@ -23,7 +29,7 @@ class IndicatorRSICalculator:
         self.avg_loss: Optional[float] = None
 
         self.current: Optional[float] = None
-        self.state: Optional[str] = None
+        self.state: Optional[RSIState] = None
 
         self.gains = deque(maxlen=period)
         self.losses = deque(maxlen=period)
@@ -88,7 +94,16 @@ class IndicatorRSICalculator:
     # ------------------- State -------------------
     def _compute_state(self, rsi: float) -> str:
         if rsi <= self.oversold:
-            return "OVERSOLD"
+            return RSIState.OVERSOLD
         if rsi >= self.overbought:
-            return "OVERBOUGHT"
+            return RSIState.OVERBOUGHT
         return "NEUTRAL"
+
+    def is_oversold(self) -> bool:
+        return self.state is RSIState.OVERSOLD
+
+    def is_overbought(self) -> bool:
+        return self.state is RSIState.OVERBOUGHT
+
+    def is_neutral(self) -> bool:
+        return self.state is RSIState.NEUTRAL

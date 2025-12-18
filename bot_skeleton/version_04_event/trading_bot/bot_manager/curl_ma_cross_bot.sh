@@ -12,12 +12,12 @@ curl -X POST "http://127.0.0.1:9101/bot/backtest" \
   "interval": "5m",
   "initial_capital": 1000,
   "trading_system": {
-      "fast_period": 14,
-      "slow_period": 50,
-      "min_gap_pct": 0.01,
+      "fast_period": 50,
+      "slow_period": 150,
+      "min_gap_pct": 0,
       "slope_threshold": 0.5,
-      "tp_pct": 1.5,
-      "sl_pct": 1.5
+      "tp_pct": 2,
+      "sl_pct": 1
    }
 }' | jq
 
@@ -46,11 +46,11 @@ curl -X POST "http://127.0.0.1:9101/bot/start" \
   "interval": "5m",
   "initial_capital": 1000,
   "trading_system": {
-      "fast_period": 14,
-      "slow_period": 50,
-      "min_gap_pct": 0.01,
-      "slope_threshold": 0.5,
-      "tp_pct": 1.5,
-      "sl_pct": 1.5
+      "atr_filter": true,
+      "rsi_fast_period": 5,
+      "rsi_slow_period": 50,
+      "atr_period":25,
+      "tp_pct": 1,
+      "sl_pct": 1
   }
 }' | jq

@@ -161,13 +161,7 @@ class Bot(Startable):
         Met à jour le warmup_count en prenant le max des attributs listés dans warmup_rules.
         """
         return_params = params.copy()
-        trading_system = return_params.get("trading_system", {})
-
-        # Priorité à warmup explicite
-        explicit_warmup = trading_system.get("warmup_count")
-        if isinstance(explicit_warmup, int) and explicit_warmup > 0:
-            return_params["trading_system"] = trading_system
-            return return_params
+        trading_system = return_params.get("trading_system", {})    
 
         # Calcul automatique à partir de warmup_rules
         warmup_rules = BOTS_CONFIG[self.bot_type].get("warmup_rules", {})

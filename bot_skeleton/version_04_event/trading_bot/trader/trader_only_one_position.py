@@ -53,8 +53,7 @@ class TraderOnlyOnePosition:
         #     "close_timestamp": None,
         #     "candle_open": event.candle
         # }
-        self.logger.debug(f"✅ Nouvelle position ouverte : {self.active_trade}"
-              f"TradeApproved={event}"
+        self.logger.debug(f"✅ Nouvelle position ouverte : {self.active_trade} | TradeApproved={event}"
               )
 
     async def on_candle_close(self, event: CandleClose):
@@ -68,10 +67,14 @@ class TraderOnlyOnePosition:
         if current_candle.is_next_of(candle_open):
             if current_candle.low <= candle_open.close <= current_candle.high:
                 # si le prix de cloture de la bougie n-1 est compris dans la bougie n alors le trade est déclenché
-                self.active_trade.enter_position(candle_open.close)
+                self.active_trade.enter_position()
+                self.logger.debug(f"Entrer en position : {self.active_trade} candle={current_candle}")
                 # pas de rturn on peut évaluer si le trade touche tp ou sl a la bougie N+1
+                # raise Exception("toto")
+
             else:
                 # le trade actif n'est pas déclecnhé sur la bougie N+1 donc il est annuler
+                self.logger.debug(f"Trade non déclanché : {self.active_trade} candle={current_candle}")
                 self.active_trade = None
                 self.last_close_timestamp = event.candle.end_time
                 return
@@ -95,6 +98,7 @@ class TraderOnlyOnePosition:
         if target:
 
             self.active_trade.close(target, current_candle)
+            self.logger.debug(f"Trade close : {self.active_trade} candle={current_candle}")
 
             await self.event_bus.publish(TradeClose(
                 side=side,

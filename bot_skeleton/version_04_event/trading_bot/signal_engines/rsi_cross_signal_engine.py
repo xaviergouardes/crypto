@@ -80,11 +80,12 @@ class RSICrossSignalEngine:
         prev_rsi_slow, prev_rsi_slow_start = self.prev_rsi_slow
         rsi_fast, rsi_fast_start = self.rsi_fast
         rsi_slow, rsi_slow_start = self.rsi_slow
-        if (prev_rsi_fast_start == prev_rsi_slow_start) and (rsi_fast_start == rsi_slow_start):       
-            await self.evaluate_strategy(candle)
+        if (prev_rsi_fast_start == prev_rsi_slow_start) and (rsi_fast_start == rsi_slow_start):     
+
+            await self.evaluate_strategy(event.values["rsi_is_oversold"] , event.values["rsi_is_overbought"], candle)
 
     # ------------------- Strategy -------------------
-    async def evaluate_strategy(self, candle: Candle):
+    async def evaluate_strategy(self, rsi_is_oversold, rsi_is_overbought, candle: Candle):
         if (
             self.prev_rsi_fast is None
             or self.prev_rsi_slow is None
@@ -106,7 +107,7 @@ class RSICrossSignalEngine:
             and rsi_fast > rsi_slow
             and (rsi_fast - rsi_slow) >= self.MIN_GAP
             and rsi_fast > 50
-            and rsi_fast <= 70  # zone autorisée
+            and not rsi_is_overbought
         )
 
         # -------- Bearish cross --------
@@ -115,7 +116,7 @@ class RSICrossSignalEngine:
             and rsi_fast < rsi_slow
             and (rsi_slow - rsi_fast) >= self.MIN_GAP
             and rsi_fast < 50
-            and rsi_fast >= 30  # zone autorisée
+            and not rsi_is_oversold
         )
 
         if bullish_cross:

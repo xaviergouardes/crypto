@@ -25,7 +25,7 @@ class Candle(Event):
         start_paris = self.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
         end_paris = self.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
 
-        return (f"Candle({self.symbol}) | "
+        return (f"Candle({self.symbol}) | {self.index} | "
                 f"o: {self.open:.2f}, h: {self.high:.2f}, l: {self.low:.2f}, c: {self.close:.2f}, "
                 f"v: {self.volume:.3f} | "
                 f"{start_paris:%Y-%m-%d %H:%M:%S} / {end_paris:%Y-%m-%d %H:%M:%S})")

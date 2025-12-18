@@ -60,7 +60,7 @@ class HttpBotServer:
     async def _handle_status(self, request):
         try:
             return web.json_response({
-                "serveur": self.bot_controler.bot.is_running(),
+                "server": "started" if self._is_running else "stopped",
                 "bot_id": self.bot_controler.bot.bot_id,
                 "type": self.bot_controler.bot_type
             },

@@ -81,8 +81,8 @@ class RSI:
                     "rsi_value": value,
                     "rsi_state": state,
                     "rsi_period": self.calculator.period,
-                    "rsi_oversold": self.calculator.oversold,
-                    "rsi_overbought": self.calculator.overbought,
+                    "rsi_is_oversold": self.calculator.is_overbought(),
+                    "rsi_is_overbought": self.calculator.is_oversold(),
                 },
             )
         )

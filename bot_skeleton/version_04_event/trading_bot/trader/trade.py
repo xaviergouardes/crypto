@@ -46,14 +46,13 @@ class Trade:
         if target == "SL": return self.sl
         return None
     
-    def enter_position(self, entry_price: float):
+    def enter_position(self):
         """
         Passe le trade de OPEN -> IN_POSITION
         """
         if self.state != TradeState.OPEN:
             raise RuntimeError("Trade must be OPEN to enter position")
 
-        self.entry_price = entry_price
         self.state = TradeState.IN_POSITION
 
     def close(self, target: str, candle_close: Candle):
@@ -106,7 +105,7 @@ class Trade:
     def __str__(self) -> str:
         if self.state == TradeState.OPEN or self.state == TradeState.IN_POSITION:
             return (
-                f"[TRADE | OPEN] "
+                f"[TRADE | {self.state}] "
                 f"side={self.side} "
                 f"size={self.size} "
                 f"entry={self.entry_price} "
@@ -118,6 +117,7 @@ class Trade:
         if self.state == TradeState.CLOSED:
             return (
                 f"[TRADE | CLOSED] "
+                f"target={self.target} "
                 f"side={self.side} "
                 f"entry={self.entry_price} "
                 f"exit={self.exit_price} "

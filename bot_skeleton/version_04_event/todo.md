@@ -19,9 +19,11 @@
 
 # Doing : 
 - La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
-- Dans le RSICrossSignalEngine => prendre la notion de surcaht dasn l'indicateur et ne pas la mettre en dur < 70
 
 # Done : 
+- Dans le RSICrossSignalEngine => prendre la notion de surcaht dasn l'indicateur et ne pas la mettre en dur < 70
+- BUG : c'est curieux on peut pas faire de ATR périod >= 40 sion on n'a plus rien de déclecnhé
+- BUG : les trade entre en position non pas sur la bougie d'après mais avec un décalage de 2 h ?
 - Vérifier aussi les calculs des trades ils me semble louche -> total profit
   -> les tp / sl / entry /exit aussi
 - Vérifier les signaux proposé par le cross RSI, ca me parait bizarre

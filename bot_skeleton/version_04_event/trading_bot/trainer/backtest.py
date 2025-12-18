@@ -38,7 +38,7 @@ if __name__ == "__main__":
     import logging
     from trading_bot.bots.bot import Bot
 
-    Logger.set_default_level(logging.ERROR)
+    Logger.set_default_level(logging.INFO)
 
     # # Niveau spécifique pour
     # Logger.set_level("AtrFilter", logging.DEBUG)
@@ -47,6 +47,7 @@ if __name__ == "__main__":
     # Logger.set_level("CandleSourceCsv", logging.DEBUG)
     # Logger.set_level("RSI", logging.DEBUG)
     Logger.set_level("Backtest", logging.INFO)
+    # Logger.set_level("TraderOnlyOnePosition", logging.DEBUG)
     # Logger.set_level("EmaCrossDetector", logging.DEBUG)
     # Logger.set_level("MaCrossFastSlowSignalEngine", logging.DEBUG)
     # Logger.set_level("BotTrainer", logging.INFO)
@@ -60,11 +61,11 @@ if __name__ == "__main__":
         "initial_capital": 1000,
         "trading_system": {
             "atr_filter": True,
-            "rsi_fast_period": 5,
-            "rsi_slow_period": 21,
-            "atr_period":35,
-            "tp_pct": 2,
-            "sl_pct": 1
+            "rsi_fast_period": 15,
+            "rsi_slow_period": 100,
+            "atr_period":90,
+            "tp_pct": 1.5,
+            "sl_pct": 1.5
         }
     }
 
@@ -72,6 +73,6 @@ if __name__ == "__main__":
     stats, trades_list = asyncio.run(backtest_executor.execute(params)) 
 
     # Backtest.logger.info(" | ".join(f"{k}: {float(v):.4f}" if isinstance(v, float) or hasattr(v, 'item') else f"{k}: {v}" for k, v in stats.items()))
-    Backtest.logger.info(f"trades_list : {trades_list}")
+    # Backtest.logger.info(f"trades_list : {trades_list}")
 
  

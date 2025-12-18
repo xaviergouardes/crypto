@@ -101,6 +101,7 @@ class CandleSourceBinance(CandleSource):
         """Transforme une entrée REST en Candle."""
         ts_utc = pd.to_datetime(k[0], unit="ms", utc=True)
         candle = Candle(
+            index=self.index,
             symbol=self.symbol,
             open=float(k[1]),
             high=float(k[2]),
@@ -117,6 +118,7 @@ class CandleSourceBinance(CandleSource):
         """Transforme une entrée websocket en Candle."""
         ts_utc = datetime.fromtimestamp(k["t"] / 1000, tz=pytz.UTC)
         candle = Candle(
+            index=self.index,
             symbol=self.symbol,
             open=float(k["o"]),
             high=float(k["h"]),

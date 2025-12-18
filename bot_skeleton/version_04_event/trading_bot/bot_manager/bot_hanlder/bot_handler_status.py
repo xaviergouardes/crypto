@@ -10,8 +10,8 @@ class BotHandlerStatus():
     async def execute(self, request):
         try:
             return web.json_response({
-                "bot_id": self.bot_controler.bot.bot_id,
-                "running": self.bot_controler.bot.is_running(),
+                "bot_id": self.bot_controler.bot.bot_id,  
+                "running": "started" if self.bot_controler.bot.is_running() else "stopped",
                 "type": self.bot_controler.bot_type
             },
             status=200)
