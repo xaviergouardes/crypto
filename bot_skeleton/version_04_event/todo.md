@@ -10,7 +10,6 @@
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - Faire une EMA with Buffer
-- Synchroniser les event avec la candle partout
 - Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
 - Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Réflechir a la réunification de system et signal engine dans le package bot cat il sont très liée 1 bot = 1 systeme = 1 signal engine
@@ -18,9 +17,11 @@
 - BUG : le RSI n'est pas correctement initialisé, mais il se stablise après quelque jours.
 
 # Doing : 
+- Terminer : PriceCrossSystemTrading
 - La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
 
 # Done : 
+- Synchroniser les event avec la candle partout
 - Dans le RSICrossSignalEngine => prendre la notion de surcaht dasn l'indicateur et ne pas la mettre en dur < 70
 - BUG : c'est curieux on peut pas faire de ATR périod >= 40 sion on n'a plus rien de déclecnhé
 - BUG : les trade entre en position non pas sur la bougie d'après mais avec un décalage de 2 h ?

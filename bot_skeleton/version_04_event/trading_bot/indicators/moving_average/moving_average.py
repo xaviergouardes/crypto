@@ -61,6 +61,7 @@ class MovingAverage:
 
     # ------------------- Publication -------------------
     async def _publish(self, value: float, candle: Candle):
+        self._logger.debug(f" Nouvelle Valeur EMA({self.calculator.period}) = {self.calculator.current}")
         await self.event_bus.publish(IndicatorUpdated(
                 symbol=self.symbol,
                 candle=candle,

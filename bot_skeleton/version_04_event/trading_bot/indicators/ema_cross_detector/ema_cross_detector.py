@@ -41,7 +41,7 @@ class EmaCrossDetector:
     async def handle_indicator_updated(self, event: IndicatorUpdated):
         """Réception d’un indicateur EMA fast/slow → test de cross."""
         
-        if event.values.get("type") != "IndicatorMovingAverage":
+        if event.values.get("type") != "MovingAverage":
             return
         period = event.values.get("ema_period")
         value = event.values.get("ema_value")
