@@ -105,13 +105,13 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--bot_type", default="sweep_bot")
-    # parser.add_argument("--bot_id", default="bot_id")
+    parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=9101)
     args = parser.parse_args()
 
     bot_id = f"{args.bot_type}_{args.port}"
     bot_controler = BotControler(bot_type=args.bot_type, bot_id=bot_id)
-    http_server = HttpBotServer(bot_controler=bot_controler, port=args.port)
+    http_server = HttpBotServer(bot_controler=bot_controler, host=args.host ,port=args.port)
 
     async def main():
         # Optionnel : enregistrement auprès du BotManager

@@ -2,7 +2,6 @@
 # Todo : 
 - Travailler avec de timeframe différent. Pas exemple stratégie de MM sur 3 échelle de temps
 - Réflechir si on ne pourrait pas simplifier la gestion des events  au sein du pipeline - il n'y aurait que le système qui ecoute des events tick candle et ensuite qu passe la dernière chandelle à tous les composants du pipeline pour qu'ils se mettent a jour. => plus event inter composant.
-- Faire un Front VUEJS por piloter les Bots
 - Lancer les bt et train en mode asynchrone et vernir récupérer le dernier résultat via un autre endpoint ``` /last_backtest ou last_trainnig ```
 - Lancer le bt et train dans un vrai thread
 - Vérifier que le TradeList en sortie du calcul des stats a un vrai interet ?
@@ -17,6 +16,7 @@
 - Faire une cli simple au lieu des commandes http brute
 - La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
 - Faire un end point restart -> a priori il faut enchainer le stop et le start sans paramétre, verifier que les paramétres sont bien les ceux du derniers démarrage et pas ceux par defaut
+- Faire un Front VUEJS por piloter les Bots
 
 
 
@@ -25,6 +25,7 @@
 
 
 # Done : 
+- Pouvoir saisir une autre IP
 - Faire remonter le temps d'execution dasn le status aussi
 - Faire un heartbeat pour savoir si le flux de candle est birsée ou pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
