@@ -20,9 +20,12 @@
 - Faire un heartbeat pour savoir si le flux de candle est birsée ou pas
 
 # Doing : 
-- BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
+
+
+
 
 # Done : 
+- BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - ajouter la période en seconde dans la candle
 - Terminer : PriceCrossSystemTrading
 - Synchroniser les event avec la candle partout

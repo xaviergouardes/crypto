@@ -26,6 +26,9 @@ class RealTimeEngine(Startable):
     async def _on_start(self):
         self._logger.info("Démarrage demandé")
 
+        # lancement des notif télépgram
+        await self._telegram_notifier.start()
+
         # Lancement du flux de candle via le websocket
         await self._candle_source.start()
 
@@ -34,5 +37,6 @@ class RealTimeEngine(Startable):
     def _on_stop(self):
         self._logger.info("Arret demandé")
         self._candle_source.stop()
+        self._telegram_notifier.stop()
         # Ajouter code pour arrêter proprement le candle_source si nécessaire
 

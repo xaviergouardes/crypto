@@ -22,7 +22,7 @@ class Bot(Startable):
     def __init__(self, bot_type="bot_type", bot_id="bot_01", params:dict = None):
         super().__init__()
 
-        self.logger = Logger.get(f"Bot {bot_type} {bot_id}")
+        self.logger = Logger.get(f"Bot {bot_id}")
 
         self.config = BOTS_CONFIG[bot_type]
 
