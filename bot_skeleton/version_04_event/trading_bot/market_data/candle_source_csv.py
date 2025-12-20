@@ -23,7 +23,7 @@ class CandleSourceCsv(CandleSource):
     def __init__(self, event_bus: EventBus, params: dict):
         super().__init__(event_bus)
         self.params = params
-        self.interval  = Timeframe.to_seconds(self.params["interval"]),
+        self.interval  = Timeframe.to_seconds(self.params["interval"])
         self.logger.info(f"Initialisé - running={self.is_running()}")
         self.index = 0
 

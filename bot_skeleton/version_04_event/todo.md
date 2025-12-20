@@ -15,16 +15,18 @@
 - Est-ce que ca a un sens de faire des bot avec du paramétrage plutot que du code : BotAbstrait + bot concret avec une surcharge des méthodes spécifiques ??? à réfléchir.
 - BUG : le RSI n'est pas correctement initialisé, mais il se stablise après quelque jours.
 - Faire une cli simple au lieu des commandes http brute
-- Faire un end point restart -> a priori il faut enchainer le stop et le start sans paramétre, verifier que les paramétres sont bien les ceux du derniers démarrage et pas ceux par defaut
 - La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
-- Faire un heartbeat pour savoir si le flux de candle est birsée ou pas
+- Faire un end point restart -> a priori il faut enchainer le stop et le start sans paramétre, verifier que les paramétres sont bien les ceux du derniers démarrage et pas ceux par defaut
+
+
 
 # Doing : 
 
 
 
-
 # Done : 
+- Faire remonter le temps d'execution dasn le status aussi
+- Faire un heartbeat pour savoir si le flux de candle est birsée ou pas
 - BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - ajouter la période en seconde dans la candle
 - Terminer : PriceCrossSystemTrading

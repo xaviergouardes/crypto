@@ -2,6 +2,7 @@ import asyncio
 from typing import override
 import pandas as pd
 
+from trading_bot.market_data.candle_heartbeat import CandleHeartbeatMonitor
 from trading_bot.core.event_bus import EventBus
 
 from trading_bot.core.logger import Logger
@@ -20,6 +21,7 @@ class RealTimeEngine(Startable):
         self._params = params
 
         self._candle_source = CandleSourceBinance(self._event_bus, self._params) 
+        self._heartbeat = CandleHeartbeatMonitor(self._event_bus)
         self._telegram_notifier = TelegramNotifier(self._event_bus, self._params) 
 
     @override
@@ -28,6 +30,9 @@ class RealTimeEngine(Startable):
 
         # lancement des notif télépgram
         await self._telegram_notifier.start()
+
+        # Lancement du heartbeat candle
+        await self._heartbeat.start()
 
         # Lancement du flux de candle via le websocket
         await self._candle_source.start()
@@ -38,5 +43,6 @@ class RealTimeEngine(Startable):
         self._logger.info("Arret demandé")
         self._candle_source.stop()
         self._telegram_notifier.stop()
+        self._heartbeat.stop()
         # Ajouter code pour arrêter proprement le candle_source si nécessaire
 

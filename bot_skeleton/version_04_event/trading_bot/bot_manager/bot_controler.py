@@ -7,7 +7,7 @@ from trading_bot.trainer.trainer import BotTrainer
 from trading_bot.bots.bot import Bot
 
 class BotControler:
-    _logger = Logger.get("BotManager")
+    _logger = Logger.get("BotControler")
 
     def __init__(self, bot_type, bot_id="bot_01"):
         self.bot_type = bot_type
@@ -50,3 +50,8 @@ class BotControler:
         self._logger.info(f"Bot stats asked")
         stats, trade_list = self.bot.get_stats()
         return stats
+    
+    def get_candle_heartbeat(self):
+        self._logger.info(f"Bot candle heartbeat asked")
+        candle_heartbeat = self.bot.get_candle_heartbeat()
+        return candle_heartbeat

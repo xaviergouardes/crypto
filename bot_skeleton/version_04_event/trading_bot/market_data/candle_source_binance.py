@@ -47,7 +47,7 @@ class CandleSourceBinance(CandleSource):
             resp.raise_for_status()
             data = resp.json()
         except Exception as e:
-            self.self.logger.error(f"Erreur récupération bougies via REST : {e}")
+            self.logger.error(f"Erreur récupération bougies via REST : {e}")
             return pd.DataFrame(columns=["timestamp", "timestamp_paris", "open", "high", "low", "close", "volume"])
 
         data = data[:-1]  # ignorer la dernière bougie potentiellement en cours

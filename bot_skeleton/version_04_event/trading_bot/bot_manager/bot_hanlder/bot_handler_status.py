@@ -10,9 +10,11 @@ class BotHandlerStatus():
     async def execute(self, request):
         try:
             return web.json_response({
+                "type": self.bot_controler.bot_type,
                 "bot_id": self.bot_controler.bot.bot_id,  
                 "running": "started" if self.bot_controler.bot.is_running() else "stopped",
-                "type": self.bot_controler.bot_type
+                "uptime": str(self.bot_controler.bot.uptime),
+                "candle_heartbeat": self.bot_controler.get_candle_heartbeat()
             },
             status=200)
         except Exception as e:

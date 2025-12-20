@@ -121,6 +121,16 @@ class Bot(Startable):
         )
         return stats, trades_list
     
+    def get_candle_heartbeat(self):    
+        engine = self._engine
+        if engine is None: raise RuntimeError("Engine non initialisé")   
+
+        if not isinstance(engine, RealTimeEngine): return "backtest_heart"
+
+        candle_heartbeat = self._engine._heartbeat.heartbeat
+
+        return candle_heartbeat
+    
     @override
     async def _on_start(self) -> list:
         self.logger.info("Demarrage Demandé.")
