@@ -1,4 +1,4 @@
-from typing import List, override
+from typing import override
 import pandas as pd
 import requests
 import json
@@ -6,8 +6,9 @@ import websockets
 import asyncio
 from datetime import datetime, timedelta
 import pytz
-import logging
 
+
+from trading_bot.core.time_frame import Timeframe
 from trading_bot.core.logger import Logger
 from trading_bot.core.events import Candle, CandleHistoryReady, CandleClose
 from trading_bot.market_data.candle_source import CandleSource
@@ -25,14 +26,14 @@ class CandleSourceBinance(CandleSource):
         self.index = 0
 
         self.symbol = params["symbol"]
-        self.interval = params["interval"]
+        self.interval  = params["interval"]
         self.warmup_count = params["trading_system"]["warmup_count"]
 
         self._ws_url = f"wss://stream.binance.com:9443/ws/{self.symbol}@kline_{self.interval}"
         self._rest_url = f"https://api.binance.com/api/v3/klines?symbol={self.symbol.upper()}&interval={self.interval}&limit={self.warmup_count + 1}"
         self._reconnect_delay = 5  # secondes
 
-        self._seconds = int(self.interval[:-1]) * 60  # intervalle en secondes
+        self._seconds = Timeframe.to_seconds(self.interval) # intervalle en secondes
         self.logger.info(f"Initialisé - running={self.is_running()}")
 
     @override
@@ -76,7 +77,12 @@ class CandleSourceBinance(CandleSource):
         while not self.should_stop():
             try:
                 self.logger.info(f"Connexion au websocket Binance ({self.symbol}, {self.interval})...")
-                async with websockets.connect(self._ws_url) as ws:
+                async with websockets.connect(
+                    self._ws_url,
+                    ping_interval=120,   # ping automatique tous les 120s
+                    ping_timeout=20     # timeout si pas de pong en 20s
+
+                ) as ws:
                     self.logger.info("✅ Connecté au websocket Binance")
                     async for message in ws:
                         data = json.loads(message)
@@ -103,6 +109,7 @@ class CandleSourceBinance(CandleSource):
         candle = Candle(
             index=self.index,
             symbol=self.symbol,
+            interval=self._seconds,
             open=float(k[1]),
             high=float(k[2]),
             low=float(k[3]),
@@ -120,6 +127,7 @@ class CandleSourceBinance(CandleSource):
         candle = Candle(
             index=self.index,
             symbol=self.symbol,
+            interval=self._seconds,
             open=float(k["o"]),
             high=float(k["h"]),
             low=float(k["l"]),

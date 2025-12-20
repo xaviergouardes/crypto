@@ -8,19 +8,23 @@
 - Vérifier que le TradeList en sortie du calcul des stats a un vrai interet ?
 - Rennomer EventBus en BotEventBus -> en efftet il s'agit d'un bus onterne au bot + etudier la question d'injecter le bot dasn tous ses composants.
 - BUG : L'arret du Bot en mode BackTest ne fonctionne pas
-- BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 - Faire une EMA with Buffer
 - Faire un test avec double calcul pandas et mon indicateur pour valider le croiseement RSI
 - Faire un backtest non pas avec un fichier mais avec un appel api Binace sur 2 mois
 - Réflechir a la réunification de system et signal engine dans le package bot cat il sont très liée 1 bot = 1 systeme = 1 signal engine
 - Est-ce que ca a un sens de faire des bot avec du paramétrage plutot que du code : BotAbstrait + bot concret avec une surcharge des méthodes spécifiques ??? à réfléchir.
 - BUG : le RSI n'est pas correctement initialisé, mais il se stablise après quelque jours.
+- Faire une cli simple au lieu des commandes http brute
+- Faire un end point restart -> a priori il faut enchainer le stop et le start sans paramétre, verifier que les paramétres sont bien les ceux du derniers démarrage et pas ceux par defaut
+- La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
+- Faire un heartbeat pour savoir si le flux de candle est birsée ou pas
 
 # Doing : 
-- Terminer : PriceCrossSystemTrading
-- La nouvelle classe Trade est bancale et surement doublonne l'event TradeClose -> on devrait utiliser Trade dans les event TradeCloe à minima
+- BUG : Telegram notifier -> fermer proprement la connexion http -> je pense avec un Statable
 
 # Done : 
+- ajouter la période en seconde dans la candle
+- Terminer : PriceCrossSystemTrading
 - Synchroniser les event avec la candle partout
 - Dans le RSICrossSignalEngine => prendre la notion de surcaht dasn l'indicateur et ne pas la mettre en dur < 70
 - BUG : c'est curieux on peut pas faire de ATR périod >= 40 sion on n'a plus rien de déclecnhé

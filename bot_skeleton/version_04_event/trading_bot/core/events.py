@@ -1,6 +1,8 @@
 # trading_bot/core/events.py
 from dataclasses import dataclass
 from typing import List, Tuple
+
+from trading_bot.core.time_frame import Timeframe
 from .event_bus import Event
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -11,6 +13,7 @@ from zoneinfo import ZoneInfo
 class Candle(Event):
     index:int
     symbol: str
+    interval: int # intervalle en seconde
     open: float
     high: float
     low: float
@@ -25,7 +28,7 @@ class Candle(Event):
         start_paris = self.start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
         end_paris = self.end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(paris_tz)
 
-        return (f"Candle({self.symbol}) | {self.index} | "
+        return (f"Candle({self.symbol}={Timeframe.from_seconds(self.interval)}) | {self.index} | "
                 f"o: {self.open:.2f}, h: {self.high:.2f}, l: {self.low:.2f}, c: {self.close:.2f}, "
                 f"v: {self.volume:.3f} | "
                 f"{start_paris:%Y-%m-%d %H:%M:%S} / {end_paris:%Y-%m-%d %H:%M:%S})")

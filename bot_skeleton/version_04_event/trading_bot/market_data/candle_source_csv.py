@@ -1,9 +1,10 @@
-import asyncio
+
 import pandas as pd
 from typing import List, override
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
+
+from trading_bot.core.time_frame import Timeframe
 from trading_bot.core.logger import Logger
 from trading_bot.core.events import Candle, CandleHistoryReady, CandleClose
 from trading_bot.market_data.candle_source import CandleSource
@@ -22,6 +23,7 @@ class CandleSourceCsv(CandleSource):
     def __init__(self, event_bus: EventBus, params: dict):
         super().__init__(event_bus)
         self.params = params
+        self.interval  = Timeframe.to_seconds(self.params["interval"]),
         self.logger.info(f"Initialisé - running={self.is_running()}")
         self.index = 0
 
@@ -39,6 +41,7 @@ class CandleSourceCsv(CandleSource):
         candle = Candle(
             index=self.index,
             symbol=self.params["symbol"],
+            interval=self.interval,
             open=float(row["open"]),
             high=float(row["high"]),
             low=float(row["low"]),
